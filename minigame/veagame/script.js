@@ -1083,12 +1083,24 @@ function confirmDpadMove() {
     updateActionShape();
 }
 
-function setupDpadButton(btn, action) {
+function setupDpadButton(btn, dir) {
     if (!btn) return;
     const press = (e) => {
         e.preventDefault();
         btn.classList.add('active');
-        action();
+        // Se um menu/overlay estiver aberto, navega por ele
+        if (updateMenuFocus(0)) {
+            if (dir.y === -1) updateMenuFocus(-1);
+            else if (dir.y === 1) updateMenuFocus(1);
+            else if (dir.x === -1) updateMenuFocus(-1);
+            else if (dir.x === 1) updateMenuFocus(1);
+            return;
+        }
+        // Caso contrário, move no tabuleiro
+        if (dir.y === -1) moveDpad(-1, 0);
+        else if (dir.y === 1) moveDpad(1, 0);
+        else if (dir.x === -1) moveDpad(0, -1);
+        else if (dir.x === 1) moveDpad(0, 1);
     };
     const release = () => btn.classList.remove('active');
     btn.addEventListener('touchstart', press, { passive: false });
@@ -1099,11 +1111,28 @@ function setupDpadButton(btn, action) {
     btn.addEventListener('mouseleave', release);
 }
 
-setupDpadButton(dpadUp, () => moveDpad(-1, 0));
-setupDpadButton(dpadDown, () => moveDpad(1, 0));
-setupDpadButton(dpadLeft, () => moveDpad(0, -1));
-setupDpadButton(dpadRight, () => moveDpad(0, 1));
-setupDpadButton(actionA, () => confirmDpadMove());
+function setupActionButton(btn) {
+    if (!btn) return;
+    const press = (e) => {
+        e.preventDefault();
+        btn.classList.add('active');
+        if (activateFocusedElement()) return;
+        confirmDpadMove();
+    };
+    const release = () => btn.classList.remove('active');
+    btn.addEventListener('touchstart', press, { passive: false });
+    btn.addEventListener('touchend', release, { passive: true });
+    btn.addEventListener('touchcancel', release, { passive: true });
+    btn.addEventListener('mousedown', press);
+    btn.addEventListener('mouseup', release);
+    btn.addEventListener('mouseleave', release);
+}
+
+setupDpadButton(dpadUp, { x: 0, y: -1 });
+setupDpadButton(dpadDown, { x: 0, y: 1 });
+setupDpadButton(dpadLeft, { x: -1, y: 0 });
+setupDpadButton(dpadRight, { x: 1, y: 0 });
+setupActionButton(actionA);
 
 // Atualiza shape do botão A no turno
 const origUpdateTurn = updateTurnIndicator;

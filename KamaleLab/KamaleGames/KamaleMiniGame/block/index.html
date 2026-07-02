@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>KamaleBlock</title>
+    <!-- Carrega a fonte Share Tech Mono para um visual retrô tecnológico limpo -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div class="toast-container" id="toastContainer"></div>
+    <div id="app-container">
+        <div class="game-top-row">
+            <div style="display: flex; align-items: center; gap: 8px;">
+                <a href="../index.html" class="home-btn" aria-label="Menu principal">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="18" height="18" fill="currentColor">
+                        <path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/>
+                    </svg>
+                </a>
+
+            </div>
+            <div style="display: flex; align-items: center; gap: 8px; margin-left: auto;">
+                <a href="../apoie.html" class="apoie-btn" aria-label="Apoie o Kamale Games">apoie ❤️</a>
+                <button class="google-login-btn" id="google-login-btn" aria-label="Entrar"></button>
+            </div>
+        </div>
+        <!-- Wrapper para suportar painel duplo no multiplayer -->
+        <div id="boards-wrapper" style="display: flex; gap: 16px; align-items: center; justify-content: center; width: 100%; max-width: 100vw;">
+            <!-- Tabuleiro do jogo que mantém aspecto 1:1.5 -->
+            <div id="game-board">
+                <!-- Menu Principal (sobreposto ao canvas) -->
+                <div id="menu-screen">
+                    <div class="menu-content">
+                        <div class="menu-title">BLOCK</div>
+                        <button id="btn-friends" class="menu-btn">
+                            Jogar com Amigo <span class="btn-emoji">👥</span>
+                        </button>
+                        <button id="btn-play" class="menu-btn">
+                            Jogar Sozinho <span class="btn-emoji">🎮</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- ═══ OVERLAYS MULTIPLAYER ═══ -->
+                <div id="multiplayer-screen" class="overlay hidden">
+                    <div class="game-over-content mp-content">
+                        <div class="game-over-title mp-title">Multiplayer</div>
+                        <button id="btn-create-room" class="menu-btn menu-btn-primary">
+                            Criar Sala <span class="btn-emoji">🏠</span>
+                        </button>
+                        <button id="btn-show-rooms" class="menu-btn menu-btn-secondary">
+                            Ver Salas <span class="btn-emoji">📋</span>
+                        </button>
+                        <button id="btn-show-join" class="menu-btn menu-btn-secondary">
+                            Entrar com Código <span class="btn-emoji">🔑</span>
+                        </button>
+                        <button id="btn-back-multiplayer" class="menu-btn menu-btn-back">
+                            ← Voltar
+                        </button>
+                    </div>
+                </div>
+
+                <div id="join-screen" class="overlay hidden">
+                    <div class="game-over-content mp-content">
+                        <div class="game-over-title mp-title">Entrar na Sala</div>
+                        <input id="input-room-code" type="text" class="mp-input" maxlength="6" placeholder="CÓDIGO" autocomplete="off" spellcheck="false">
+                        <input id="input-player-name" type="text" class="mp-input" maxlength="12" placeholder="Seu nome" autocomplete="off">
+                        <div id="join-error" class="error-text hidden" style="color: #ff4a4a; font-size: 0.8rem; margin: 4px 0;"></div>
+                        <button id="btn-join-confirm" class="menu-btn menu-btn-primary">
+                            Entrar <span class="btn-emoji">▶</span>
+                        </button>
+                        <button id="btn-back-join" class="menu-btn menu-btn-back">
+                            ← Voltar
+                        </button>
+                    </div>
+                </div>
+
+                <div id="create-screen" class="overlay hidden">
+                    <div class="game-over-content mp-content">
+                        <div class="game-over-title mp-title">Criar Sala</div>
+                        <input id="input-room-name" type="text" class="mp-input" maxlength="20" placeholder="Nome da sala" autocomplete="off">
+                        <input id="input-create-player-name" type="text" class="mp-input" maxlength="12" placeholder="Seu nome" autocomplete="off">
+                        <button id="btn-create-confirm" class="menu-btn menu-btn-primary">
+                            Criar Sala <span class="btn-emoji">🏠</span>
+                        </button>
+                        <button id="btn-back-create" class="menu-btn menu-btn-back">
+                            ← Voltar
+                        </button>
+                    </div>
+                </div>
+
+                <div id="rooms-screen" class="overlay hidden">
+                    <div class="game-over-content mp-content">
+                        <div class="game-over-title mp-title">Salas Disponíveis</div>
+                        <div id="rooms-list" class="rooms-list" style="width: 100%; max-height: 150px; overflow-y: auto; display: flex; flex-direction: column; gap: 6px; padding: 4px; background-color: #0a0a0a; border: 2px solid #222; border-radius: 8px;">
+                            <div class="lobby-waiting" style="color: #888; font-size: 0.85rem; text-align: center;">Carregando...</div>
+                        </div>
+                        <button id="btn-refresh-rooms" class="menu-btn menu-btn-secondary" style="margin-top:8px;">
+                            Atualizar <span class="btn-emoji">🔄</span>
+                        </button>
+                        <button id="btn-back-rooms" class="menu-btn menu-btn-back">
+                            ← Voltar
+                        </button>
+                    </div>
+                </div>
+
+                <div id="lobby-screen" class="overlay hidden">
+                    <div class="game-over-content mp-content">
+                        <div class="game-over-title mp-title">SALA</div>
+                        <div id="lobby-room-code" class="mp-code" style="color: #ffd100; font-size: 1.5rem; letter-spacing: 4px; font-weight: bold; border: 2px dashed #ffd100; padding: 6px 20px; border-radius: 8px; background-color: #0c0c0c;">------</div>
+                        <div class="lobby-code-hint" style="color: #888; font-size: 0.72rem; text-align: center; margin-top: -4px;">Compartilhe o código com seu amigo</div>
+                        <div id="lobby-players" class="lobby-players" style="display: flex; flex-direction: column; gap: 8px; width: 100%; max-width: 260px; margin: 10px 0;"></div>
+                        <div id="lobby-waiting" class="lobby-waiting" style="color: #888; font-size: 0.8rem; text-align: center;">Aguardando adversário...</div>
+                        <button id="btn-ready" class="menu-btn menu-btn-primary hidden">
+                            Pronto! <span class="btn-emoji">✓</span>
+                        </button>
+                        <div id="lobby-ready-status" class="lobby-waiting" style="display:none;color:#888;font-size:0.75rem;text-align:center;margin:4px 0;"></div>
+                        <button id="btn-leave-lobby" class="menu-btn menu-btn-back" style="margin-top: 10px;">
+                            Sair da Sala ←
+                        </button>
+                    </div>
+                </div>
+
+                <div id="name-modal" class="overlay hidden">
+                    <div class="game-over-content">
+                        <div class="game-over-title" style="font-size:1rem;">Qual é o seu nome?</div>
+                        <input id="name-modal-input" type="text" maxlength="12" placeholder="Seu nome" autocomplete="off" class="mp-input" style="margin-top:12px;">
+                        <button id="name-modal-confirm" class="menu-btn menu-btn-primary" style="margin-top:12px;">Confirmar ✓</button>
+                    </div>
+                </div>
+
+                <!-- Canvas onde as peças caem (grade 10x15) -->
+            <canvas id="game-canvas" width="240" height="360"></canvas>
+
+            <!-- Exibição de Scores (sobreposta ao canvas) -->
+            <div id="score-display">Score: <span id="score-val">0</span></div>
+            <div id="highscore-display">Linhas: <span id="lines-val">0</span></div>
+            
+            <div id="garbage-indicator" class="hidden" style="position: absolute; bottom: 10px; left: 50%; transform: translateX(-50%); background: rgba(255, 74, 74, 0.95); color: #fff; padding: 4px 10px; border-radius: 12px; font-size: 0.75rem; font-weight: bold; z-index: 20; border: 1px solid #ff4a4a;">🚨 0 LINHAS DE LIXO!</div>
+
+            <!-- Overlay de Pausa -->
+            <div id="pause-overlay" class="overlay hidden">
+                <div class="game-over-content">
+                    <div class="game-over-title">
+                        ⏸ Pausado
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tela de Game Over (Sobreposta ao Canvas) -->
+            <div id="game-over-screen" class="overlay hidden">
+                <div class="game-over-content">
+                    <div id="game-over-title" class="game-over-title">
+                        <span class="skull-emoji">💀</span> Fim de Jogo
+                    </div>
+                    <div class="game-over-score">
+                        Score: <span id="final-score">0</span>
+                    </div>
+                    <div id="rematch-status" style="display:none; font-size: 0.85rem; margin-bottom: 10px; color: #3acc7a;"></div>
+                    <button id="restart-btn" class="menu-btn">
+                        Jogar novamente <span class="btn-emoji-restart">🔄</span>
+                    </button>
+                    <button id="back-to-menu-btn" class="menu-btn menu-btn-back">
+                        Menu
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Painel do Adversário (Apenas no Modo Online) -->
+        <div id="opponent-panel" class="hidden" style="display: flex; flex-direction: column; align-items: center; background: rgba(12, 12, 12, 0.9); border: 2px dashed #ff4a4a; border-radius: 16px; padding: 10px; width: 140px; aspect-ratio: 1 / 1.6; max-height: 480px; box-shadow: 0 0 15px rgba(255, 74, 74, 0.1);">
+            <div id="opponent-name" style="font-size: 0.8rem; color: #ff4a4a; font-weight: bold; margin-bottom: 4px; text-overflow: ellipsis; overflow: hidden; white-space: nowrap; max-width: 120px;">Adversário</div>
+            <div id="opponent-score" style="font-size: 0.75rem; color: #ffd100; margin-bottom: 6px; font-weight: bold;">0 pts</div>
+            <div style="flex: 1; width: 100%; border: 1px solid #333; border-radius: 8px; overflow: hidden; background: #000; display: flex; align-items: center; justify-content: center;">
+                <canvas id="opponent-canvas" width="100" height="150" style="width: 100%; height: 100%; display: block;"></canvas>
+            </div>
+            <div id="opponent-lines" style="font-size: 0.7rem; color: #888; margin-top: 6px;">0 linhas</div>
+        </div>
+        </div>
+
+        <!-- Controles Móveis (D-pad e Botões Redondos) - Ocultos por padrão no Desktop -->
+        <div id="controls-wrapper">
+            <!-- D-pad (Esquerda) -->
+            <div id="dpad-container">
+                <div class="dpad-btn-wrapper up">
+                    <button id="dpad-up" class="dpad-btn" aria-label="Rotacionar Peça">▲</button>
+                </div>
+                <div class="dpad-btn-wrapper left">
+                    <button id="dpad-left" class="dpad-btn" aria-label="Mover para Esquerda">◀</button>
+                </div>
+                <div class="dpad-btn-wrapper center">
+                    <div class="dpad-center-dot"></div>
+                </div>
+                <div class="dpad-btn-wrapper right">
+                    <button id="dpad-right" class="dpad-btn" aria-label="Mover para Direita">▶</button>
+                </div>
+                <div class="dpad-btn-wrapper down">
+                    <button id="dpad-down" class="dpad-btn" aria-label="Mover para Baixo">▼</button>
+                </div>
+            </div>
+
+            <!-- Botão de Pause (Meio) -->
+            <div class="pause-btn-wrapper">
+                <button id="mobile-pause-btn" class="pause-btn" aria-label="Iniciar ou Pausar jogo">Iniciar</button>
+                <button id="mobile-reset-btn" class="reset-btn hidden" aria-label="Menu do jogo">reset</button>
+            </div>
+
+            <!-- Botão de Ação único (Direita - Rotacionar) -->
+            <div id="action-buttons-container">
+                <button id="action-a" class="action-btn action-a" aria-label="Rotacionar">↻</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+    <script src="firebase-config.js"></script>
+    <script src="../auth.js"></script>
+    <script src="multiplayer.js"></script>
+    <script src="script.js"></script>
+</body>
+</html>

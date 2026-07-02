@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>Kamale Bomber - Futebol</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <div id="game-wrapper">
+        <div id="header">
+            <div id="player-info">
+                <span class="info-label">VIDAS:</span>
+                <span id="lives"></span>
+            </div>
+            <h1 id="game-title">⚽ KAMALE BOMBER ⚽</h1>
+            <div id="score-info">
+                <span class="info-label">FASE:</span>
+                <span id="level">1</span>
+                <span class="info-label" style="margin-left:16px">SCORE:</span>
+                <span id="score">0</span>
+            </div>
+        </div>
+
+        <div id="canvas-container">
+            <canvas id="game-canvas"></canvas>
+            <div id="hud-overlay"></div>
+        </div>
+
+        <div id="mobile-controls">
+            <div id="dpad">
+                <button class="dpad-btn" id="btn-up" data-dir="up">&#9650;</button>
+                <div id="dpad-mid">
+                    <button class="dpad-btn" id="btn-left" data-dir="left">&#9664;</button>
+                    <button class="dpad-btn" id="btn-right" data-dir="right">&#9654;</button>
+                </div>
+                <button class="dpad-btn" id="btn-down" data-dir="down">&#9660;</button>
+            </div>
+            <div id="action-buttons">
+                <button class="action-btn bomb-btn" id="btn-bomb">⚽</button>
+            </div>
+        </div>
+
+        <!-- Menu -->
+        <div id="screen-menu" class="screen active">
+            <h1>⚽ KAMALE BOMBER ⚽</h1>
+            <p>Destrua as arquibancadas, derrote rivais e conquiste o troféu!</p>
+            <div class="menu-powerups">
+                <span title="Mais bolas">⚽ +Bola</span>
+                <span title="Chute forte">👟 +Chute</span>
+                <span title="Mais velocidade">🏃 +Speed</span>
+                <span title="Escanteio">🚩 Escanteio</span>
+                <span title="Comando do técnico">📋 Técnico</span>
+            </div>
+            <button class="screen-btn" id="btn-start">INICIAR</button>
+            <p class="controls-hint">WASD ou Setas = Mover &nbsp;|&nbsp; Espaço = Bola &nbsp;|&nbsp; P = Pausa</p>
+        </div>
+
+        <!-- Pause -->
+        <div id="screen-pause" class="screen">
+            <h1>⏸️ intervalo</h1>
+            <button class="screen-btn" id="btn-resume">CONTINUAR</button>
+        </div>
+
+        <!-- Game Over -->
+        <div id="screen-gameover" class="screen">
+            <h1>⚽ DERROTA!</h1>
+            <p>Expulso do jogo! Score final: <span id="final-score">0</span></p>
+            <button class="screen-btn" id="btn-restart">TENTAR NOVAMENTE</button>
+        </div>
+
+        <!-- Level Complete -->
+        <div id="screen-levelcomplete" class="screen">
+            <h1>🏆 GOL! FASE COMPLETA!</h1>
+            <p>Score: <span id="level-score">0</span></p>
+            <button class="screen-btn" id="btn-nextlevel">PRÓXIMA FASE</button>
+        </div>
+
+        <!-- Win -->
+        <div id="screen-win" class="screen">
+            <h1>🏆 CAMPEÃO! 🏆</h1>
+            <p>Você conquistou o troféu! Score final: <span id="win-score">0</span></p>
+            <button class="screen-btn" id="btn-menuwin">MENU</button>
+        </div>
+    </div>
+
+    <script src="js/config.js"></script>
+    <script src="js/audio.js"></script>
+    <script src="js/input.js"></script>
+    <script src="js/map.js"></script>
+    <script src="js/bomb.js"></script>
+    <script src="js/player.js"></script>
+    <script src="js/enemy.js"></script>
+    <script src="js/game.js"></script>
+</body>
+</html>

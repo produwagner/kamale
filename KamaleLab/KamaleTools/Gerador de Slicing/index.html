@@ -1,0 +1,808 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gerador de Slicing - Sprite Sheet</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #0f0f1a;
+            color: #e0e0e0;
+            min-height: 100vh;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            padding: 20px 30px;
+            border-bottom: 2px solid #0f3460;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .header h1 { font-size: 1.6rem; color: #e94560; }
+        .header .subtitle { color: #888; font-size: 0.85rem; }
+
+        .container {
+            display: grid;
+            grid-template-columns: 300px 1fr;
+            height: calc(100vh - 72px);
+        }
+
+        .sidebar {
+            background: #1a1a2e;
+            padding: 20px;
+            border-right: 1px solid #2a2a4a;
+            overflow-y: auto;
+        }
+
+        .sidebar h3 {
+            color: #e94560;
+            margin-bottom: 12px;
+            font-size: 0.95rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .form-group { margin-bottom: 16px; }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            color: #aaa;
+            font-size: 0.8rem;
+        }
+
+        .form-group input[type="range"] {
+            width: 100%;
+            accent-color: #e94560;
+        }
+
+        .form-group .value {
+            color: #e94560;
+            font-weight: bold;
+            float: right;
+        }
+
+        .btn {
+            padding: 10px 16px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.85rem;
+            font-weight: 600;
+            transition: all 0.2s;
+            width: 100%;
+            margin-bottom: 8px;
+        }
+
+        .btn-primary { background: #e94560; color: white; }
+        .btn-primary:hover { background: #c73650; }
+        .btn-primary:disabled { background: #555; cursor: not-allowed; }
+
+        .btn-secondary { background: #2a2a4a; color: #e0e0e0; border: 1px solid #3a3a5a; }
+        .btn-secondary:hover { background: #3a3a5a; }
+
+        .btn-success { background: #00b894; color: white; }
+        .btn-success:hover { background: #009975; }
+        .btn-success:disabled { background: #555; cursor: not-allowed; }
+
+        .stats {
+            background: #0f0f1a;
+            border-radius: 8px;
+            padding: 12px;
+            margin-top: 16px;
+            font-size: 0.8rem;
+        }
+
+        .stats div { display: flex; justify-content: space-between; margin-bottom: 4px; }
+        .stats span:last-child { color: #e94560; font-weight: bold; }
+
+        .main { display: flex; flex-direction: column; overflow: hidden; }
+
+        .tabs {
+            display: flex;
+            background: #1a1a2e;
+            border-bottom: 1px solid #2a2a4a;
+        }
+
+        .tab {
+            padding: 12px 24px;
+            cursor: pointer;
+            border-bottom: 2px solid transparent;
+            color: #888;
+            font-size: 0.9rem;
+            transition: all 0.2s;
+        }
+
+        .tab:hover { color: #e0e0e0; }
+        .tab.active { color: #e94560; border-bottom-color: #e94560; }
+
+        .tab-content { flex: 1; overflow: auto; padding: 20px; position: relative; }
+
+        .tab-panel { display: none; height: 100%; }
+        .tab-panel.active { display: flex; flex-direction: column; }
+
+        .upload-zone {
+            border: 3px dashed #2a2a4a;
+            border-radius: 16px;
+            padding: 60px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 400px;
+        }
+
+        .upload-zone:hover, .upload-zone.dragover {
+            border-color: #e94560;
+            background: rgba(233, 69, 96, 0.05);
+        }
+
+        .upload-zone .icon { font-size: 4rem; margin-bottom: 16px; opacity: 0.5; }
+        .upload-zone h2 { color: #aaa; font-weight: 400; margin-bottom: 8px; }
+        .upload-zone p { color: #666; font-size: 0.85rem; }
+
+        #fileInput { display: none; }
+
+        .canvas-container {
+            flex: 1;
+            overflow: auto;
+            background: repeating-conic-gradient(#1a1a2e 0% 25%, #12121f 0% 50%) 50% / 20px 20px;
+            border-radius: 8px;
+            position: relative;
+            min-height: 400px;
+        }
+
+        .canvas-container canvas { display: block; }
+
+        .sprites-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+            gap: 12px;
+            padding: 4px;
+        }
+
+        .sprite-card {
+            background: #1a1a2e;
+            border: 1px solid #2a2a4a;
+            border-radius: 8px;
+            overflow: hidden;
+            transition: all 0.2s;
+        }
+
+        .sprite-card:hover { border-color: #e94560; transform: translateY(-2px); }
+
+        .sprite-card .preview {
+            height: 120px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: repeating-conic-gradient(#12121f 0% 25%, #0f0f1a 0% 50%) 50% / 12px 12px;
+            padding: 8px;
+        }
+
+        .sprite-card .preview img {
+            max-width: 100%;
+            max-height: 100%;
+            image-rendering: pixelated;
+        }
+
+        .sprite-card .info {
+            padding: 8px 10px;
+            border-top: 1px solid #2a2a4a;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .sprite-card .info .name { font-size: 0.75rem; color: #aaa; }
+        .sprite-card .info .size { font-size: 0.7rem; color: #666; }
+
+        .sprite-card .download-btn {
+            padding: 5px 10px;
+            background: #e94560;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.7rem;
+            margin: 0 10px 8px;
+            width: calc(100% - 20px);
+        }
+
+        .sprite-card .download-btn:hover { background: #c73650; }
+
+        .empty-state {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100%;
+            color: #666;
+        }
+
+        .empty-state .icon { font-size: 3rem; margin-bottom: 12px; opacity: 0.3; }
+
+        .zoom-controls {
+            position: absolute;
+            bottom: 16px;
+            right: 16px;
+            display: flex;
+            gap: 4px;
+            background: #1a1a2e;
+            border-radius: 8px;
+            padding: 4px;
+            border: 1px solid #2a2a4a;
+        }
+
+        .zoom-btn {
+            width: 32px;
+            height: 32px;
+            background: transparent;
+            border: none;
+            color: #e0e0e0;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 1rem;
+        }
+
+        .zoom-btn:hover { background: #2a2a4a; }
+
+        .checkbox-group { display: flex; align-items: center; gap: 8px; margin-bottom: 12px; }
+        .checkbox-group input[type="checkbox"] { accent-color: #e94560; }
+        .checkbox-group label { color: #aaa; font-size: 0.8rem; }
+
+        .loading-overlay {
+            display: none;
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(15, 15, 26, 0.92);
+            z-index: 10;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+            gap: 16px;
+            border-radius: 8px;
+        }
+
+        .loading-overlay.active { display: flex; }
+
+        .spinner {
+            width: 48px;
+            height: 48px;
+            border: 4px solid #2a2a4a;
+            border-top-color: #e94560;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+        }
+
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        .loading-text { color: #aaa; font-size: 0.9rem; }
+
+        ::-webkit-scrollbar { width: 8px; height: 8px; }
+        ::-webkit-scrollbar-track { background: #0f0f1a; }
+        ::-webkit-scrollbar-thumb { background: #2a2a4a; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #3a3a5a; }
+    </style>
+</head>
+<body>
+
+<div class="header">
+    <h1>SliceS</h1>
+    <span class="subtitle">Gerador de Slicing de Sprite Sheet</span>
+</div>
+
+<div class="container">
+    <div class="sidebar">
+        <h3>Configurações</h3>
+
+        <div class="form-group">
+            <label>Limiar de Alpha <span class="value" id="alphaVal">10</span></label>
+            <input type="range" id="alphaThreshold" min="1" max="100" value="10">
+        </div>
+
+        <div class="form-group">
+            <label>Tamanho mínimo (px) <span class="value" id="minSizeVal">16</span></label>
+            <input type="range" id="minSpriteSize" min="4" max="200" value="16">
+        </div>
+
+        <div class="form-group">
+            <label>Distância de merge (px) <span class="value" id="mergeDistVal">20</span></label>
+            <input type="range" id="mergeDistance" min="1" max="80" value="20">
+        </div>
+
+        <div class="form-group">
+            <label>Borda visual (px) <span class="value" id="borderVal">2</span></label>
+            <input type="range" id="borderWidth" min="0" max="6" value="2">
+        </div>
+
+        <div class="checkbox-group">
+            <input type="checkbox" id="showBounds" checked>
+            <label for="showBounds">Mostrar bounding boxes</label>
+        </div>
+
+        <div class="checkbox-group">
+            <input type="checkbox" id="showIndex" checked>
+            <label for="showIndex">Mostrar índice</label>
+        </div>
+
+        <div class="checkbox-group">
+            <input type="checkbox" id="trimAlpha" checked>
+            <label for="trimAlpha">Recortar bordas transparentes</label>
+        </div>
+
+        <button class="btn btn-primary" id="btnSlice" disabled>Recortar Sprites</button>
+        <button class="btn btn-success" id="btnDownloadAll" disabled>Download ZIP</button>
+        <button class="btn btn-secondary" id="btnReset">Limpar</button>
+
+        <div class="stats" id="statsPanel" style="display:none;">
+            <div><span>Arquivo:</span><span id="statFile">-</span></div>
+            <div><span>Dimensões:</span><span id="statDimensions">-</span></div>
+            <div><span>Sprites encontrados:</span><span id="statSprites">-</span></div>
+            <div><span>Tempo:</span><span id="statTime">-</span></div>
+        </div>
+    </div>
+
+    <div class="main">
+        <div class="tabs">
+            <div class="tab active" data-tab="editor">Editor</div>
+            <div class="tab" data-tab="sprites">Sprites Recortados</div>
+        </div>
+
+        <div class="tab-content">
+            <div class="tab-panel active" id="panel-editor">
+                <div class="upload-zone" id="uploadZone">
+                    <input type="file" id="fileInput" accept="image/png,image/*">
+                    <div class="icon">&#128444;</div>
+                    <h2>Arraste uma Sprite Sheet aqui</h2>
+                    <p>ou clique para selecionar um arquivo</p>
+                </div>
+                <div class="canvas-container" id="canvasContainer" style="display:none;">
+                    <canvas id="previewCanvas"></canvas>
+                    <div class="loading-overlay" id="loadingOverlay">
+                        <div class="spinner"></div>
+                        <div class="loading-text">Detectando sprites...</div>
+                    </div>
+                    <div class="zoom-controls">
+                        <button class="zoom-btn" id="zoomOut">-</button>
+                        <button class="zoom-btn" id="zoomFit">Ajustar</button>
+                        <button class="zoom-btn" id="zoomIn">+</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="tab-panel" id="panel-sprites">
+                <div class="sprites-grid" id="spritesGrid"></div>
+                <div class="empty-state" id="emptySprites">
+                    <div class="icon">&#128196;</div>
+                    <p>Nenhum sprite recortado ainda</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+const $ = id => document.getElementById(id);
+
+const state = {
+    image: null,
+    imageData: null,
+    width: 0,
+    height: 0,
+    sprites: [],
+    zoom: 1,
+    fileName: ''
+};
+
+const BOUNDS_COLORS = [
+    '#e94560','#00b894','#0984e3','#6c5ce7','#fdcb6e','#e17055',
+    '#00cec9','#d63031','#a29bfe','#55efc4','#fab1a0','#74b9ff',
+    '#ffeaa7','#dfe6e9','#ff7675','#fd79a8'
+];
+
+$('fileInput').addEventListener('change', e => {
+    if (e.target.files[0]) loadImage(e.target.files[0]);
+});
+
+const uploadZone = $('uploadZone');
+uploadZone.addEventListener('click', () => $('fileInput').click());
+uploadZone.addEventListener('dragover', e => { e.preventDefault(); uploadZone.classList.add('dragover'); });
+uploadZone.addEventListener('dragleave', () => uploadZone.classList.remove('dragover'));
+uploadZone.addEventListener('drop', e => {
+    e.preventDefault();
+    uploadZone.classList.remove('dragover');
+    if (e.dataTransfer.files[0]) loadImage(e.dataTransfer.files[0]);
+});
+
+document.querySelectorAll('.tab').forEach(tab => {
+    tab.addEventListener('click', () => {
+        document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+        document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+        tab.classList.add('active');
+        $('panel-' + tab.dataset.tab).classList.add('active');
+    });
+});
+
+['alphaThreshold','minSpriteSize','mergeDistance','borderWidth'].forEach(id => {
+    $(id).addEventListener('input', e => {
+        const valId = id.replace(/([A-Z])/g, 'Val');
+        $(valId).textContent = e.target.value;
+    });
+});
+
+$('btnSlice').addEventListener('click', () => sliceSprites());
+$('btnDownloadAll').addEventListener('click', downloadAll);
+$('btnReset').addEventListener('click', resetAll);
+$('zoomIn').addEventListener('click', () => setZoom(state.zoom * 1.25));
+$('zoomOut').addEventListener('click', () => setZoom(state.zoom / 1.25));
+$('zoomFit').addEventListener('click', zoomFit);
+$('showBounds').addEventListener('change', drawPreview);
+$('showIndex').addEventListener('change', drawPreview);
+$('trimAlpha').addEventListener('change', () => { if (state.sprites.length > 0) renderSpritesGrid(); });
+
+function loadImage(file) {
+    state.fileName = file.name.replace(/\.[^.]+$/, '');
+    const reader = new FileReader();
+    reader.onload = e => {
+        const img = new Image();
+        img.onload = () => {
+            state.image = img;
+            state.width = img.width;
+            state.height = img.height;
+
+            const c = document.createElement('canvas');
+            c.width = img.width;
+            c.height = img.height;
+            const ctx = c.getContext('2d');
+            ctx.drawImage(img, 0, 0);
+            state.imageData = ctx.getImageData(0, 0, img.width, img.height);
+
+            $('statFile').textContent = file.name.length > 18 ? file.name.substring(0, 16) + '...' : file.name;
+            $('statDimensions').textContent = img.width + 'x' + img.height;
+            $('statsPanel').style.display = 'block';
+            $('btnSlice').disabled = false;
+
+            $('uploadZone').style.display = 'none';
+            $('canvasContainer').style.display = 'block';
+
+            zoomFit();
+            drawPreview();
+
+            setTimeout(() => sliceSprites(), 50);
+        };
+        img.src = e.target.result;
+    };
+    reader.readAsDataURL(file);
+}
+
+function setZoom(z) {
+    state.zoom = Math.max(0.1, Math.min(5, z));
+    drawPreview();
+}
+
+function zoomFit() {
+    if (!state.image) return;
+    const ctn = $('canvasContainer');
+    const sx = (ctn.clientWidth - 40) / state.width;
+    const sy = (ctn.clientHeight - 40) / state.height;
+    state.zoom = Math.min(sx, sy, 2);
+    drawPreview();
+}
+
+function drawPreview() {
+    const canvas = $('previewCanvas');
+    const ctx = canvas.getContext('2d');
+    const z = state.zoom;
+
+    canvas.width = state.width * z;
+    canvas.height = state.height * z;
+
+    ctx.imageSmoothingEnabled = false;
+    ctx.drawImage(state.image, 0, 0, canvas.width, canvas.height);
+
+    if ($('showBounds').checked && state.sprites.length > 0) {
+        const border = parseInt($('borderWidth').value);
+
+        state.sprites.forEach((sp, i) => {
+            const color = BOUNDS_COLORS[i % BOUNDS_COLORS.length];
+            ctx.strokeStyle = color;
+            ctx.lineWidth = border;
+            ctx.strokeRect(sp.x * z, sp.y * z, sp.w * z, sp.h * z);
+
+            if ($('showIndex').checked && z > 0.25) {
+                const label = '' + (i + 1);
+                const fontSize = Math.max(10, Math.round(13 * z));
+                ctx.font = 'bold ' + fontSize + 'px monospace';
+                const tw = ctx.measureText(label).width;
+                const lx = sp.x * z;
+                const ly = sp.y * z;
+                const pad = 2 * z;
+
+                ctx.fillStyle = color;
+                ctx.fillRect(lx, ly - fontSize - pad * 2, tw + pad * 2, fontSize + pad * 2);
+                ctx.fillStyle = '#fff';
+                ctx.fillText(label, lx + pad, ly - pad);
+            }
+        });
+    }
+}
+
+function detectSprites() {
+    const alpha = parseInt($('alphaThreshold').value);
+    const minSize = parseInt($('minSpriteSize').value);
+    const mergeDist = parseInt($('mergeDistance').value);
+
+    const data = state.imageData.data;
+    const w = state.width;
+    const h = state.height;
+
+    const visited = new Uint8Array(w * h);
+    const boxes = [];
+
+    for (let y = 0; y < h; y++) {
+        for (let x = 0; x < w; x++) {
+            const idx = y * w + x;
+            if (visited[idx]) continue;
+            if (data[idx * 4 + 3] <= alpha) { visited[idx] = 1; continue; }
+
+            const box = scanlineBFS(data, visited, x, y, w, h, alpha);
+            if (box.w >= minSize && box.h >= minSize) {
+                boxes.push(box);
+            }
+        }
+    }
+
+    return mergeBoxes(boxes, mergeDist);
+}
+
+function scanlineBFS(data, visited, startX, startY, w, h, alpha) {
+    let minX = startX, maxX = startX, minY = startY, maxY = startY;
+    const queue = [startX, startY];
+    visited[startY * w + startX] = 1;
+
+    let qi = 0;
+    while (qi < queue.length) {
+        const cx = queue[qi++];
+        const cy = queue[qi++];
+
+        minX = Math.min(minX, cx);
+        maxX = Math.max(maxX, cx);
+        minY = Math.min(minY, cy);
+        maxY = Math.max(maxY, cy);
+
+        let lx = cx, rx = cx;
+
+        while (lx > 0 && !visited[cy * w + (lx - 1)] && data[(cy * w + (lx - 1)) * 4 + 3] > alpha) {
+            lx--;
+            visited[cy * w + lx] = 1;
+        }
+
+        while (rx < w - 1 && !visited[cy * w + (rx + 1)] && data[(cy * w + (rx + 1)) * 4 + 3] > alpha) {
+            rx++;
+            visited[cy * w + rx] = 1;
+        }
+
+        minX = Math.min(minX, lx);
+        maxX = Math.max(maxX, rx);
+
+        for (let x = lx; x <= rx; x++) {
+            if (cy > 0 && !visited[(cy - 1) * w + x] && data[((cy - 1) * w + x) * 4 + 3] > alpha) {
+                visited[(cy - 1) * w + x] = 1;
+                queue.push(x, cy - 1);
+            }
+            if (cy < h - 1 && !visited[(cy + 1) * w + x] && data[((cy + 1) * w + x) * 4 + 3] > alpha) {
+                visited[(cy + 1) * w + x] = 1;
+                queue.push(x, cy + 1);
+            }
+        }
+    }
+
+    return { x: minX, y: minY, w: maxX - minX + 1, h: maxY - minY + 1 };
+}
+
+function mergeBoxes(boxes, dist) {
+    if (boxes.length === 0) return [];
+
+    let merged = boxes.map(b => ({ x: b.x, y: b.y, w: b.w, h: b.h }));
+    let changed = true;
+
+    while (changed) {
+        changed = false;
+        for (let i = 0; i < merged.length; i++) {
+            for (let j = i + 1; j < merged.length; j++) {
+                const a = merged[i], b = merged[j];
+                const overlaps = !(
+                    b.x > a.x + a.w + dist ||
+                    b.x + b.w < a.x - dist ||
+                    b.y > a.y + a.h + dist ||
+                    b.y + b.h < a.y - dist
+                );
+
+                if (overlaps) {
+                    const nx = Math.min(a.x, b.x);
+                    const ny = Math.min(a.y, b.y);
+                    const nr = Math.max(a.x + a.w, b.x + b.w);
+                    const nb = Math.max(a.y + a.h, b.y + b.h);
+                    merged[i] = { x: nx, y: ny, w: nr - nx, h: nb - ny };
+                    merged.splice(j, 1);
+                    changed = true;
+                    break;
+                }
+            }
+            if (changed) break;
+        }
+    }
+
+    return merged.sort((a, b) => a.y - b.y || a.x - b.x);
+}
+
+function sliceSprites() {
+    if (!state.image) return;
+
+    $('loadingOverlay').classList.add('active');
+    $('btnSlice').disabled = true;
+
+    setTimeout(() => {
+        const t0 = performance.now();
+        const boxes = detectSprites();
+        const elapsed = (performance.now() - t0).toFixed(1);
+
+        state.sprites = boxes;
+        $('statSprites').textContent = boxes.length;
+        $('statTime').textContent = elapsed + 'ms';
+        $('btnDownloadAll').disabled = boxes.length === 0;
+        $('btnSlice').disabled = false;
+
+        drawPreview();
+        renderSpritesGrid();
+
+        $('loadingOverlay').classList.remove('active');
+
+        $('emptySprites').style.display = boxes.length === 0 ? 'flex' : 'none';
+        if (boxes.length > 0) {
+            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+            document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+            document.querySelector('[data-tab="sprites"]').classList.add('active');
+            $('panel-sprites').classList.add('active');
+        }
+    }, 60);
+}
+
+function renderSpritesGrid() {
+    const grid = $('spritesGrid');
+    grid.innerHTML = '';
+
+    const trim = $('trimAlpha').checked;
+
+    state.sprites.forEach((sp, i) => {
+        let cx = sp.x, cy = sp.y, cw = sp.w, ch = sp.h;
+
+        if (trim) {
+            const t = trimBox(sp);
+            cx = t.x; cy = t.y; cw = t.w; ch = t.h;
+        }
+
+        const c = document.createElement('canvas');
+        c.width = cw;
+        c.height = ch;
+        const ctx = c.getContext('2d');
+        ctx.drawImage(state.image, cx, cy, cw, ch, 0, 0, cw, ch);
+
+        const dataURL = c.toDataURL('image/png');
+        const name = state.fileName + '_' + String(i + 1).padStart(3, '0') + '.png';
+
+        const card = document.createElement('div');
+        card.className = 'sprite-card';
+        card.innerHTML =
+            '<div class="preview"><img src="' + dataURL + '" alt="Sprite ' + (i+1) + '"></div>' +
+            '<div class="info"><span class="name">' + name + '</span><span class="size">' + cw + 'x' + ch + '</span></div>' +
+            '<button class="download-btn">Download</button>';
+
+        card.querySelector('.download-btn').addEventListener('click', () => {
+            const a = document.createElement('a');
+            a.href = dataURL;
+            a.download = name;
+            a.click();
+        });
+
+        grid.appendChild(card);
+    });
+}
+
+function trimBox(sp) {
+    const data = state.imageData.data;
+    const w = state.width;
+    let l = sp.x, r = sp.x + sp.w - 1, t = sp.y, b = sp.y + sp.h - 1;
+
+    outer_l: for (; l <= r; l++)
+        for (let y = sp.y; y < sp.y + sp.h; y++)
+            if (data[(y * w + l) * 4 + 3] > 0) break outer_l;
+
+    outer_r: for (; r >= l; r--)
+        for (let y = sp.y; y < sp.y + sp.h; y++)
+            if (data[(y * w + r) * 4 + 3] > 0) break outer_r;
+
+    outer_t: for (; t <= b; t++)
+        for (let x = l; x <= r; x++)
+            if (data[(t * w + x) * 4 + 3] > 0) break outer_t;
+
+    outer_b: for (; b >= t; b--)
+        for (let x = l; x <= r; x++)
+            if (data[(b * w + x) * 4 + 3] > 0) break outer_b;
+
+    return { x: l, y: t, w: r - l + 1, h: b - t + 1 };
+}
+
+async function downloadAll() {
+    if (state.sprites.length === 0) return;
+
+    const zip = new JSZip();
+    const trim = $('trimAlpha').checked;
+
+    state.sprites.forEach((sp, i) => {
+        let cx = sp.x, cy = sp.y, cw = sp.w, ch = sp.h;
+
+        if (trim) {
+            const t = trimBox(sp);
+            cx = t.x; cy = t.y; cw = t.w; ch = t.h;
+        }
+
+        const c = document.createElement('canvas');
+        c.width = cw;
+        c.height = ch;
+        const ctx = c.getContext('2d');
+        ctx.drawImage(state.image, cx, cy, cw, ch, 0, 0, cw, ch);
+
+        const dataURL = c.toDataURL('image/png');
+        const base64 = dataURL.split(',')[1];
+        const name = state.fileName + '_' + String(i + 1).padStart(3, '0') + '.png';
+        zip.file(name, base64, { base64: true });
+    });
+
+    const blob = await zip.generateAsync({ type: 'blob' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = state.fileName + '_sprites.zip';
+    a.click();
+    URL.revokeObjectURL(url);
+}
+
+function resetAll() {
+    state.image = null;
+    state.imageData = null;
+    state.sprites = [];
+    state.width = 0;
+    state.height = 0;
+
+    $('uploadZone').style.display = 'flex';
+    $('canvasContainer').style.display = 'none';
+    $('btnSlice').disabled = true;
+    $('btnDownloadAll').disabled = true;
+    $('statsPanel').style.display = 'none';
+    $('spritesGrid').innerHTML = '';
+    $('emptySprites').style.display = 'flex';
+    $('fileInput').value = '';
+
+    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+    document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+    document.querySelector('[data-tab="editor"]').classList.add('active');
+    $('panel-editor').classList.add('active');
+}
+
+window.addEventListener('resize', () => { if (state.image) zoomFit(); });
+</script>
+
+</body>
+</html>

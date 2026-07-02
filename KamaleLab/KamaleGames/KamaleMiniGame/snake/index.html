@@ -1,0 +1,549 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>KamaleSnake</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div class="toast-container" id="toastContainer"></div>
+    <div id="app-container">
+
+        <!-- ═══ TELA DE MENU PRINCIPAL ═══ -->
+        <div id="menu-screen" class="screen">
+            <div class="game-section">
+                <div class="game-top-row">
+                    <div style="display: flex; align-items: center; gap: 8px;">
+                        <a href="../index.html" class="home-btn" aria-label="Menu principal">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="18" height="18" fill="currentColor">
+                            <path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/>
+                        </svg>
+                    </a>
+
+                    </div>
+                    <div style="display: flex; align-items: center; gap: 8px;">
+                        <a href="../apoie.html" class="apoie-btn" aria-label="Apoie o Kamale Games">apoie ❤️</a>
+                        <button class="google-login-btn" id="google-login-btn" aria-label="Entrar"></button>
+                        <button id="menu-learn-btn" class="help-btn" aria-label="Abrir instruções do jogo">?</button>
+                    </div>
+                </div>
+                <div id="game-board">
+                    <div class="menu-content">
+                        <div class="menu-title">🐍 SNAKE</div>
+
+                        <button id="btn-show-multiplayer" class="menu-btn menu-btn-primary">
+                            Jogar com Amigo <span class="btn-emoji">👥</span>
+                        </button>
+
+                        <button id="btn-solo" class="menu-btn menu-btn-secondary">
+                            Jogar Sozinho <span class="btn-emoji">🎮</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ═══ TELA DE MULTIPLAYER ═══ -->
+        <div id="multiplayer-screen" class="screen hidden">
+            <div class="game-section">
+                <div class="game-top-row">
+                    <div style="display: flex; align-items: center; gap: 8px;">
+                        <a href="../index.html" class="home-btn" aria-label="Menu principal">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="18" height="18" fill="currentColor">
+                            <path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/>
+                        </svg>
+                    </a>
+
+                    </div>
+                    <div style="display: flex; align-items: center; gap: 8px;">
+                        <a href="../apoie.html" class="apoie-btn" aria-label="Apoie o Kamale Games">apoie ❤️</a>
+                        <button class="google-login-btn" id="google-login-btn" aria-label="Entrar"></button>
+                        <button class="mp-learn-btn help-btn" aria-label="Instruções">?</button>
+                    </div>
+                </div>
+                <div id="game-board">
+                    <div class="menu-content">
+                        <div class="menu-title" style="font-size:1rem;">Multiplayer</div>
+
+                        <button id="btn-local-multiplayer" class="menu-btn menu-btn-primary">
+                            Na Mesma Máquina <span class="btn-emoji">🖥️</span>
+                        </button>
+
+                        <button id="btn-create-room" class="menu-btn menu-btn-secondary">
+                            Criar Sala <span class="btn-emoji">🏠</span>
+                        </button>
+
+                        <button id="btn-show-rooms" class="menu-btn menu-btn-secondary">
+                            Ver Salas <span class="btn-emoji">📋</span>
+                        </button>
+
+                        <button id="btn-show-join" class="menu-btn menu-btn-secondary">
+                            Entrar com Código <span class="btn-emoji">🔑</span>
+                        </button>
+
+                        <button id="btn-back-multiplayer" class="menu-btn menu-btn-back">
+                            ← Voltar
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ═══ TELA PARA DIGITAR CÓDIGO ═══ -->
+        <div id="join-screen" class="screen hidden">
+            <div class="game-section">
+                <div class="game-top-row">
+                    <div style="display: flex; align-items: center; gap: 8px;">
+                        <a href="../index.html" class="home-btn" aria-label="Menu principal">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="18" height="18" fill="currentColor">
+                            <path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/>
+                        </svg>
+                    </a>
+
+                    </div>
+                    <div style="display: flex; align-items: center; gap: 8px;">
+                        <a href="../apoie.html" class="apoie-btn" aria-label="Apoie o Kamale Games">apoie ❤️</a>
+                        <button class="google-login-btn" id="google-login-btn" aria-label="Entrar"></button>
+                        <button class="help-btn" aria-label="Instruções">?</button>
+                    </div>
+                </div>
+                <div id="game-board">
+                    <div class="menu-content">
+                        <div class="menu-title" style="font-size:1rem;">Entrar na Sala</div>
+
+                        <input id="input-room-code" type="text" class="room-input" maxlength="6"
+                               placeholder="CÓDIGO" autocomplete="off" spellcheck="false">
+
+                        <input id="input-player-name" type="text" class="room-input name-input"
+                               maxlength="12" placeholder="Seu nome" autocomplete="off">
+
+                        <div id="join-error" class="error-text hidden"></div>
+
+                        <button id="btn-join-confirm" class="menu-btn menu-btn-primary">
+                            Entrar <span class="btn-emoji">▶</span>
+                        </button>
+
+                        <button id="btn-back-menu" class="menu-btn menu-btn-back">
+                            ← Voltar
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ═══ TELA LOBBY LOCAL (na mesma máquina) ═══ -->
+        <div id="local-lobby-screen" class="screen hidden">
+            <div class="game-section">
+                <div class="game-top-row">
+                    <div style="display: flex; align-items: center; gap: 8px;">
+                        <a href="../index.html" class="home-btn" aria-label="Menu principal">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="18" height="18" fill="currentColor">
+                            <path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/>
+                        </svg>
+                    </a>
+
+                    </div>
+                    <div style="display: flex; align-items: center; gap: 8px;">
+                        <a href="../apoie.html" class="apoie-btn" aria-label="Apoie o Kamale Games">apoie ❤️</a>
+                        <button class="google-login-btn" id="google-login-btn" aria-label="Entrar"></button>
+                        <button class="help-btn" aria-label="Instruções">?</button>
+                    </div>
+                </div>
+                <div id="game-board">
+                    <div class="menu-content">
+                        <div class="menu-title" style="font-size:1rem;">Na Mesma Máquina</div>
+
+                        <input id="input-local-p1" type="text" class="room-input name-input"
+                               maxlength="12" placeholder="Nome Jogador 1 (Setas)" autocomplete="off">
+
+                        <input id="input-local-p2" type="text" class="room-input name-input"
+                               maxlength="12" placeholder="Nome Jogador 2 (WASD)" autocomplete="off">
+
+                        <div class="lobby-controls-hint" style="color:#888;font-size:0.7rem;text-align:center;line-height:1.6;">
+                            <span style="color:#3acc7a;">● Jogador 1</span> — Setas<br>
+                            <span style="color:#00c8ff;">● Jogador 2</span> — W A S D
+                        </div>
+
+                        <button id="btn-start-local" class="menu-btn menu-btn-primary">
+                            Iniciar Jogo <span class="btn-emoji">▶</span>
+                        </button>
+
+                        <button id="btn-back-local-lobby" class="menu-btn menu-btn-back">
+                            ← Voltar
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ═══ TELA CRIAR SALA ═══ -->
+        <div id="create-screen" class="screen hidden">
+            <div class="game-section">
+                <div class="game-top-row">
+                    <div style="display: flex; align-items: center; gap: 8px;">
+                        <a href="../index.html" class="home-btn" aria-label="Menu principal">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="18" height="18" fill="currentColor">
+                            <path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/>
+                        </svg>
+                    </a>
+
+                    </div>
+                    <div style="display: flex; align-items: center; gap: 8px;">
+                        <a href="../apoie.html" class="apoie-btn" aria-label="Apoie o Kamale Games">apoie ❤️</a>
+                        <button class="google-login-btn" id="google-login-btn" aria-label="Entrar"></button>
+                        <button class="help-btn" aria-label="Instruções">?</button>
+                    </div>
+                </div>
+                <div id="game-board">
+                    <div class="menu-content">
+                        <div class="menu-title" style="font-size:1rem;">Criar Sala</div>
+
+                        <input id="input-room-name" type="text" class="room-input name-input"
+                               maxlength="20" placeholder="Nome da sala" autocomplete="off">
+
+                        <input id="input-create-player-name" type="text" class="room-input name-input"
+                               maxlength="12" placeholder="Seu nome" autocomplete="off">
+
+                        <button id="btn-create-confirm" class="menu-btn menu-btn-primary">
+                            Criar Sala <span class="btn-emoji">🏠</span>
+                        </button>
+
+                        <button id="btn-back-menu-create" class="menu-btn menu-btn-back">
+                            ← Voltar
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ═══ TELA VER SALAS ═══ -->
+        <div id="rooms-screen" class="screen hidden">
+            <div class="game-section">
+                <div class="game-top-row">
+                    <div style="display: flex; align-items: center; gap: 8px;">
+                        <a href="../index.html" class="home-btn" aria-label="Menu principal">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="18" height="18" fill="currentColor">
+                            <path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/>
+                        </svg>
+                    </a>
+
+                    </div>
+                    <div style="display: flex; align-items: center; gap: 8px;">
+                        <a href="../apoie.html" class="apoie-btn" aria-label="Apoie o Kamale Games">apoie ❤️</a>
+                        <button class="google-login-btn" id="google-login-btn" aria-label="Entrar"></button>
+                        <button class="help-btn" aria-label="Instruções">?</button>
+                    </div>
+                </div>
+                <div id="game-board">
+                    <div class="menu-content">
+                        <div class="menu-title" style="font-size:1rem;">Salas Disponíveis</div>
+
+                        <div id="rooms-list" class="rooms-list">
+                            <div class="lobby-waiting">Carregando...</div>
+                        </div>
+
+                        <button id="btn-refresh-rooms" class="menu-btn menu-btn-secondary" style="margin-top:8px;">
+                            Atualizar <span class="btn-emoji">🔄</span>
+                        </button>
+
+                        <button id="btn-back-menu-rooms" class="menu-btn menu-btn-back">
+                            ← Voltar
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ═══ TELA DO JOGO (singleplayer) ═══ -->
+        <div id="game-screen" class="screen hidden">
+            <div class="game-section">
+                <div class="game-top-row">
+                    <div style="display: flex; align-items: center; gap: 8px;">
+                        <a href="../index.html" class="home-btn" aria-label="Menu principal">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="18" height="18" fill="currentColor">
+                            <path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/>
+                        </svg>
+                    </a>
+
+                    </div>
+                    <div style="display: flex; align-items: center; gap: 8px;">
+                        <a href="../apoie.html" class="apoie-btn" aria-label="Apoie o Kamale Games">apoie ❤️</a>
+                        <button class="google-login-btn" id="google-login-btn" aria-label="Entrar"></button>
+                        <button id="learn-btn" class="help-btn" aria-label="Abrir instruções do jogo">?</button>
+                    </div>
+                </div>
+
+                <div id="game-board">
+                    <canvas id="game-canvas" width="400" height="400"></canvas>
+                    <div id="score-display">Score: <span id="score-val">0</span></div>
+                    <div id="highscore-display">Recorde: <span id="highscore-val">0</span></div>
+
+
+                    <!-- Overlay de Pausa -->
+                    <div id="pause-overlay" class="overlay hidden">
+                        <div class="game-over-content">
+                            <div class="game-over-title">
+                                ⏸ Pausado
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Game Over -->
+                    <div id="game-over-screen" class="overlay hidden">
+                        <div class="game-over-content">
+                            <div class="game-over-title">
+                                <span class="skull-emoji">💀</span> Game Over!
+                            </div>
+                            <div class="game-over-score">
+                                Score: <span id="final-score">0</span>
+                            </div>
+                            <button id="restart-btn" class="menu-btn">
+                                Jogar novamente <span class="btn-emoji-restart">🔄</span>
+                            </button>
+                            <button id="back-to-menu-btn" class="menu-btn menu-btn-back" style="margin-top:8px;">
+                                Menu ←
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Instruções -->
+                    <div id="instructions-modal" class="overlay hidden">
+                        <button id="close-instructions-btn" class="modal-close-btn" aria-label="Fechar instruções">✕</button>
+                        <div class="instructions-content">
+                            <div class="instructions-title">🐍 Como Jogar</div>
+                            <ul class="instructions-list instructions-desktop">
+                                <li><span class="key-hint">↑ ↓ ← →</span> Mover a cobra</li>
+                                <li><span class="key-hint">Espaço</span> Língua — come à dist. 1</li>
+                                <li><span class="key-hint">Segurar dir.</span> Acelera a cobra</li>
+                                <li><span class="key-hint">P</span> Pausar / Retomar</li>
+                                <li><span class="key-hint">💀</span> Evite paredes e o próprio corpo</li>
+                            </ul>
+                            <ul class="instructions-list instructions-mobile">
+                                <li><span class="key-hint">▲ ▼ ◄ ► D-pad</span> Mover (segurar acelera)</li>
+                                <li><span class="key-hint"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="transform:rotate(180deg);vertical-align:middle;margin-right:3px;"><line x1="12" y1="4" x2="12" y2="14"/><line x1="12" y1="14" x2="7" y2="20"/><line x1="12" y1="14" x2="17" y2="20"/></svg> Botão</span> Língua — come à dist. 1</li>
+                                <li><span class="key-hint">⏸ Botão</span> Pausar / Retomar</li>
+                                <li><span class="key-hint">💀</span> Evite paredes e o próprio corpo</li>
+                            </ul>
+                            <button class="menu-btn" style="margin-top:6px;" onclick="closeInstructions()">
+                                Entendido! ✓
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ═══ TELA DE LOBBY (multiplayer) ═══ -->
+        <div id="lobby-screen" class="screen hidden">
+            <div class="game-section">
+                <div class="game-top-row">
+                    <div style="display: flex; align-items: center; gap: 8px;">
+                        <a href="../index.html" class="home-btn" aria-label="Menu principal">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="18" height="18" fill="currentColor">
+                            <path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/>
+                        </svg>
+                    </a>
+
+                    </div>
+                    <div style="display: flex; align-items: center; gap: 8px;">
+                        <a href="../apoie.html" class="apoie-btn" aria-label="Apoie o Kamale Games">apoie ❤️</a>
+                        <button class="google-login-btn" id="google-login-btn" aria-label="Entrar"></button>
+                        <button class="help-btn" aria-label="Instruções">?</button>
+                    </div>
+                </div>
+                <div id="game-board">
+                    <div class="lobby-content">
+                        <div class="lobby-title">SALA</div>
+
+                        <div id="lobby-room-code" class="lobby-code">------</div>
+                        <div class="lobby-code-hint">Compartilhe o código com seus amigos</div>
+
+                        <div id="lobby-players" class="lobby-players"></div>
+
+                        <div id="lobby-waiting" class="lobby-waiting">
+                            Aguardando jogadores...
+                        </div>
+
+                        <button id="btn-ready" class="menu-btn menu-btn-primary hidden">
+                            Pronto! <span class="btn-emoji">✓</span>
+                        </button>
+
+                        <div id="lobby-ready-status" class="lobby-waiting" style="display:none;">
+                        </div>
+
+                        <button id="btn-start-game" class="menu-btn menu-btn-primary" style="display:none;">
+                            Iniciar Jogo <span class="btn-emoji">▶</span>
+                        </button>
+
+                        <button id="btn-leave-lobby" class="menu-btn menu-btn-back" style="margin-top:10px;">
+                            Sair da Sala ←
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ═══ TELA DO JOGO MULTIPLAYER ═══ -->
+        <div id="mp-game-screen" class="screen hidden">
+            <div class="game-section">
+                <div class="game-top-row">
+                    <div style="display: flex; align-items: center; gap: 8px;">
+                        <a href="../index.html" class="home-btn" aria-label="Menu principal">
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="18" height="18" fill="currentColor">
+                                <path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/>
+                            </svg>
+                        </a>
+
+                    </div>
+                    <div style="display:flex;align-items:center;gap:8px;">
+                        <a href="../apoie.html" class="apoie-btn" aria-label="Apoie o Kamale Games">apoie ❤️</a>
+                        <button class="google-login-btn" id="google-login-btn" aria-label="Entrar"></button>
+                        <div id="mp-players-bar" class="mp-players-bar"></div>
+                        <button id="mp-learn-btn" class="help-btn" aria-label="Instruções">?</button>
+                    </div>
+                </div>
+
+                <div id="game-board">
+                    <canvas id="mp-game-canvas" width="400" height="400"></canvas>
+                    <div id="mp-score-display">
+                        Você: <span id="mp-score-val">0</span>
+                    </div>
+
+                    <!-- Placar dos outros jogadores -->
+                    <div id="mp-other-scores" class="mp-other-scores"></div>
+
+                    <!-- Overlay de espectador -->
+                    <div id="spectator-overlay" class="overlay hidden">
+                        <div class="game-over-content">
+                            <div class="game-over-title" style="color:#ff6b6b;">
+                                💀 Você morreu!
+                            </div>
+                            <div class="spectator-text">Assistindo aos outros jogadores...</div>
+                            <div id="spectator-leaderboard" class="spectator-leaderboard"></div>
+                            <button id="btn-rematch-spectator" class="menu-btn menu-btn-primary" style="margin-top:14px;">
+                                Jogar novamente 🔄
+                            </button>
+                            <div id="rematch-status-spectator" class="lobby-waiting" style="display:none;margin-top:8px;"></div>
+                            <button id="btn-back-menu-spectator" class="menu-btn menu-btn-back" style="margin-top:8px;">
+                                Sair da Sala ←
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Overlay de vitória -->
+                    <div id="victory-overlay" class="overlay hidden">
+                        <div class="game-over-content">
+                            <div class="game-over-title" style="color:#ffd100;">
+                                🏆 Vitória!
+                            </div>
+                            <div id="victory-text" class="victory-text"></div>
+                            <div id="victory-leaderboard" class="spectator-leaderboard"></div>
+                            <button id="btn-rematch-victory" class="menu-btn menu-btn-primary" style="margin-top:12px;">
+                                Jogar novamente 🔄
+                            </button>
+                            <div id="rematch-status-victory" class="lobby-waiting" style="display:none;margin-top:8px;"></div>
+                            <button id="btn-back-menu-victory" class="menu-btn menu-btn-back" style="margin-top:8px;">
+                                Sair da Sala ←
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Overlay de pausa multiplayer -->
+                    <div id="pause-overlay-mp" class="overlay hidden">
+                        <div class="game-over-content">
+                            <div class="game-over-title">⏸ Pausado</div>
+                            <div id="pause-text-mp" class="spectator-text"></div>
+                        </div>
+                    </div>
+
+                    <!-- Modal de instruções (multiplayer) -->
+                    <div id="mp-instructions-modal" class="overlay hidden">
+                        <button id="mp-close-instructions-btn" class="modal-close-btn" aria-label="Fechar instruções">✕</button>
+                        <div class="instructions-content">
+                            <div class="instructions-title">🐍 Multiplayer</div>
+                            <ul class="instructions-list instructions-desktop">
+                                <li><span class="key-hint">↑ ↓ ← →</span> Mover a cobra</li>
+                                <li><span class="key-hint">Espaço</span> Língua — come à dist. 1</li>
+                                <li><span class="key-hint">Segurar dir.</span> Acelera a cobra</li>
+                                <li><span class="key-hint">P</span> Pausar / Retomar</li>
+                                <li><span class="key-hint">🐍 Outro jogador</span> Perde 1 tamanho</li>
+                                <li><span class="key-hint">💀 Parede / Corpo</span> Morre</li>
+                            </ul>
+                            <ul class="instructions-list instructions-mobile">
+                                <li><span class="key-hint">▲ ▼ ◄ ► D-pad</span> Mover</li>
+                                <li><span class="key-hint">.Botão</span> Língua</li>
+                                <li><span class="key-hint">🐍 Outro jogador</span> Perde 1 tamanho</li>
+                                <li><span class="key-hint">💀 Parede / Corpo</span> Morre</li>
+                            </ul>
+                            <button class="menu-btn" style="margin-top:6px;" onclick="closeMpInstructions()">
+                                Entendido! ✓
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ═══ MODAL DE NOME PARA SALA ═══ -->
+        <div id="name-modal" class="overlay hidden">
+            <div class="game-over-content">
+                <div class="game-over-title" style="font-size:1rem;">Qual é o seu nome?</div>
+                <input id="name-modal-input" type="text" class="room-input name-input"
+                       maxlength="12" placeholder="Seu nome" autocomplete="off" style="margin-top:12px;">
+                <button id="name-modal-confirm" class="menu-btn menu-btn-primary" style="margin-top:12px;">
+                    Confirmar <span class="btn-emoji">✓</span>
+                </button>
+            </div>
+        </div>
+
+        <!-- ═══ CONTROLES MÓVEIS ═══ -->
+        <div id="controls-wrapper">
+            <div id="dpad-container">
+                <div class="dpad-btn-wrapper up">
+                    <button id="dpad-up" class="dpad-btn" aria-label="Mover para cima">▲</button>
+                </div>
+                <div class="dpad-btn-wrapper left">
+                    <button id="dpad-left" class="dpad-btn" aria-label="Mover para a esquerda">◀</button>
+                </div>
+                <div class="dpad-btn-wrapper center">
+                    <div class="dpad-center-dot"></div>
+                </div>
+                <div class="dpad-btn-wrapper right">
+                    <button id="dpad-right" class="dpad-btn" aria-label="Mover para a direita">▶</button>
+                </div>
+                <div class="dpad-btn-wrapper down">
+                    <button id="dpad-down" class="dpad-btn" aria-label="Mover para baixo">▼</button>
+                </div>
+            </div>
+
+            <div class="pause-btn-wrapper">
+                <button id="mobile-pause-btn" class="pause-btn" aria-label="Pausar jogo">⏸</button>
+                <button id="mobile-reset-btn" class="reset-btn hidden" aria-label="Menu do jogo">reset</button>
+            </div>
+
+            <div id="action-buttons-container">
+                <button id="action-a" class="action-btn action-a" aria-label="Língua da cobra">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="transform: rotate(180deg)">
+                        <line x1="12" y1="4" x2="12" y2="14"/>
+                        <line x1="12" y1="14" x2="7" y2="20"/>
+                        <line x1="12" y1="14" x2="17" y2="20"/>
+                    </svg>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+    <script src="firebase-config.js"></script>
+    <script src="../auth.js"></script>
+    <script src="multiplayer.js"></script>
+    <script src="script.js"></script>
+</body>
+</html>

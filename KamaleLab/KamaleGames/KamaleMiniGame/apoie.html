@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>Apoie o Kamale MiniGame</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            width: 100vw;
+            height: 100vh;
+            overflow: hidden;
+            position: fixed;
+            background-color: #1a1a2e;
+            color: #e0e0e0;
+            font-family: 'Share Tech Mono', 'Courier New', Courier, monospace;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            touch-action: none;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 400px;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .back-btn {
+            align-self: flex-start;
+            background: none;
+            border: 1px solid #555;
+            color: #aaa;
+            padding: 6px 14px;
+            border-radius: 8px;
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 0.85rem;
+            cursor: pointer;
+            transition: color 0.2s, border-color 0.2s;
+            text-decoration: none;
+        }
+        .back-btn:hover { color: #3acc7a; border-color: #3acc7a; }
+
+        .card {
+            width: 100%;
+            background-color: #16213e;
+            border: 2px solid #0f3460;
+            border-radius: 16px;
+            padding: 30px 24px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 24px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+        }
+
+        .card-icon {
+            width: 64px;
+            height: 64px;
+            background-color: #0f3460;
+            border: 2px solid #1a73e8;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.8rem;
+        }
+        .card-icon img {
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            object-fit: cover;
+        }
+
+        .card-title {
+            font-size: 1.3rem;
+            font-weight: bold;
+            color: #ffd100;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.5);
+            text-align: center;
+        }
+
+        .card-desc {
+            font-size: 0.85rem;
+            color: #666;
+            text-align: center;
+            line-height: 1.5;
+        }
+
+        .divider {
+            width: 100%;
+            height: 1px;
+            background-color: #e0e0e0;
+        }
+
+        .amount-section {
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .amount-label {
+            font-size: 0.8rem;
+            color: #888;
+        }
+
+        .amount-options {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 10px;
+        }
+
+        .amount-btn {
+            background-color: #f9f9f9;
+            border: 2px solid #ddd;
+            color: #333;
+            padding: 12px 0;
+            border-radius: 10px;
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 1rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.15s;
+            box-shadow: 0 3px 0 #e0e0e0;
+        }
+        .amount-btn:hover {
+            background-color: #f0f0f0;
+            border-color: #3acc7a;
+        }
+        .amount-btn:active {
+            transform: translateY(2px);
+            box-shadow: 0 1px 0 #e0e0e0;
+        }
+        .amount-btn.selected {
+            background-color: #3acc7a;
+            color: #ffffff;
+            border-color: #2ea862;
+            box-shadow: 0 3px 0 #1e8a50;
+        }
+
+        .pay-btn {
+            width: 100%;
+            background-color: #3acc7a;
+            color: #ffffff;
+            border: none;
+            padding: 14px 0;
+            border-radius: 12px;
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 1.1rem;
+            font-weight: bold;
+            cursor: pointer;
+            box-shadow: 0 5px 0 #1e8a50;
+            transform: translateY(-3px);
+            transition: all 0.1s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+        .pay-btn:hover { background-color: #4ddb8b; }
+        .pay-btn:active {
+            transform: translateY(2px);
+            box-shadow: 0 1px 0 #1e8a50;
+        }
+
+        .secure-text {
+            font-size: 0.7rem;
+            color: #999;
+            text-align: center;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        /* Toast */
+        .toast-container {
+            position: fixed;
+            top: 12px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 9999;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
+            pointer-events: none;
+        }
+        .toast {
+            padding: 10px 20px;
+            border-radius: 10px;
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 0.8rem;
+            font-weight: bold;
+            color: #333;
+            background-color: #ffffff;
+            border: 1px solid #ddd;
+            box-shadow: 0 6px 20px rgba(0,0,0,0.1);
+            opacity: 0;
+            transform: translateY(-20px);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            pointer-events: auto;
+            white-space: nowrap;
+        }
+        .toast.show { opacity: 1; transform: translateY(0); }
+        .toast.hide { opacity: 0; transform: translateY(-20px); }
+        .toast.toast-success { border-color: #3acc7a; background-color: #eafaf1; color: #2ea862; }
+        .toast.toast-info { border-color: #ddd; background-color: #ffffff; color: #333; }
+
+        @media (min-width: 769px) {
+            .container { max-width: 420px; }
+        }
+    </style>
+</head>
+<body>
+    <div class="toast-container" id="toastContainer"></div>
+
+    <div class="container">
+        <a href="index.html" class="back-btn">← Voltar</a>
+
+        <div class="card">
+            <div class="card-icon">
+                <img src="logo1.png" alt="Kamale Logo">
+            </div>
+            <div class="card-title">Apoie o Kamale MiniGame</div>
+            <div class="card-desc">
+                Ajude-nos a manter os jogos gratuitos e sempre melhorando.
+                Sua contribuição faz a diferença!
+            </div>
+
+            <div class="divider"></div>
+
+            <div class="amount-section">
+                <div class="amount-label">Escolha o valor:</div>
+                <div class="amount-options">
+                    <button class="amount-btn" data-value="5">R$ 5</button>
+                    <button class="amount-btn selected" data-value="10">R$ 10</button>
+                    <button class="amount-btn" data-value="20">R$ 20</button>
+                    <button class="amount-btn" data-value="50">R$ 50</button>
+                </div>
+            </div>
+
+            <div class="divider"></div>
+
+            <button class="pay-btn" id="payBtn">
+                Apoiar <span style="color: #ff4444;">❤️</span>
+            </button>
+
+            <div class="secure-text">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="#999">
+                    <path d="M18 8h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zm-6 9c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2zm3.1-9H8.9V6c0-1.71 1.39-3.1 3.1-3.1 1.71 0 3.1 1.39 3.1 3.1v2z"/>
+                </svg>
+                Pagamento seguro e criptografado
+            </div>
+        </div>
+    </div>
+
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+    <script src="firebase-config.js"></script>
+
+    <script>
+        function showToast(message, type = 'info', duration = 3000) {
+            const container = document.getElementById('toastContainer');
+            const toast = document.createElement('div');
+            toast.className = 'toast toast-' + type;
+            toast.textContent = message;
+            container.appendChild(toast);
+            requestAnimationFrame(() => { toast.classList.add('show'); });
+            setTimeout(() => {
+                toast.classList.remove('show');
+                toast.classList.add('hide');
+                setTimeout(() => toast.remove(), 300);
+            }, duration);
+        }
+
+        const amountBtns = document.querySelectorAll('.amount-btn');
+        let selectedAmount = 10;
+
+        amountBtns.forEach(btn => {
+            btn.addEventListener('click', () => {
+                amountBtns.forEach(b => b.classList.remove('selected'));
+                btn.classList.add('selected');
+                selectedAmount = parseInt(btn.dataset.value);
+            });
+        });
+
+        document.getElementById('payBtn').addEventListener('click', () => {
+            if (selectedAmount <= 0 || isNaN(selectedAmount)) {
+                showToast('Selecione um valor válido', 'info');
+                return;
+            }
+            var user = window.KamaleAuth ? window.KamaleAuth.getUser() : firebase.auth().currentUser;
+            if (!user) {
+                showToast('Faça login para apoiar', 'info');
+                return;
+            }
+            firebase.database().ref('supporters/' + user.uid).set({
+                name: user.displayName || '',
+                email: user.email || '',
+                amount: selectedAmount,
+                date: new Date().toISOString()
+            }).then(() => {
+                showToast('Obrigado pelo apoio! Você ganhou um presente surpresa!', 'success', 2500);
+                setTimeout(() => {
+                    window.location.href = 'index.html?gift=pending';
+                }, 1500);
+            });
+        });
+    </script>
+</body>
+</html>

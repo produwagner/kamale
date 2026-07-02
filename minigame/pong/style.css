@@ -936,4 +936,34 @@ a.apoie-btn {
     display: none !important;
 }
 
+/* ==========================================================================
+   AJUSTES PARA MODO CENTRALIZADO (IFRAME)
+   ========================================================================== */
+body.in-iframe #controls-wrapper,
+body.in-iframe .game-top-row {
+    display: none !important;
+}
+
+body.in-iframe #app-container {
+    padding: 0 !important;
+    max-width: 100% !important;
+    width: 100% !important;
+    height: 100% !important;
+}
+
+body.in-iframe #game-board {
+    max-width: 100% !important;
+    width: 100% !important;
+    height: 100% !important;
+    border: none !important;
+    border-radius: 0 !important;
+    box-shadow: none !important;
+    padding: 10px !important;
+}
+
+body.in-iframe .overlay {
+    border-radius: 0 !important;
+}
+
+
 

@@ -247,6 +247,39 @@
             height: 54px;
         }
 
+        .pause-btn-wrapper {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 50px;
+        }
+
+        .pause-btn {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background-color: #282828;
+            border: 2px solid #444444;
+            color: #888888;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            outline: none;
+            box-shadow: 0 4px 0 #141414;
+            transform: translateY(-3px);
+            transition: background-color 0.1s, transform 0.1s, border-color 0.1s, box-shadow 0.1s, color 0.1s;
+        }
+
+        .pause-btn:active, .pause-btn.active {
+            background-color: #ffd100;
+            border-color: #cca700;
+            color: #000000;
+            transform: translateY(1px);
+            box-shadow: 0 1px 0 #cca700;
+        }
+
         .dpad-center-dot {
             width: 8px;
             height: 8px;
@@ -386,44 +419,57 @@
 </div>
 
 <div id="game-board">
-    <div style="display: flex; align-items: center; gap: 8px; margin-left: auto; margin-bottom: 2px;">
-        <a href="apoie.html" class="apoie-btn" id="apoie-btn" aria-label="Apoie o Kamale Games">apoie ❤️</a>
-        <button class="google-login-btn" id="google-login-btn" aria-label="Entrar"></button>
+    <!-- Barra Superior Interna da Tela -->
+    <div id="screen-header" style="display: flex; align-items: center; width: 100%; margin-bottom: clamp(4px, 1vh, 8px); min-height: 30px; user-select: none;">
+        <!-- Botão Home (Voltar ao Menu) - Oculto por padrão -->
+        <button id="home-btn" class="home-btn hidden" aria-label="Voltar ao menu" style="display: none; align-items: center; justify-content: center; width: 30px; height: 30px; border-radius: 50%; background: #cf6666; border: 2px solid #df8888; color: #fff; cursor: pointer; box-shadow: 0 3px 0 #8a3c3c; transform: translateY(-2px); font-weight: bold; font-family: monospace; font-size: 0.9rem; outline: none; z-index: 10;">
+            ←
+        </button>
+        
+        <!-- Área de Login/Apoie à direita -->
+        <div id="screen-header-right" style="display: flex; align-items: center; gap: 8px; margin-left: auto;">
+            <a href="apoie.html" class="apoie-btn" id="apoie-btn" aria-label="Apoie o Kamale Games">apoie ❤️</a>
+            <button class="google-login-btn" id="google-login-btn" aria-label="Entrar"></button>
+        </div>
     </div>
-    <div class="games-grid">
 
-        <!-- SNAKE -->
-        <a href="snake/index.html" class="game-card card-snake" id="card-snake" aria-label="Jogar Snake">
-            <div class="card-preview">
-                <img src="snake/snake-preview.jpg" alt="Snake" class="card-preview-img">
-            </div>
-            <div class="card-label">SNAKE</div>
-        </a>
+    <!-- Container de Conteúdo -->
+    <div id="screen-content" style="width: 100%; flex: 1; min-height: 0; display: flex; flex-direction: column;">
+        <div class="games-grid" id="games-grid">
+            <!-- SNAKE -->
+            <a href="snake/index.html" class="game-card card-snake" id="card-snake" aria-label="Jogar Snake">
+                <div class="card-preview">
+                    <img src="snake/snake-preview.jpg" alt="Snake" class="card-preview-img">
+                </div>
+                <div class="card-label">SNAKE</div>
+            </a>
 
-        <!-- PONG -->
-        <a href="pong/index.html" class="game-card card-pong" id="card-pong" aria-label="Jogar Pong">
-            <div class="card-preview">
-                <img src="pong/pong-preview.png" alt="Pong" class="card-preview-img">
-            </div>
-            <div class="card-label">PONG</div>
-        </a>
+            <!-- PONG -->
+            <a href="pong/index.html" class="game-card card-pong" id="card-pong" aria-label="Jogar Pong">
+                <div class="card-preview">
+                    <img src="pong/pong-preview.png" alt="Pong" class="card-preview-img">
+                </div>
+                <div class="card-label">PONG</div>
+            </a>
 
-        <!-- BLOCK -->
-        <a href="block/index.html" class="game-card card-block" id="card-block" aria-label="Jogar Block Game">
-            <div class="card-preview">
-                <img src="block/block-preview.png" alt="Block Game" class="card-preview-img">
-            </div>
-            <div class="card-label">BLOCK GAME</div>
-        </a>
+            <!-- BLOCK -->
+            <a href="block/index.html" class="game-card card-block" id="card-block" aria-label="Jogar Block Game">
+                <div class="card-preview">
+                    <img src="block/block-preview.png" alt="Block Game" class="card-preview-img">
+                </div>
+                <div class="card-label">BLOCK GAME</div>
+            </a>
 
-        <!-- VEA GAME -->
-        <a href="veagame/index.html" class="game-card card-velha" id="card-velha" aria-label="Jogar Vea Game">
-            <div class="card-preview">
-                <img src="veagame/vea-preview.png" alt="Vea Game" class="card-preview-img">
-            </div>
-            <div class="card-label">VEA GAME</div>
-        </a>
-
+            <!-- VEA GAME -->
+            <a href="veagame/index.html" class="game-card card-velha" id="card-velha" aria-label="Jogar Vea Game">
+                <div class="card-preview">
+                    <img src="veagame/vea-preview.png" alt="Vea Game" class="card-preview-img">
+                </div>
+                <div class="card-label">VEA GAME</div>
+            </a>
+        </div>
+        
+        <iframe id="game-iframe" class="hidden" src="" style="width: 100%; flex: 1; border: none; background: #000; border-radius: 10px; display: none;"></iframe>
     </div>
 </div>
 
@@ -474,6 +520,16 @@
         <div class="dpad-btn-wrapper down">
             <button id="dpad-down" class="dpad-btn" aria-label="Mover para baixo">▼</button>
         </div>
+    </div>
+
+    <!-- Botão de Pause (Meio) - Oculto por padrão -->
+    <div class="pause-btn-wrapper">
+        <button id="mobile-pause-btn" class="pause-btn hidden" aria-label="Pausar jogo" style="display: none;">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor">
+                <rect x="5" y="4" width="4" height="16" rx="1"/>
+                <rect x="15" y="4" width="4" height="16" rx="1"/>
+            </svg>
+        </button>
     </div>
 
     <div id="action-buttons-container">
@@ -563,7 +619,69 @@
 
     checkGiftModal();
 
-    // ═══ NAVEGAÇÃO ═══
+    // Estado do Jogo Centralizado
+    let gameActive = false;
+    const gameIframe = document.getElementById('game-iframe');
+    const gamesGrid = document.getElementById('games-grid');
+    const homeBtn = document.getElementById('home-btn');
+    const screenHeaderRight = document.getElementById('screen-header-right');
+    const mobilePauseBtn = document.getElementById('mobile-pause-btn');
+
+    function startGame(url) {
+        gameActive = true;
+        
+        // Exibir e carregar o iframe
+        gameIframe.src = url;
+        gameIframe.style.display = 'block';
+        gameIframe.classList.remove('hidden');
+        
+        // Ocultar a grid de jogos
+        gamesGrid.style.display = 'none';
+        
+        // Exibir botão home
+        homeBtn.style.display = 'flex';
+        homeBtn.classList.remove('hidden');
+        
+        // Ocultar cabeçalho direito (login/apoie)
+        screenHeaderRight.style.display = 'none';
+        
+        // Exibir botão de pause
+        mobilePauseBtn.style.display = 'flex';
+        mobilePauseBtn.classList.remove('hidden');
+        
+        // Dar foco ao iframe
+        setTimeout(() => {
+            gameIframe.focus();
+        }, 150);
+    }
+
+    function exitGame() {
+        gameActive = false;
+        
+        // Limpar e ocultar o iframe
+        gameIframe.src = 'about:blank';
+        gameIframe.style.display = 'none';
+        gameIframe.classList.add('hidden');
+        
+        // Mostrar a grid de jogos
+        gamesGrid.style.display = 'grid';
+        
+        // Ocultar botão home
+        homeBtn.style.display = 'none';
+        homeBtn.classList.add('hidden');
+        
+        // Mostrar cabeçalho direito (login/apoie)
+        screenHeaderRight.style.display = 'flex';
+        
+        // Ocultar botão de pause
+        mobilePauseBtn.style.display = 'none';
+        mobilePauseBtn.classList.add('hidden');
+        
+        // Retornar o foco
+        updateFocus();
+    }
+
+    // ═══ NAVEGAÇÃO DO MENU ═══
     const allItems = [
         document.getElementById('apoie-btn'),
         document.getElementById('google-login-btn'),
@@ -584,6 +702,7 @@
     }
 
     function updateFocus() {
+        if (gameActive) return;
         allItems.forEach((item, idx) => {
             if (idx === focusedIndex) {
                 item.classList.add('focused');
@@ -596,12 +715,25 @@
 
     allItems.forEach((item, idx) => {
         item.addEventListener('mouseenter', () => {
-            focusedIndex = idx;
-            updateFocus();
+            if (!gameActive) {
+                focusedIndex = idx;
+                updateFocus();
+            }
+        });
+    });
+
+    // Capturar cliques diretos do mouse nos cards de jogos
+    const gameCards = document.querySelectorAll('.game-card');
+    gameCards.forEach(card => {
+        card.addEventListener('click', (e) => {
+            e.preventDefault();
+            const url = card.getAttribute('href');
+            startGame(url);
         });
     });
 
     function moveFocus(dr, dc) {
+        if (gameActive) return;
         const { r, c } = findPos(focusedIndex);
         let nr = r + dr;
         const totalRows = ROWS.length;
@@ -621,14 +753,18 @@
         updateFocus();
     }
 
-    function setupButton(btn, action) {
+    // Configuração dos Botões Físicos / D-pad
+    function setupButton(btn, pressAction, releaseAction) {
         if (!btn) return;
         const press = (e) => {
             e.preventDefault();
             btn.classList.add('active');
-            action();
+            pressAction();
         };
-        const release = () => btn.classList.remove('active');
+        const release = () => {
+            btn.classList.remove('active');
+            if (releaseAction) releaseAction();
+        };
         btn.addEventListener('touchstart', press, { passive: false });
         btn.addEventListener('touchend', release, { passive: true });
         btn.addEventListener('touchcancel', release, { passive: true });
@@ -637,20 +773,175 @@
         btn.addEventListener('mouseleave', release);
     }
 
-    setupButton(document.getElementById('dpad-up'), () => moveFocus(-1, 0));
-    setupButton(document.getElementById('dpad-down'), () => moveFocus(1, 0));
-    setupButton(document.getElementById('dpad-left'), () => moveFocus(0, -1));
-    setupButton(document.getElementById('dpad-right'), () => moveFocus(0, 1));
-    setupButton(document.getElementById('action-a'), () => {
-        const item = allItems[focusedIndex];
-        if (item.tagName === 'A') {
-            window.location.href = item.getAttribute('href');
-        } else {
-            item.click();
+    // Comunicação com o Iframe (Inputs)
+    function sendDpadEventToIframe(id, eventType) {
+        if (!gameActive) return;
+        try {
+            const iframeDoc = gameIframe.contentDocument || gameIframe.contentWindow.document;
+            if (iframeDoc) {
+                const targetBtn = iframeDoc.getElementById(id);
+                if (targetBtn) {
+                    const evt = new MouseEvent(eventType, {
+                        bubbles: true,
+                        cancelable: true,
+                        view: gameIframe.contentWindow
+                    });
+                    targetBtn.dispatchEvent(evt);
+                }
+            }
+        } catch (e) {
+            // Silencia erro de CORS
         }
-    });
+    }
 
+    function sendActionEventToIframe(eventType) {
+        if (!gameActive) return;
+        try {
+            const iframeDoc = gameIframe.contentDocument || gameIframe.contentWindow.document;
+            if (iframeDoc) {
+                let targetBtn = iframeDoc.getElementById('action-a');
+                if (!targetBtn) {
+                    targetBtn = iframeDoc.getElementById('action-power');
+                }
+                if (targetBtn) {
+                    const evt = new MouseEvent(eventType, {
+                        bubbles: true,
+                        cancelable: true,
+                        view: gameIframe.contentWindow
+                    });
+                    targetBtn.dispatchEvent(evt);
+                }
+            }
+        } catch (e) {}
+    }
+
+    function sendPauseEventToIframe(eventType) {
+        if (!gameActive) return;
+        try {
+            const iframeDoc = gameIframe.contentDocument || gameIframe.contentWindow.document;
+            if (iframeDoc) {
+                const targetBtn = iframeDoc.getElementById('mobile-pause-btn');
+                if (targetBtn) {
+                    const evt = new MouseEvent(eventType, {
+                        bubbles: true,
+                        cancelable: true,
+                        view: gameIframe.contentWindow
+                    });
+                    targetBtn.dispatchEvent(evt);
+                }
+            }
+        } catch (e) {}
+    }
+
+    setupButton(document.getElementById('dpad-up'), 
+        () => {
+            if (gameActive) sendDpadEventToIframe('dpad-up', 'mousedown');
+            else moveFocus(-1, 0);
+        },
+        () => {
+            if (gameActive) sendDpadEventToIframe('dpad-up', 'mouseup');
+        }
+    );
+
+    setupButton(document.getElementById('dpad-down'), 
+        () => {
+            if (gameActive) sendDpadEventToIframe('dpad-down', 'mousedown');
+            else moveFocus(1, 0);
+        },
+        () => {
+            if (gameActive) sendDpadEventToIframe('dpad-down', 'mouseup');
+        }
+    );
+
+    setupButton(document.getElementById('dpad-left'), 
+        () => {
+            if (gameActive) sendDpadEventToIframe('dpad-left', 'mousedown');
+            else moveFocus(0, -1);
+        },
+        () => {
+            if (gameActive) sendDpadEventToIframe('dpad-left', 'mouseup');
+        }
+    );
+
+    setupButton(document.getElementById('dpad-right'), 
+        () => {
+            if (gameActive) sendDpadEventToIframe('dpad-right', 'mousedown');
+            else moveFocus(0, 1);
+        },
+        () => {
+            if (gameActive) sendDpadEventToIframe('dpad-right', 'mouseup');
+        }
+    );
+
+    setupButton(document.getElementById('mobile-pause-btn'),
+        () => {
+            if (gameActive) sendPauseEventToIframe('mousedown');
+        },
+        () => {
+            if (gameActive) sendPauseEventToIframe('mouseup');
+        }
+    );
+
+    setupButton(document.getElementById('action-a'), 
+        () => {
+            if (gameActive) {
+                sendActionEventToIframe('mousedown');
+            } else {
+                const item = allItems[focusedIndex];
+                if (item.tagName === 'A') {
+                    const url = item.getAttribute('href');
+                    startGame(url);
+                } else {
+                    item.click();
+                }
+            }
+        },
+        () => {
+            if (gameActive) sendActionEventToIframe('mouseup');
+        }
+    );
+
+    // Evento do Botão Home
+    homeBtn.addEventListener('click', exitGame);
+
+    // Repasse de Inputs de Teclado
     window.addEventListener('keydown', (e) => {
+        if (gameActive) {
+            if (e.key === 'Escape') {
+                exitGame();
+                e.preventDefault();
+                return;
+            }
+
+            // Adiciona classe ativada física para feedback visual na tela pai
+            switch (e.key) {
+                case 'ArrowUp': case 'w': case 'W': document.getElementById('dpad-up')?.classList.add('active'); break;
+                case 'ArrowDown': case 's': case 'S': document.getElementById('dpad-down')?.classList.add('active'); break;
+                case 'ArrowLeft': case 'a': case 'A': document.getElementById('dpad-left')?.classList.add('active'); break;
+                case 'ArrowRight': case 'd': case 'D': document.getElementById('dpad-right')?.classList.add('active'); break;
+                case ' ': case 'Enter': case 'z': case 'Z': case 'x': case 'X': document.getElementById('action-a')?.classList.add('active'); break;
+                case 'p': case 'P': document.getElementById('mobile-pause-btn')?.classList.add('active'); break;
+            }
+
+            try {
+                const keyEvent = new KeyboardEvent(e.type, {
+                    key: e.key,
+                    code: e.code,
+                    keyCode: e.keyCode,
+                    which: e.which,
+                    bubbles: true,
+                    cancelable: true,
+                    altKey: e.altKey,
+                    ctrlKey: e.ctrlKey,
+                    shiftKey: e.shiftKey,
+                    metaKey: e.metaKey,
+                    repeat: e.repeat
+                });
+                gameIframe.contentWindow.dispatchEvent(keyEvent);
+            } catch (err) {}
+            return;
+        }
+
         let handled = false;
         switch (e.key) {
             case 'ArrowUp': case 'w': case 'W':
@@ -673,7 +964,8 @@
                 document.getElementById('action-a')?.classList.add('active');
                 const item = allItems[focusedIndex];
                 if (item.tagName === 'A') {
-                    window.location.href = item.getAttribute('href');
+                    const url = item.getAttribute('href');
+                    startGame(url);
                 } else {
                     item.click();
                 }
@@ -683,6 +975,34 @@
     });
 
     window.addEventListener('keyup', (e) => {
+        if (gameActive) {
+            switch (e.key) {
+                case 'ArrowUp': case 'w': case 'W': document.getElementById('dpad-up')?.classList.remove('active'); break;
+                case 'ArrowDown': case 's': case 'S': document.getElementById('dpad-down')?.classList.remove('active'); break;
+                case 'ArrowLeft': case 'a': case 'A': document.getElementById('dpad-left')?.classList.remove('active'); break;
+                case 'ArrowRight': case 'd': case 'D': document.getElementById('dpad-right')?.classList.remove('active'); break;
+                case ' ': case 'Enter': case 'z': case 'Z': case 'x': case 'X': document.getElementById('action-a')?.classList.remove('active'); break;
+                case 'p': case 'P': document.getElementById('mobile-pause-btn')?.classList.remove('active'); break;
+            }
+
+            try {
+                const keyEvent = new KeyboardEvent(e.type, {
+                    key: e.key,
+                    code: e.code,
+                    keyCode: e.keyCode,
+                    which: e.which,
+                    bubbles: true,
+                    cancelable: true,
+                    altKey: e.altKey,
+                    ctrlKey: e.ctrlKey,
+                    shiftKey: e.shiftKey,
+                    metaKey: e.metaKey
+                });
+                gameIframe.contentWindow.dispatchEvent(keyEvent);
+            } catch (err) {}
+            return;
+        }
+
         switch (e.key) {
             case 'ArrowUp': case 'w': case 'W': document.getElementById('dpad-up')?.classList.remove('active'); break;
             case 'ArrowDown': case 's': case 'S': document.getElementById('dpad-down')?.classList.remove('active'); break;

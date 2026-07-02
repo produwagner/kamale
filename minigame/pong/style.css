@@ -611,10 +611,60 @@ a.apoie-btn {
     flex-shrink: 0;
 }
 
-/* Mobile: ocultar desktop, mostrar mobile */
+/* Mobile: ocultar desktop, mostrar mobile e compactar lobbies */
 @media (max-width: 768px) {
     .instructions-desktop { display: none; }
     #btn-local-multiplayer { display: none; }
+
+    #lobby-screen {
+        overflow: hidden !important;
+    }
+    .mp-content {
+        gap: 6px !important;
+        padding: 10px !important;
+    }
+    .mp-title {
+        font-size: 0.95rem !important;
+        letter-spacing: 2px !important;
+    }
+    .mp-room-info {
+        margin: 2px auto !important;
+    }
+    .mp-room-code-label {
+        font-size: 0.6rem !important;
+        letter-spacing: 1px !important;
+    }
+    .mp-room-code {
+        font-size: 1.4rem !important;
+        letter-spacing: 4px !important;
+        margin-top: 2px !important;
+    }
+    .mp-players-list {
+        margin: 4px auto !important;
+        gap: 4px !important;
+    }
+    .mp-player-card {
+        padding: 6px 10px !important;
+        font-size: 0.8rem !important;
+        border-width: 1px !important;
+    }
+    .mp-player-host {
+        font-size: 0.55rem !important;
+        padding: 1px 4px !important;
+    }
+    .mp-wait-text {
+        font-size: 0.7rem !important;
+        margin: 2px 0 !important;
+    }
+    #lobby-ready-status {
+        font-size: 0.7rem !important;
+        margin: 2px 0 !important;
+    }
+    .mp-content .menu-btn {
+        margin-top: 4px !important;
+        padding: 8px 12px !important;
+        font-size: 0.8rem !important;
+    }
 }
 
 /* Desktop: ocultar mobile, mostrar desktop */

@@ -826,6 +826,54 @@ a.apoie-btn {
     .instructions-desktop { display: none; }
     #btn-local-multiplayer { display: none !important; }
     #local-lobby-screen { display: none !important; }
+
+    /* Compactação do lobby para telas móveis */
+    #lobby-screen #game-board {
+        overflow: hidden !important;
+    }
+    .lobby-content {
+        gap: 6px !important;
+        padding: 10px !important;
+    }
+    .lobby-title {
+        font-size: 0.95rem !important;
+        letter-spacing: 2px !important;
+    }
+    .lobby-code {
+        font-size: 1.6rem !important;
+        padding: 4px 12px !important;
+        border-radius: 8px !important;
+    }
+    .lobby-code-hint {
+        font-size: 0.6rem !important;
+        margin-bottom: 2px !important;
+    }
+    .lobby-players {
+        margin-top: 4px !important;
+        gap: 4px !important;
+    }
+    .lobby-player {
+        padding: 5px 8px !important;
+        gap: 6px !important;
+        border-radius: 6px !important;
+    }
+    .lobby-player-name {
+        font-size: 0.8rem !important;
+    }
+    .lobby-player-host {
+        font-size: 0.55rem !important;
+    }
+    .lobby-waiting {
+        font-size: 0.75rem !important;
+    }
+    #lobby-ready-status {
+        font-size: 0.75rem !important;
+    }
+    .lobby-content .menu-btn {
+        margin-top: 4px !important;
+        padding: 8px 12px !important;
+        font-size: 0.8rem !important;
+    }
 }
 @media (min-width: 769px) {
     .instructions-mobile { display: none; }
@@ -969,15 +1017,14 @@ a.apoie-btn {
     display: none !important;
 }
 
-/* Correção da rolagem na tela de lobby e overlays */
+/* Configuração de aspecto e transbordo das telas */
 #lobby-screen, .overlay {
     touch-action: auto !important;
 }
 
 #lobby-screen #game-board {
     aspect-ratio: 1 / 1;
-    overflow-y: auto;
-    touch-action: auto !important;
+    overflow: hidden !important;
 }
 
 /* Ocultar os controles móveis (dpad) por padrão */

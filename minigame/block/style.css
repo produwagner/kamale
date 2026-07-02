@@ -404,6 +404,56 @@ a:has(> .game-header-img) {
     box-shadow: 0 1px 0 #cca700;
 }
 
+/* Compactação do lobby para telas móveis */
+@media (max-width: 768px) {
+    #lobby-screen {
+        overflow: hidden !important;
+    }
+    .mp-content {
+        gap: 6px !important;
+        padding: 10px !important;
+    }
+    .mp-title {
+        font-size: 0.95rem !important;
+        letter-spacing: 2px !important;
+    }
+    .mp-code, #lobby-room-code {
+        font-size: 1.25rem !important;
+        padding: 4px 12px !important;
+        border-radius: 6px !important;
+        margin: 2px auto !important;
+    }
+    .lobby-code-hint {
+        font-size: 0.6rem !important;
+        margin-top: 2px !important;
+        margin-bottom: 2px !important;
+    }
+    .lobby-players {
+        margin: 4px auto !important;
+        gap: 4px !important;
+    }
+    .lobby-player-card {
+        padding: 6px 10px !important;
+        font-size: 0.8rem !important;
+        border-width: 1px !important;
+    }
+    .lobby-player-host {
+        font-size: 0.55rem !important;
+        padding: 1px 4px !important;
+    }
+    .lobby-waiting {
+        font-size: 0.75rem !important;
+    }
+    #lobby-ready-status {
+        font-size: 0.75rem !important;
+    }
+    .mp-content .menu-btn {
+        margin-top: 4px !important;
+        padding: 8px 12px !important;
+        font-size: 0.8rem !important;
+    }
+}
+
 /* Responsividade: Ocultar controles no Desktop e ajustar o tamanho do tabuleiro */
 @media (min-width: 769px) {
     #controls-wrapper {

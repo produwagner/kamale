@@ -369,23 +369,28 @@
     }
 
     function injectErgonomicMobileCSS() {
-        if (document.getElementById('kamale-mobile-ergonomics')) return;
+        var existing = document.getElementById('kamale-mobile-ergonomics');
+        if (existing) existing.remove();
         var s = document.createElement('style');
         s.id = 'kamale-mobile-ergonomics';
         s.textContent =
             '@media (max-width: 768px) {' +
-                'body { padding: 4px !important; justify-content: space-between !important; }' +
-                '#app-container, .app-container { padding: clamp(4px, 1vh, 10px) clamp(6px, 2vw, 14px) clamp(10px, 2.5vh, 20px) !important; justify-content: space-between !important; gap: clamp(4px, 1vh, 8px) !important; }' +
-                '.game-section { max-width: min(98vw, calc(100vh - 180px), 520px) !important; width: 100% !important; margin-top: clamp(2px, 0.5vh, 6px) !important; }' +
-                '#game-board { width: min(96vw, calc(100vh - 200px), 500px) !important; max-width: none !important; border-radius: 16px !important; }' +
-                '#game-board:has(#game-canvas[width="300"]), .block-game #game-board, body:has(#action-a[aria-label*="Rotacionar"]) #game-board { max-height: calc(100vh - 210px) !important; height: calc(100vh - 210px) !important; aspect-ratio: 1 / 1.55 !important; }' +
-                'body:has(.games-grid) #game-board { width: min(96vw, 440px) !important; aspect-ratio: 1 / 1.15 !important; padding: clamp(10px, 3vw, 18px) !important; gap: clamp(8px, 2vw, 14px) !important; }' +
-                '#controls-wrapper { width: 100% !important; max-width: min(98vw, 560px) !important; margin-top: auto !important; margin-bottom: clamp(4px, 1.5vh, 12px) !important; padding: 0 clamp(10px, 4vw, 28px) !important; justify-content: space-between !important; }' +
-                '#dpad-container { grid-template-columns: repeat(3, clamp(50px, 15vw, 62px)) !important; grid-template-rows: repeat(3, clamp(50px, 15vw, 62px)) !important; gap: clamp(5px, 1.5vw, 8px) !important; }' +
-                '.dpad-btn { font-size: clamp(1.1rem, 3.5vw, 1.4rem) !important; border-radius: 14px !important; box-shadow: 0 5px 0 #141414 !important; }' +
-                '.action-btn { width: clamp(74px, 22vw, 88px) !important; height: clamp(74px, 22vw, 88px) !important; font-size: clamp(1.6rem, 5vw, 1.9rem) !important; box-shadow: 0 6px 0 #141414 !important; }' +
-                '.action-btn.action-a, .action-btn.action-power { width: clamp(74px, 22vw, 88px) !important; height: clamp(74px, 22vw, 88px) !important; }' +
-                '.pause-btn-wrapper { min-height: auto !important; justify-content: center !important; gap: 8px !important; }' +
+                'html, body { min-height: 100vh !important; min-height: 100dvh !important; max-height: 100vh !important; max-height: 100dvh !important; overflow: hidden !important; margin: 0 !important; padding: 0 !important; }' +
+                '#app-container, .app-container { width: 100vw !important; max-width: 100vw !important; height: 100vh !important; height: 100dvh !important; padding: clamp(4px, 1vh, 8px) clamp(8px, 3vw, 16px) clamp(16px, 3vh, 28px) !important; padding-bottom: calc(clamp(12px, 2vh, 20px) + env(safe-area-inset-bottom, 12px)) !important; box-sizing: border-box !important; display: flex !important; flex-direction: column !important; justify-content: space-evenly !important; align-items: center !important; gap: clamp(4px, 1vh, 10px) !important; }' +
+                '.game-top-row { width: 100% !important; max-width: min(96vw, 500px) !important; flex-shrink: 0 !important; margin-bottom: 0 !important; }' +
+                '.game-section, #boards-wrapper { width: 100% !important; max-width: min(96vw, 500px) !important; flex: 1 !important; display: flex !important; align-items: center !important; justify-content: center !important; min-height: 0 !important; margin: 0 !important; }' +
+                '#game-board { width: min(94vw, calc(100vh - 245px), calc(100dvh - 245px), 440px) !important; height: min(94vw, calc(100vh - 245px), calc(100dvh - 245px), 440px) !important; max-width: none !important; max-height: none !important; aspect-ratio: 1 / 1 !important; border-radius: 16px !important; margin: 0 auto !important; flex-shrink: 0 !important; }' +
+                '#game-board:has(#game-canvas[width="240"]), #game-board:has(#game-canvas[width="300"]), .block-game #game-board, body:has(#action-a[aria-label*="Rotacionar"]) #game-board { height: min(calc(100vh - 245px), calc(100dvh - 245px), 510px) !important; max-height: min(calc(100vh - 245px), calc(100dvh - 245px), 510px) !important; width: auto !important; aspect-ratio: 1 / 1.5 !important; margin: 0 auto !important; flex-shrink: 0 !important; }' +
+                '#controls-wrapper { width: 100% !important; max-width: min(96vw, 520px) !important; flex-shrink: 0 !important; margin-top: 0 !important; margin-bottom: 0 !important; padding: 0 clamp(8px, 4vw, 24px) !important; box-sizing: border-box !important; display: flex !important; align-items: center !important; justify-content: space-between !important; z-index: 50 !important; }' +
+                '#dpad-container { display: grid !important; grid-template-columns: repeat(3, clamp(45px, 13vw, 56px)) !important; grid-template-rows: repeat(3, clamp(45px, 13vw, 56px)) !important; gap: clamp(4px, 1vw, 6px) !important; flex-shrink: 0 !important; }' +
+                '.dpad-btn { font-size: clamp(1.1rem, 3.5vw, 1.35rem) !important; border-radius: 12px !important; box-shadow: 0 4px 0 #141414 !important; display: flex !important; align-items: center !important; justify-content: center !important; }' +
+                '.action-btn { width: clamp(70px, 20vw, 84px) !important; height: clamp(70px, 20vw, 84px) !important; font-size: clamp(1.5rem, 5vw, 1.8rem) !important; box-shadow: 0 5px 0 #141414 !important; border-radius: 50% !important; display: flex !important; align-items: center !important; justify-content: center !important; flex-shrink: 0 !important; }' +
+                '.action-btn.action-a, .action-btn.action-power { width: clamp(70px, 20vw, 84px) !important; height: clamp(70px, 20vw, 84px) !important; }' +
+                '.pause-btn-wrapper { display: flex !important; flex-direction: column !important; justify-content: center !important; align-items: center !important; gap: 8px !important; min-height: auto !important; flex-shrink: 0 !important; }' +
+                '.pause-btn, .reset-btn { padding: 8px 14px !important; font-size: clamp(0.75rem, 2.5vw, 0.85rem) !important; border-radius: 8px !important; }' +
+                'body:has(.games-grid) #app-container, body:has(.games-grid) .app-container { justify-content: center !important; gap: clamp(14px, 2.5vh, 26px) !important; }' +
+                'body:has(.games-grid) #game-board { width: min(94vw, calc(100vh - 245px), calc(100dvh - 245px), 440px) !important; height: min(94vw, calc(100vh - 245px), calc(100dvh - 245px), 440px) !important; aspect-ratio: 1 / 1 !important; padding: clamp(10px, 3vw, 18px) !important; gap: clamp(8px, 2vw, 14px) !important; }' +
+                'body:has(.games-grid) #controls-wrapper { margin-bottom: clamp(32px, 6vh, 65px) !important; margin-top: clamp(4px, 1vh, 14px) !important; }' +
             '}';
         document.head.appendChild(s);
     }

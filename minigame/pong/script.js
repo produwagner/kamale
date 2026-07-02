@@ -365,6 +365,13 @@ function update() {
     if (powerFlash > 0) powerFlash = Math.max(0, powerFlash - 0.04);
     if (cpuPowerFlash > 0) cpuPowerFlash = Math.max(0, cpuPowerFlash - 0.04);
 
+    if (spaceHeld && powerReady && !powerActive) {
+        powerActive = true;
+        if (isMultiplayer) {
+            Multiplayer.sendState({ powerActive: true });
+        }
+    }
+
     // No online multiplayer, cliente não roda física da bola
     if (isMultiplayer && !Multiplayer.isHost) {
         // Guest collision check to update power locally
@@ -811,6 +818,13 @@ function updateLocal() {
 
     if (localP1.powerFlash > 0) localP1.powerFlash = Math.max(0, localP1.powerFlash - 0.04);
     if (localP2.powerFlash > 0) localP2.powerFlash = Math.max(0, localP2.powerFlash - 0.04);
+
+    if (spaceHeld && localP1.powerReady && !localP1PowerActive) {
+        localP1PowerActive = true;
+    }
+    if (localP2SpaceHeld && localP2.powerReady && !localP2PowerActive) {
+        localP2PowerActive = true;
+    }
 
     if (!isMoving) return;
 
@@ -1679,6 +1693,18 @@ if (actionPower) {
         e.preventDefault(); 
         actionPower.classList.add('active');
         if (activateFocusedElement()) return;
+        if (isLocalMultiplayer && gameRunning) {
+            if (localP1.powerReady && !localP1PowerActive) {
+                localP1PowerActive = true;
+            }
+        } else {
+            if (powerReady && !powerActive) {
+                powerActive = true;
+                if (isMultiplayer) {
+                    Multiplayer.sendState({ powerActive: true });
+                }
+            }
+        }
         spaceHeld = true; 
     };
     const releasePower = () => { spaceHeld = false; actionPower.classList.remove('active'); };
@@ -1688,6 +1714,18 @@ if (actionPower) {
     actionPower.addEventListener('mousedown', (e) => {
         actionPower.classList.add('active');
         if (activateFocusedElement()) return;
+        if (isLocalMultiplayer && gameRunning) {
+            if (localP1.powerReady && !localP1PowerActive) {
+                localP1PowerActive = true;
+            }
+        } else {
+            if (powerReady && !powerActive) {
+                powerActive = true;
+                if (isMultiplayer) {
+                    Multiplayer.sendState({ powerActive: true });
+                }
+            }
+        }
         spaceHeld = true;
     });
     actionPower.addEventListener('mouseup', releasePower);

@@ -6,8 +6,8 @@
     -webkit-tap-highlight-color: transparent;
 }
 
-.hidden { display: none; }
-#menu-screen.hidden { display: none; }
+.hidden { display: none !important; }
+#menu-screen.hidden { display: none !important; }
 
 body {
     width: 100vw;
@@ -195,7 +195,7 @@ a:has(> .game-header-img) {
     background-color: #000000;
     border-radius: 17px;
 }
-#menu-screen.hidden { display: none; }
+#menu-screen.hidden { display: none !important; }
 .menu-content {
     display: flex;
     flex-direction: column;

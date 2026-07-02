@@ -870,9 +870,10 @@ body.in-iframe #boards-wrapper {
 }
 
 body.in-iframe #game-board {
-    max-width: 100% !important;
-    width: 100% !important;
+    aspect-ratio: 1 / 1.5 !important;
     height: 100% !important;
+    width: auto !important;
+    max-width: 100% !important;
     border: none !important;
     border-radius: 0 !important;
     box-shadow: none !important;

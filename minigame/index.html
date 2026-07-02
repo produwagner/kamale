@@ -662,7 +662,8 @@
         }
 
         // Exibir e carregar o iframe
-        gameIframe.src = url;
+        const separator = url.includes('?') ? '&' : '?';
+        gameIframe.src = `${url}${separator}iframe=true`;
         gameIframe.style.display = 'block';
         gameIframe.classList.remove('hidden');
         

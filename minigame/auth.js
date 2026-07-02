@@ -617,7 +617,10 @@
 
     function initAuth() {
         injectThemeCSS();
-        injectErgonomicMobileCSS();
+        // Apenas injetar CSS ergonômico móvel fora de um iframe
+        if (!window.location.search.includes('iframe=true') && window.self === window.top) {
+            injectErgonomicMobileCSS();
+        }
         initHapticFeedback();
 
         // Apply cached theme immediately on load

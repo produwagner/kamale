@@ -426,11 +426,13 @@
 
         /* ═══ ASPECT RATIO FOR VERTICAL GAMES (BLOCK/TETRIS) ═══ */
         body.vertical-game #game-board {
-            aspect-ratio: 1 / 1.4;
-            width: min(90vw, 55vh, 350px);
+            aspect-ratio: 1 / 1.4 !important;
+            width: min(90vw, 55vh, 350px) !important;
+            height: auto !important;
+            max-height: 80vh !important;
         }
         body.vertical-game #screen-header {
-            width: min(90vw, 55vh, 350px);
+            width: min(90vw, 55vh, 350px) !important;
         }
     </style>
 </head>

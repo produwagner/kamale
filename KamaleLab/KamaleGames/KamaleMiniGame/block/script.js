@@ -1057,7 +1057,8 @@ function updateLobbyPlayers(playersObj) {
 }
 
 btnReady.addEventListener('click', () => {
-    Multiplayer.toggleReady();
+    Multiplayer.sendReady(true);
+    btnReady.classList.add('hidden');
 });
 
 function refreshRoomsList() {

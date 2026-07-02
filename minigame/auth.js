@@ -368,6 +368,51 @@
         document.head.appendChild(s);
     }
 
+    function injectErgonomicMobileCSS() {
+        if (document.getElementById('kamale-mobile-ergonomics')) return;
+        var s = document.createElement('style');
+        s.id = 'kamale-mobile-ergonomics';
+        s.textContent =
+            '@media (max-width: 768px) {' +
+                'body { padding: 4px !important; justify-content: space-between !important; }' +
+                '#app-container, .app-container { padding: clamp(4px, 1vh, 10px) clamp(6px, 2vw, 14px) clamp(10px, 2.5vh, 20px) !important; justify-content: space-between !important; gap: clamp(4px, 1vh, 8px) !important; }' +
+                '.game-section { max-width: min(98vw, calc(100vh - 180px), 520px) !important; width: 100% !important; margin-top: clamp(2px, 0.5vh, 6px) !important; }' +
+                '#game-board { width: min(96vw, calc(100vh - 200px), 500px) !important; max-width: none !important; border-radius: 16px !important; }' +
+                '#game-board:has(#game-canvas[width="300"]), .block-game #game-board, body:has(#action-a[aria-label*="Rotacionar"]) #game-board { max-height: calc(100vh - 210px) !important; height: calc(100vh - 210px) !important; aspect-ratio: 1 / 1.55 !important; }' +
+                'body:has(.games-grid) #game-board { width: min(96vw, 440px) !important; aspect-ratio: 1 / 1.15 !important; padding: clamp(10px, 3vw, 18px) !important; gap: clamp(8px, 2vw, 14px) !important; }' +
+                '#controls-wrapper { width: 100% !important; max-width: min(98vw, 560px) !important; margin-top: auto !important; margin-bottom: clamp(4px, 1.5vh, 12px) !important; padding: 0 clamp(10px, 4vw, 28px) !important; justify-content: space-between !important; }' +
+                '#dpad-container { grid-template-columns: repeat(3, clamp(50px, 15vw, 62px)) !important; grid-template-rows: repeat(3, clamp(50px, 15vw, 62px)) !important; gap: clamp(5px, 1.5vw, 8px) !important; }' +
+                '.dpad-btn { font-size: clamp(1.1rem, 3.5vw, 1.4rem) !important; border-radius: 14px !important; box-shadow: 0 5px 0 #141414 !important; }' +
+                '.action-btn { width: clamp(74px, 22vw, 88px) !important; height: clamp(74px, 22vw, 88px) !important; font-size: clamp(1.6rem, 5vw, 1.9rem) !important; box-shadow: 0 6px 0 #141414 !important; }' +
+                '.action-btn.action-a, .action-btn.action-power { width: clamp(74px, 22vw, 88px) !important; height: clamp(74px, 22vw, 88px) !important; }' +
+                '.pause-btn-wrapper { min-height: auto !important; justify-content: center !important; gap: 8px !important; }' +
+            '}';
+        document.head.appendChild(s);
+    }
+
+    function initHapticFeedback() {
+        if (!('vibrate' in navigator)) return;
+        var lastVibrate = 0;
+        function triggerVibration(e) {
+            var now = Date.now();
+            if (now - lastVibrate < 40) return;
+            var target = e.target.closest('button, .dpad-btn, .action-btn, .menu-btn, .reset-btn, .pause-btn, .back-btn, .apoie-btn, .modal-close-btn, .game-card');
+            if (!target || target.disabled) return;
+            lastVibrate = now;
+            try {
+                if (target.classList.contains('action-btn') || target.id === 'action-a' || target.id === 'action-power' || target.classList.contains('game-card')) {
+                    navigator.vibrate(25);
+                } else if (target.classList.contains('reset-btn') || target.classList.contains('pause-btn')) {
+                    navigator.vibrate([15, 30, 15]);
+                } else {
+                    navigator.vibrate(15);
+                }
+            } catch (err) {}
+        }
+        document.addEventListener('touchstart', triggerVibration, { passive: true });
+        document.addEventListener('pointerdown', triggerVibration, { passive: true });
+    }
+
     function loadTheme() {
         var user = firebase.auth().currentUser;
         if (!user) return;
@@ -566,6 +611,8 @@
 
     function initAuth() {
         injectThemeCSS();
+        injectErgonomicMobileCSS();
+        initHapticFeedback();
 
         // Apply cached theme immediately on load
         var cachedTheme = localStorage.getItem('kamale_cached_theme');

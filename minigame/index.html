@@ -299,18 +299,21 @@
         /* ═══ RESPONSIVIDADE ═══ */
         @media (max-width:420px) {
             #game-board { width:95vw; height:auto; max-height:80vh; }
+            #screen-header { width:95vw; }
         }
         @media (max-height:560px) {
             .header { margin-bottom:4px; }
             .header-sub { display:none; }
             .footer { margin-top:4px; }
             #game-board { width:min(90vw, 70vh, 400px); }
+            #screen-header { width:min(90vw, 70vh, 400px); }
         }
         @media (orientation:landscape) and (max-height:500px) {
             body { padding:4px; }
             .header { margin-bottom:2px; gap:2px; }
             .header-sub { display:none; }
             #game-board { width:min(85vw, 75vh, 380px); padding:6px; gap:4px; }
+            #screen-header { width:min(85vw, 75vh, 380px); padding:0 6px; }
             #controls-wrapper { margin-top:4px; }
             .footer { margin-top:2px; }
         }
@@ -409,6 +412,26 @@
         #toastContainer .toast.show { opacity: 1; transform: translateY(0); }
         #toastContainer .toast.hide { opacity: 0; transform: translateY(-20px); }
         #toastContainer .toast.toast-success { border-color: #3acc7a; background-color: #eafaf1; color: #2ea862; }
+
+        /* ═══ SCREEN HEADER (FOR TOP BUTTONS ABOVE GAME BOARD) ═══ */
+        #screen-header {
+            display: flex;
+            align-items: center;
+            width: min(90vw, 72vh, 420px);
+            padding: 0 clamp(8px, 2vw, 15px);
+            margin-bottom: clamp(4px, 1vh, 8px);
+            min-height: 30px;
+            user-select: none;
+        }
+
+        /* ═══ ASPECT RATIO FOR VERTICAL GAMES (BLOCK/TETRIS) ═══ */
+        body.vertical-game #game-board {
+            aspect-ratio: 1 / 1.4;
+            width: min(90vw, 55vh, 350px);
+        }
+        body.vertical-game #screen-header {
+            width: min(90vw, 55vh, 350px);
+        }
     </style>
 </head>
 <body>
@@ -418,20 +441,21 @@
     <div class="header-sub">Passe o tempo e divirta-se com seus amigos</div>
 </div>
 
-<div id="game-board">
-    <!-- Barra Superior Interna da Tela -->
-    <div id="screen-header" style="display: flex; align-items: center; width: 100%; margin-bottom: clamp(4px, 1vh, 8px); min-height: 30px; user-select: none;">
-        <!-- Botão Home (Voltar ao Menu) - Oculto por padrão -->
-        <button id="home-btn" class="home-btn hidden" aria-label="Voltar ao menu" style="display: none; align-items: center; justify-content: center; width: 30px; height: 30px; border-radius: 50%; background: #cf6666; border: 2px solid #df8888; color: #fff; cursor: pointer; box-shadow: 0 3px 0 #8a3c3c; transform: translateY(-2px); font-weight: bold; font-family: monospace; font-size: 0.9rem; outline: none; z-index: 10;">
-            ←
-        </button>
-        
-        <!-- Área de Login/Apoie à direita -->
-        <div id="screen-header-right" style="display: flex; align-items: center; gap: 8px; margin-left: auto;">
-            <a href="apoie.html" class="apoie-btn" id="apoie-btn" aria-label="Apoie o Kamale Games">apoie ❤️</a>
-            <button class="google-login-btn" id="google-login-btn" aria-label="Entrar"></button>
-        </div>
+<!-- Barra Superior Externa à Tela (Acima da linha tracejada) -->
+<div id="screen-header">
+    <!-- Botão Home (Voltar ao Menu) - Oculto por padrão -->
+    <button id="home-btn" class="home-btn hidden" aria-label="Voltar ao menu" style="display: none; align-items: center; justify-content: center; width: 30px; height: 30px; border-radius: 50%; background: #cf6666; border: 2px solid #df8888; color: #fff; cursor: pointer; box-shadow: 0 3px 0 #8a3c3c; transform: translateY(-2px); font-weight: bold; font-family: monospace; font-size: 0.9rem; outline: none; z-index: 10;">
+        ←
+    </button>
+    
+    <!-- Área de Login/Apoie à direita -->
+    <div id="screen-header-right" style="display: flex; align-items: center; gap: 8px; margin-left: auto;">
+        <a href="apoie.html" class="apoie-btn" id="apoie-btn" aria-label="Apoie o Kamale Games">apoie ❤️</a>
+        <button class="google-login-btn" id="google-login-btn" aria-label="Entrar"></button>
     </div>
+</div>
+
+<div id="game-board">
 
     <!-- Container de Conteúdo -->
     <div id="screen-content" style="width: 100%; flex: 1; min-height: 0; display: flex; flex-direction: column;">
@@ -439,7 +463,7 @@
             <!-- SNAKE -->
             <a href="snake/index.html" class="game-card card-snake" id="card-snake" aria-label="Jogar Snake">
                 <div class="card-preview">
-                    <img src="snake/snake-preview.jpg" alt="Snake" class="card-preview-img">
+                    <img src="assets/previews/snake-preview.jpg" alt="Snake" class="card-preview-img">
                 </div>
                 <div class="card-label">SNAKE</div>
             </a>
@@ -447,7 +471,7 @@
             <!-- PONG -->
             <a href="pong/index.html" class="game-card card-pong" id="card-pong" aria-label="Jogar Pong">
                 <div class="card-preview">
-                    <img src="pong/pong-preview.png" alt="Pong" class="card-preview-img">
+                    <img src="assets/previews/pong-preview.png" alt="Pong" class="card-preview-img">
                 </div>
                 <div class="card-label">PONG</div>
             </a>
@@ -455,7 +479,7 @@
             <!-- BLOCK -->
             <a href="block/index.html" class="game-card card-block" id="card-block" aria-label="Jogar Block Game">
                 <div class="card-preview">
-                    <img src="block/block-preview.png" alt="Block Game" class="card-preview-img">
+                    <img src="assets/previews/block-preview.png" alt="Block Game" class="card-preview-img">
                 </div>
                 <div class="card-label">BLOCK GAME</div>
             </a>
@@ -463,7 +487,7 @@
             <!-- VEA GAME -->
             <a href="veagame/index.html" class="game-card card-velha" id="card-velha" aria-label="Jogar Vea Game">
                 <div class="card-preview">
-                    <img src="veagame/vea-preview.png" alt="Vea Game" class="card-preview-img">
+                    <img src="assets/previews/vea-preview.png" alt="Vea Game" class="card-preview-img">
                 </div>
                 <div class="card-label">VEA GAME</div>
             </a>
@@ -489,7 +513,7 @@
                 </svg>
             </div>
             <div class="gift-ball" id="giftBall">
-                <img src="bola-da-copa-26.png" alt="Bola da Copa" class="gift-ball-svg">
+                <img src="assets/shared/bola-da-copa-26.png" alt="Bola da Copa" class="gift-ball-svg">
             </div>
         </div>
         <div class="gift-hint" id="giftHint">Toque na caixa para abrir!</div>
@@ -630,6 +654,13 @@
     function startGame(url) {
         gameActive = true;
         
+        // Ajustar proporção se for o jogo Block
+        if (url.includes('block')) {
+            document.body.classList.add('vertical-game');
+        } else {
+            document.body.classList.remove('vertical-game');
+        }
+
         // Exibir e carregar o iframe
         gameIframe.src = url;
         gameIframe.style.display = 'block';
@@ -642,8 +673,8 @@
         homeBtn.style.display = 'flex';
         homeBtn.classList.remove('hidden');
         
-        // Ocultar cabeçalho direito (login/apoie)
-        screenHeaderRight.style.display = 'none';
+        // Ocultar cabeçalho direito (login/apoie) - COMENTADO para sempre exibir os botões
+        // screenHeaderRight.style.display = 'none';
         
         // Exibir botão de pause
         mobilePauseBtn.style.display = 'flex';
@@ -658,6 +689,9 @@
     function exitGame() {
         gameActive = false;
         
+        // Resetar proporção da tela
+        document.body.classList.remove('vertical-game');
+
         // Limpar e ocultar o iframe
         gameIframe.src = 'about:blank';
         gameIframe.style.display = 'none';

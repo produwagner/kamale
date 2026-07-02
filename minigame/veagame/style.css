@@ -38,7 +38,7 @@ body {
     align-items: center;
     justify-content: space-between;
     width: 100%;
-    max-width: min(95vw, calc(100vh - 200px), 400px);
+    max-width: min(95vw, calc(100vh - 200px), 440px);
     margin-bottom: 4px;
 }
 
@@ -91,7 +91,7 @@ a:has(> .game-header-img) {
     position: relative;
     aspect-ratio: 1 / 1;
     width: 100%;
-    max-width: min(95vw, calc(100vh - 120px), 440px);
+    max-width: min(95vw, calc(100vh - 200px), 440px);
     border: 3px dashed rgba(255,209,0,0.4);
     border-radius: 20px;
     background-color: #000000;
@@ -830,7 +830,8 @@ a.apoie-btn {
     display: none !important;
 }
 
-/* Ocultar os controles móveis (dpad) nas telas de menu e lobby */
+/* Ocultar os controles móveis (dpad) nas telas de menu e lobby desativado para manter o formato do snake */
+/*
 #game-board:has(#menu-screen:not(.hidden)) ~ #controls-wrapper,
 #game-board:has(#mp-screen:not(.hidden)) ~ #controls-wrapper,
 #game-board:has(#multiplayer-screen:not(.hidden)) ~ #controls-wrapper,
@@ -842,6 +843,7 @@ a.apoie-btn {
 #game-board:has(#name-modal:not(.hidden)) ~ #controls-wrapper {
     display: none !important;
 }
+*/
 
 /* ==========================================================================
    AJUSTES PARA MODO CENTRALIZADO (IFRAME)

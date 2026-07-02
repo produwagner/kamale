@@ -170,6 +170,17 @@ function showScreen(screen) {
         if (s) s.classList.add('hidden');
     });
     if (screen) screen.classList.remove('hidden');
+
+    const gridContainer = document.getElementById('grid-container');
+    const scoreboard = document.getElementById('scoreboard');
+    if (screen) {
+        if (gridContainer) gridContainer.classList.add('hidden');
+        if (scoreboard) scoreboard.classList.add('hidden');
+    } else {
+        if (gridContainer) gridContainer.classList.remove('hidden');
+        if (scoreboard) scoreboard.classList.remove('hidden');
+    }
+
     setTimeout(() => updateMenuFocus(0), 50);
 }
 

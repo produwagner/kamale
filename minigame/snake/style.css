@@ -969,15 +969,26 @@ a.apoie-btn {
     display: none !important;
 }
 
-/* Correção da rolagem na tela de lobby */
+/* Correção da rolagem na tela de lobby e overlays */
 #lobby-screen, .overlay {
     touch-action: auto !important;
 }
 
 #lobby-screen #game-board {
-    aspect-ratio: auto;
-    max-height: calc(100vh - 140px);
+    aspect-ratio: 1 / 1;
     overflow-y: auto;
+    touch-action: auto !important;
+}
+
+/* Ocultar os controles móveis (dpad) por padrão */
+#controls-wrapper {
+    display: none !important;
+}
+
+/* Exibir os controles móveis apenas quando o jogo solo ou multiplayer estiver ativo */
+#game-screen:not(.hidden) ~ #controls-wrapper,
+#mp-game-screen:not(.hidden) ~ #controls-wrapper {
+    display: flex !important;
 }
 
 

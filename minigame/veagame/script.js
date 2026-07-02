@@ -433,9 +433,27 @@ function endGame(result) {
 // ─── MULTIPLAYER ONLINE (FIREBASE) ───────────────────────────────────────────
 
 btnCreateRoom.addEventListener('click', () => {
-    inputCreatePlayerName.value = userNickname || localStorage.getItem('ttt_player_name') || 'Jogador';
-    inputRoomName.value = userNickname ? 'Sala de ' + userNickname : 'Sala de Velha';
+    inputCreatePlayerName.value = userNickname || localStorage.getItem('ttt_player_name') || 'Jogador 1';
+    inputRoomName.value = userNickname ? 'Sala de ' + userNickname : 'Sala 1';
     showScreen(createScreen);
+
+    // Busca dinâmica do primeiro nome de sala sequencial livre
+    if (typeof firebase !== 'undefined' && firebase.database) {
+        firebase.database().ref('rooms').once('value', (snap) => {
+            let activeRoomNames = [];
+            snap.forEach(child => {
+                const r = child.val();
+                if (r.roomName && (r.status === 'waiting' || r.status === 'playing')) {
+                    activeRoomNames.push(r.roomName);
+                }
+            });
+            let num = 1;
+            while (activeRoomNames.includes('Sala ' + num)) {
+                num++;
+            }
+            inputRoomName.value = userNickname ? 'Sala de ' + userNickname : 'Sala ' + num;
+        });
+    }
 });
 
 btnBackCreate.addEventListener('click', () => {
@@ -472,7 +490,7 @@ btnBackRooms.addEventListener('click', () => {
 });
 
 btnShowJoin.addEventListener('click', () => {
-    inputPlayerName.value = userNickname || localStorage.getItem('ttt_player_name') || 'Jogador';
+    inputPlayerName.value = userNickname || localStorage.getItem('ttt_player_name') || 'Jogador 2';
     inputRoomCode.value = '';
     joinError.classList.add('hidden');
     showScreen(joinScreen);
@@ -603,7 +621,7 @@ function refreshRoomsList() {
             `;
             item.querySelector('.room-item-join').addEventListener('click', (e) => {
                 e.stopPropagation();
-                joinFromRooms(r.code);
+                joinFromRooms(r.code, r.playersCount);
             });
             roomsList.appendChild(item);
         });
@@ -611,8 +629,8 @@ function refreshRoomsList() {
     });
 }
 
-function joinFromRooms(code) {
-    const storedName = userNickname || localStorage.getItem('ttt_player_name') || '';
+function joinFromRooms(code, playersCount = 1) {
+    const storedName = userNickname || localStorage.getItem('ttt_player_name') || ('Jogador ' + (playersCount + 1));
     nameModalInput.value = storedName;
     nameModal.classList.remove('hidden');
     setTimeout(() => nameModalInput.focus(), 100);

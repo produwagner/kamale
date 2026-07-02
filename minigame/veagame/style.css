@@ -785,16 +785,17 @@ a.apoie-btn {
     display: none !important;
 }
 
-/* Permitir que o tabuleiro cresça em telas de lobby/menu */
-#game-board:has(#lobby-screen:not(.hidden)),
-#game-board:has(#rooms-screen:not(.hidden)),
-#game-board:has(#local-lobby-screen:not(.hidden)),
-#game-board:has(#create-screen:not(.hidden)),
-#game-board:has(#join-screen:not(.hidden)),
-#game-board:has(#mp-screen:not(.hidden)) {
-    aspect-ratio: auto;
-    max-height: calc(100vh - 140px);
-    overflow: visible;
+/* Ocultar os controles móveis (dpad) nas telas de menu e lobby */
+#game-board:has(#menu-screen:not(.hidden)) ~ #controls-wrapper,
+#game-board:has(#mp-screen:not(.hidden)) ~ #controls-wrapper,
+#game-board:has(#multiplayer-screen:not(.hidden)) ~ #controls-wrapper,
+#game-board:has(#local-lobby-screen:not(.hidden)) ~ #controls-wrapper,
+#game-board:has(#create-screen:not(.hidden)) ~ #controls-wrapper,
+#game-board:has(#rooms-screen:not(.hidden)) ~ #controls-wrapper,
+#game-board:has(#join-screen:not(.hidden)) ~ #controls-wrapper,
+#game-board:has(#lobby-screen:not(.hidden)) ~ #controls-wrapper,
+#game-board:has(#name-modal:not(.hidden)) ~ #controls-wrapper {
+    display: none !important;
 }
 
 

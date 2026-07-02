@@ -14,6 +14,26 @@ function showToast(message, type = 'error', duration = 3000) {
     }, duration);
 }
 
+// Autenticação e Apelido do Usuário Logado
+let userNickname = '';
+function loadUserNickname() {
+    if (typeof firebase === 'undefined' || !firebase.auth) return;
+    var user = firebase.auth().currentUser;
+    if (!user) { userNickname = ''; return; }
+    userNickname = user.nickname || localStorage.getItem('kamale_cached_nickname') || user.displayName || '';
+    if (userNickname) {
+        var db = firebase.database();
+        db.ref('users/' + user.uid + '/nickname').once('value', function (snap) {
+            userNickname = snap.val() || userNickname;
+            localStorage.setItem('kamale_cached_nickname', userNickname);
+        });
+    }
+}
+if (typeof firebase !== 'undefined' && firebase.auth) {
+    loadUserNickname();
+    firebase.auth().onAuthStateChanged(function () { loadUserNickname(); });
+}
+
 // Elementos do DOM
 const canvas = document.getElementById('game-canvas');
 const ctx = canvas.getContext('2d');
@@ -890,9 +910,27 @@ btnFriends.addEventListener('click', () => {
 btnBackMultiplayer.addEventListener('click', showMenu);
 
 btnCreateRoom.addEventListener('click', () => {
-    if (inputCreatePlayerName) inputCreatePlayerName.value = localStorage.getItem('block_player_name') || 'Jogador';
-    if (inputRoomName) inputRoomName.value = 'Sala de Tetris';
+    if (inputCreatePlayerName) inputCreatePlayerName.value = userNickname || localStorage.getItem('block_player_name') || 'Jogador 1';
+    if (inputRoomName) inputRoomName.value = userNickname ? 'Sala de ' + userNickname : 'Sala 1';
     showScreen(createScreen);
+
+    // Busca dinâmica do primeiro nome de sala sequencial livre
+    if (typeof firebase !== 'undefined' && firebase.database) {
+        firebase.database().ref('rooms').once('value', (snap) => {
+            let activeRoomNames = [];
+            snap.forEach(child => {
+                const r = child.val();
+                if (r.roomName && (r.status === 'waiting' || r.status === 'playing')) {
+                    activeRoomNames.push(r.roomName);
+                }
+            });
+            let num = 1;
+            while (activeRoomNames.includes('Sala ' + num)) {
+                num++;
+            }
+            if (inputRoomName) inputRoomName.value = userNickname ? 'Sala de ' + userNickname : 'Sala ' + num;
+        });
+    }
 });
 
 btnBackCreate.addEventListener('click', () => {
@@ -929,7 +967,7 @@ btnBackRooms.addEventListener('click', () => {
 });
 
 btnShowJoin.addEventListener('click', () => {
-    if (inputPlayerName) inputPlayerName.value = localStorage.getItem('block_player_name') || 'Jogador';
+    if (inputPlayerName) inputPlayerName.value = userNickname || localStorage.getItem('block_player_name') || 'Jogador 2';
     if (inputRoomCode) inputRoomCode.value = '';
     if (joinError) joinError.classList.add('hidden');
     showScreen(joinScreen);
@@ -1093,6 +1131,7 @@ function refreshRoomsList() {
             
             item.addEventListener('click', () => {
                 if (inputRoomCode) inputRoomCode.value = room.code;
+                if (inputPlayerName) inputPlayerName.value = userNickname || localStorage.getItem('block_player_name') || ('Jogador ' + (room.playerCount + 1));
                 showScreen(joinScreen);
                 if (inputPlayerName) inputPlayerName.focus();
             });

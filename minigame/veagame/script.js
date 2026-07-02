@@ -1039,7 +1039,7 @@ function activateFocusedElement() {
     return false;
 }
 
-// Captura keydown para navegar nos menus
+// Captura keydown para navegar nos menus e no tabuleiro
 window.addEventListener('keydown', (e) => {
     const tag = document.activeElement?.tagName;
     if (tag === 'INPUT' || tag === 'TEXTAREA') return;
@@ -1055,6 +1055,27 @@ window.addEventListener('keydown', (e) => {
         } else if (e.key === ' ' || e.key === 'Enter' || e.key === 'z' || e.key === 'Z' || e.key === 'x' || e.key === 'X') {
             e.preventDefault();
             activateFocusedElement();
+        }
+        return;
+    }
+
+    // Navegar células do tabuleiro durante o jogo
+    if (gameActive) {
+        if (e.key === 'ArrowUp' || e.key === 'w' || e.key === 'W') {
+            e.preventDefault();
+            moveDpad(-1, 0);
+        } else if (e.key === 'ArrowDown' || e.key === 's' || e.key === 'S') {
+            e.preventDefault();
+            moveDpad(1, 0);
+        } else if (e.key === 'ArrowLeft' || e.key === 'a' || e.key === 'A') {
+            e.preventDefault();
+            moveDpad(0, -1);
+        } else if (e.key === 'ArrowRight' || e.key === 'd' || e.key === 'D') {
+            e.preventDefault();
+            moveDpad(0, 1);
+        } else if (e.key === ' ' || e.key === 'Enter' || e.key === 'z' || e.key === 'Z' || e.key === 'x' || e.key === 'X') {
+            e.preventDefault();
+            confirmDpadMove();
         }
     }
 

@@ -224,5 +224,19 @@
     <script src="../auth.js"></script>
     <script src="multiplayer.js"></script>
     <script src="script.js"></script>
+    <script>
+    // ═══ KAMALE: recebe inputs do index.html via postMessage ═══
+    window.addEventListener('message', function(e) {
+        var d = e.data;
+        if (!d || d.type !== 'KAMALE_INPUT') return;
+        var evt = new KeyboardEvent(d.event, {
+            key: d.key,
+            code: d.key,
+            bubbles: true,
+            cancelable: true
+        });
+        window.dispatchEvent(evt);
+    });
+    </script>
 </body>
 </html>

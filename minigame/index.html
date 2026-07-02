@@ -653,11 +653,27 @@
     const screenHeaderRight = document.getElementById('screen-header-right');
     const mobilePauseBtn = document.getElementById('mobile-pause-btn');
 
+    // Mapeamento de tecla do botão A por jogo
+    const GAME_ACTION_MAP = {
+        snake:   { key: 'z',        label: '↔' },
+        pong:    { key: 'z',        label: '⚡' },
+        block:   { key: 'ArrowUp',  label: '↻' },
+        veagame: { key: 'Enter',    label: '✓' },
+    };
+    let currentGameActionKey = 'z';
+
     function startGame(url) {
         gameActive = true;
-        
+
+        // Detectar jogo pelo URL e configurar botão A
+        const gameName = Object.keys(GAME_ACTION_MAP).find(k => url.includes(k)) || 'snake';
+        const actionCfg = GAME_ACTION_MAP[gameName];
+        currentGameActionKey = actionCfg.key;
+        const actionBtn = document.getElementById('action-a');
+        if (actionBtn) actionBtn.textContent = actionCfg.label;
+
         // Ajustar proporção se for o jogo Block
-        if (url.includes('block')) {
+        if (gameName === 'block') {
             document.body.classList.add('vertical-game');
         } else {
             document.body.classList.remove('vertical-game');
@@ -668,25 +684,17 @@
         gameIframe.src = `${url}${separator}iframe=true`;
         gameIframe.style.display = 'block';
         gameIframe.classList.remove('hidden');
-        
+
         // Ocultar a grid de jogos
         gamesGrid.style.display = 'none';
-        
+
         // Exibir botão home
         homeBtn.style.display = 'flex';
         homeBtn.classList.remove('hidden');
-        
-        // Ocultar cabeçalho direito (login/apoie) - COMENTADO para sempre exibir os botões
-        // screenHeaderRight.style.display = 'none';
-        
+
         // Exibir botão de pause
         mobilePauseBtn.style.display = 'flex';
         mobilePauseBtn.classList.remove('hidden');
-        
-        // Dar foco ao iframe
-        setTimeout(() => {
-            gameIframe.focus();
-        }, 150);
     }
 
     function exitGame() {
@@ -810,119 +818,76 @@
         btn.addEventListener('mouseleave', release);
     }
 
-    // Comunicação com o Iframe (Inputs)
-    function sendDpadEventToIframe(id, eventType) {
-        if (!gameActive) return;
-        try {
-            const iframeDoc = gameIframe.contentDocument || gameIframe.contentWindow.document;
-            if (iframeDoc) {
-                const targetBtn = iframeDoc.getElementById(id);
-                if (targetBtn) {
-                    const evt = new MouseEvent(eventType, {
-                        bubbles: true,
-                        cancelable: true,
-                        view: gameIframe.contentWindow
-                    });
-                    targetBtn.dispatchEvent(evt);
-                }
-            }
-        } catch (e) {
-            // Silencia erro de CORS
-        }
+    // ═══ COMUNICAÇÃO COM IFRAME VIA postMessage ═══
+    // Mapeia botão do dpad para tecla de teclado padrão
+    const DPAD_KEY_MAP = {
+        'dpad-up':    'ArrowUp',
+        'dpad-down':  'ArrowDown',
+        'dpad-left':  'ArrowLeft',
+        'dpad-right': 'ArrowRight',
+    };
+
+    function sendKeyToIframe(key, eventType) {
+        if (!gameActive || !gameIframe.contentWindow) return;
+        gameIframe.contentWindow.postMessage(
+            { type: 'KAMALE_INPUT', key, event: eventType },
+            '*'
+        );
     }
 
-    function sendActionEventToIframe(eventType) {
-        if (!gameActive) return;
-        try {
-            const iframeDoc = gameIframe.contentDocument || gameIframe.contentWindow.document;
-            if (iframeDoc) {
-                let targetBtn = iframeDoc.getElementById('action-a');
-                if (!targetBtn) {
-                    targetBtn = iframeDoc.getElementById('action-power');
-                }
-                if (targetBtn) {
-                    const evt = new MouseEvent(eventType, {
-                        bubbles: true,
-                        cancelable: true,
-                        view: gameIframe.contentWindow
-                    });
-                    targetBtn.dispatchEvent(evt);
-                }
-            }
-        } catch (e) {}
-    }
-
-    function sendPauseEventToIframe(eventType) {
-        if (!gameActive) return;
-        try {
-            const iframeDoc = gameIframe.contentDocument || gameIframe.contentWindow.document;
-            if (iframeDoc) {
-                const targetBtn = iframeDoc.getElementById('mobile-pause-btn');
-                if (targetBtn) {
-                    const evt = new MouseEvent(eventType, {
-                        bubbles: true,
-                        cancelable: true,
-                        view: gameIframe.contentWindow
-                    });
-                    targetBtn.dispatchEvent(evt);
-                }
-            }
-        } catch (e) {}
-    }
-
-    setupButton(document.getElementById('dpad-up'), 
+    setupButton(document.getElementById('dpad-up'),
         () => {
-            if (gameActive) sendDpadEventToIframe('dpad-up', 'mousedown');
+            if (gameActive) sendKeyToIframe('ArrowUp', 'keydown');
             else moveFocus(-1, 0);
         },
         () => {
-            if (gameActive) sendDpadEventToIframe('dpad-up', 'mouseup');
+            if (gameActive) sendKeyToIframe('ArrowUp', 'keyup');
         }
     );
 
-    setupButton(document.getElementById('dpad-down'), 
+    setupButton(document.getElementById('dpad-down'),
         () => {
-            if (gameActive) sendDpadEventToIframe('dpad-down', 'mousedown');
+            if (gameActive) sendKeyToIframe('ArrowDown', 'keydown');
             else moveFocus(1, 0);
         },
         () => {
-            if (gameActive) sendDpadEventToIframe('dpad-down', 'mouseup');
+            if (gameActive) sendKeyToIframe('ArrowDown', 'keyup');
         }
     );
 
-    setupButton(document.getElementById('dpad-left'), 
+    setupButton(document.getElementById('dpad-left'),
         () => {
-            if (gameActive) sendDpadEventToIframe('dpad-left', 'mousedown');
+            if (gameActive) sendKeyToIframe('ArrowLeft', 'keydown');
             else moveFocus(0, -1);
         },
         () => {
-            if (gameActive) sendDpadEventToIframe('dpad-left', 'mouseup');
+            if (gameActive) sendKeyToIframe('ArrowLeft', 'keyup');
         }
     );
 
-    setupButton(document.getElementById('dpad-right'), 
+    setupButton(document.getElementById('dpad-right'),
         () => {
-            if (gameActive) sendDpadEventToIframe('dpad-right', 'mousedown');
+            if (gameActive) sendKeyToIframe('ArrowRight', 'keydown');
             else moveFocus(0, 1);
         },
         () => {
-            if (gameActive) sendDpadEventToIframe('dpad-right', 'mouseup');
+            if (gameActive) sendKeyToIframe('ArrowRight', 'keyup');
         }
     );
 
     setupButton(document.getElementById('mobile-pause-btn'),
         () => {
-            if (gameActive) sendPauseEventToIframe('mousedown');
+            if (gameActive) sendKeyToIframe('p', 'keydown');
         },
         () => {
-            if (gameActive) sendPauseEventToIframe('mouseup');
+            if (gameActive) sendKeyToIframe('p', 'keyup');
         }
     );
 
-    setupButton(document.getElementById('action-a'), 
+    setupButton(document.getElementById('action-a'),
         () => {
             if (gameActive) {
-                sendActionEventToIframe('mousedown');
+                sendKeyToIframe(currentGameActionKey, 'keydown');
             } else {
                 const item = allItems[focusedIndex];
                 if (item.tagName === 'A') {
@@ -934,14 +899,14 @@
             }
         },
         () => {
-            if (gameActive) sendActionEventToIframe('mouseup');
+            if (gameActive) sendKeyToIframe(currentGameActionKey, 'keyup');
         }
     );
 
     // Evento do Botão Home
     homeBtn.addEventListener('click', exitGame);
 
-    // Repasse de Inputs de Teclado
+    // Repasse de Inputs de Teclado ao iframe via postMessage
     window.addEventListener('keydown', (e) => {
         if (gameActive) {
             if (e.key === 'Escape') {
@@ -950,7 +915,7 @@
                 return;
             }
 
-            // Adiciona classe ativada física para feedback visual na tela pai
+            // Feedback visual nos botões do index
             switch (e.key) {
                 case 'ArrowUp': case 'w': case 'W': document.getElementById('dpad-up')?.classList.add('active'); break;
                 case 'ArrowDown': case 's': case 'S': document.getElementById('dpad-down')?.classList.add('active'); break;
@@ -960,22 +925,9 @@
                 case 'p': case 'P': document.getElementById('mobile-pause-btn')?.classList.add('active'); break;
             }
 
-            try {
-                const keyEvent = new KeyboardEvent(e.type, {
-                    key: e.key,
-                    code: e.code,
-                    keyCode: e.keyCode,
-                    which: e.which,
-                    bubbles: true,
-                    cancelable: true,
-                    altKey: e.altKey,
-                    ctrlKey: e.ctrlKey,
-                    shiftKey: e.shiftKey,
-                    metaKey: e.metaKey,
-                    repeat: e.repeat
-                });
-                gameIframe.contentWindow.dispatchEvent(keyEvent);
-            } catch (err) {}
+            // Encaminhar tecla ao iframe via postMessage
+            sendKeyToIframe(e.key, 'keydown');
+            e.preventDefault();
             return;
         }
 
@@ -1022,21 +974,8 @@
                 case 'p': case 'P': document.getElementById('mobile-pause-btn')?.classList.remove('active'); break;
             }
 
-            try {
-                const keyEvent = new KeyboardEvent(e.type, {
-                    key: e.key,
-                    code: e.code,
-                    keyCode: e.keyCode,
-                    which: e.which,
-                    bubbles: true,
-                    cancelable: true,
-                    altKey: e.altKey,
-                    ctrlKey: e.ctrlKey,
-                    shiftKey: e.shiftKey,
-                    metaKey: e.metaKey
-                });
-                gameIframe.contentWindow.dispatchEvent(keyEvent);
-            } catch (err) {}
+            // Encaminhar keyup ao iframe via postMessage
+            sendKeyToIframe(e.key, 'keyup');
             return;
         }
 

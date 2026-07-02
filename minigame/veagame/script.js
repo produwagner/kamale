@@ -773,7 +773,9 @@ function togglePause() {
     } else {
         isPaused = !isPaused;
         if (isPaused) {
-            pauseOverlay.classList.remove('hidden');
+            if (instructionsModal.classList.contains('hidden')) {
+                pauseOverlay.classList.remove('hidden');
+            }
             mobileResetBtn.classList.remove('hidden');
         } else {
             pauseOverlay.classList.add('hidden');
@@ -785,14 +787,18 @@ function togglePause() {
 }
 
 function updatePauseBtn() {
-    if (mobilePauseBtn) {
-        if (isPaused) {
-            mobilePauseBtn.textContent = '▶';
-            mobilePauseBtn.classList.add('active');
-        } else {
-            mobilePauseBtn.textContent = '⏸';
-            mobilePauseBtn.classList.remove('active');
-        }
+    if (!mobilePauseBtn) return;
+    if (!instructionsModal.classList.contains('hidden')) {
+        mobilePauseBtn.textContent = '✕';
+        mobilePauseBtn.classList.remove('active');
+        return;
+    }
+    if (isPaused) {
+        mobilePauseBtn.textContent = '▶';
+        mobilePauseBtn.classList.add('active');
+    } else {
+        mobilePauseBtn.textContent = '⏸';
+        mobilePauseBtn.classList.remove('active');
     }
 }
 

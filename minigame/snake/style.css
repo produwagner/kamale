@@ -969,3 +969,15 @@ a.apoie-btn {
     display: none !important;
 }
 
+/* Correção da rolagem na tela de lobby */
+#lobby-screen, .overlay {
+    touch-action: auto !important;
+}
+
+#lobby-screen #game-board {
+    aspect-ratio: auto;
+    max-height: calc(100vh - 140px);
+    overflow-y: auto;
+}
+
+

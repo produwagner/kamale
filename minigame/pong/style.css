@@ -123,7 +123,7 @@ a:has(> .game-header-img) {
     background-color: rgba(0, 0, 0, 0.85);
     display: flex;
     justify-content: center;
-    align-items: center;
+    align-items: flex-start;
     z-index: 20;
     border-radius: 17px;
     opacity: 1;
@@ -131,6 +131,7 @@ a:has(> .game-header-img) {
     transition: opacity 0.25s ease, visibility 0.25s ease;
     overflow-y: auto;
     overflow-x: hidden;
+    touch-action: auto !important;
 }
 
 .overlay.hidden {
@@ -196,6 +197,7 @@ a:has(> .game-header-img) {
     text-align: center;
     max-height: 100%;
     padding: 10px 8px;
+    margin: auto 0;
 }
 
 .game-over-title {
@@ -872,4 +874,17 @@ a.apoie-btn {
 .hidden {
     display: none !important;
 }
+
+/* Permitir que o tabuleiro cresça em telas de lobby/menu */
+#game-board:has(#lobby-screen:not(.hidden)),
+#game-board:has(#rooms-screen:not(.hidden)),
+#game-board:has(#local-lobby-screen:not(.hidden)),
+#game-board:has(#create-screen:not(.hidden)),
+#game-board:has(#join-screen:not(.hidden)),
+#game-board:has(#mp-screen:not(.hidden)) {
+    aspect-ratio: auto;
+    max-height: calc(100vh - 140px);
+    overflow: visible;
+}
+
 

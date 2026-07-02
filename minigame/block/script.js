@@ -156,7 +156,6 @@ function startGame() {
     if (mobilePauseBtn) {
         mobilePauseBtn.textContent = '⏸';
         mobilePauseBtn.classList.remove('active');
-        mobilePauseBtn.classList.add('circle');
     }
     gameRunning = true;
     
@@ -185,9 +184,8 @@ function gameOver() {
     }
     
     if (mobilePauseBtn) {
-        mobilePauseBtn.textContent = 'Iniciar';
+        mobilePauseBtn.textContent = '⏸';
         mobilePauseBtn.classList.remove('active');
-        mobilePauseBtn.classList.remove('circle');
     }
     setTimeout(() => updateMenuFocus(0), 50);
 }
@@ -287,7 +285,6 @@ function triggerStart() {
         if (mobilePauseBtn) {
             mobilePauseBtn.textContent = '⏸';
             mobilePauseBtn.classList.remove('active');
-            mobilePauseBtn.classList.add('circle');
         }
     }
 }
@@ -510,14 +507,12 @@ function togglePause() {
         if (mobilePauseBtn) {
             mobilePauseBtn.textContent = '▶';
             mobilePauseBtn.classList.add('active');
-            mobilePauseBtn.classList.add('circle');
         }
     } else {
         if (pOverlay) pOverlay.classList.add('hidden');
         if (mobilePauseBtn) {
             mobilePauseBtn.textContent = '⏸';
             mobilePauseBtn.classList.remove('active');
-            mobilePauseBtn.classList.add('circle');
         }
         gameTick();
     }
@@ -1170,9 +1165,8 @@ function handleOnlineGameOver(winnerSymbol) {
     
     gameOverScreen.classList.remove('hidden');
     if (mobilePauseBtn) {
-        mobilePauseBtn.textContent = 'Iniciar';
+        mobilePauseBtn.textContent = '⏸';
         mobilePauseBtn.classList.remove('active');
-        mobilePauseBtn.classList.remove('circle');
     }
     setTimeout(() => updateMenuFocus(0), 50);
 }

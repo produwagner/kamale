@@ -349,9 +349,11 @@
                 'border-color:rgba(0,0,0,0.08) !important;' +
                 'background-color:#e0e0e0 !important;' +
             '}' +
-            '.theme-light .header-logo { color:#ffd100; }' +
-            '.theme-light .logo-mini { color:#282828 !important; }' +
-            '.theme-light .card-label { color:#777; }' +
+            '.theme-light .header-logo { color:#7a5c00; }' +
+            '.theme-light .logo-mini { color:#1a1a1a !important; }' +
+            '.theme-light .card-label { color:#555; }' +
+            '.theme-light .menu-title { color:#1a1a1a !important; }' +
+            '.theme-light .game-over-title { color:#1a1a1a !important; }' +
             '.theme-light #apoie-screen .apoie-desc { color:#555; }' +
             '.theme-light .apoie-back-btn { color:#888;border-color:#bbb; }' +
             '.theme-light .toast { background-color:#cfcfcf;color:#333;border-color:#bbb; }' +

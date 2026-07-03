@@ -821,6 +821,29 @@ a.apoie-btn {
     font-weight: bold;
 }
 
+/* ═══ MULTIPLAYER MENU COMPACT (prevent overflow) ═══ */
+#multiplayer-screen .menu-content {
+    gap: 8px !important;
+    padding: 10px !important;
+}
+#multiplayer-screen .menu-title {
+    font-size: 0.95rem !important;
+    margin-bottom: 2px !important;
+}
+#multiplayer-screen .menu-btn {
+    padding: 6px 12px 8px 12px !important;
+    font-size: 0.85rem !important;
+    box-shadow: 0 3px 0 #141414 !important;
+    transform: translateY(-2px) !important;
+}
+#multiplayer-screen .menu-btn:active {
+    transform: translateY(1px) !important;
+    box-shadow: 0 0px 0 #141414 !important;
+}
+#multiplayer-screen .btn-emoji {
+    font-size: 0.95rem !important;
+}
+
 /* ═══ RESPONSIVIDADE ════════════════════════════════════════════════════════ */
 @media (max-width: 768px) {
     .instructions-desktop { display: none; }
@@ -1092,8 +1115,8 @@ body.in-iframe #mp-game-canvas {
 
 /* Escala de menus e botões no modo iframe */
 body.in-iframe .menu-btn {
-    padding: 6px 14px 10px 14px !important;
-    font-size: 0.95rem !important;
+    padding: clamp(4px, 1vh, 8px) clamp(8px, 2vw, 14px) clamp(6px, 1.2vh, 12px) clamp(8px, 2vw, 14px) !important;
+    font-size: clamp(0.8rem, 2vh, 0.95rem) !important;
     box-shadow: 0 3px 0 #141414 !important;
     transform: translateY(-2px) !important;
     width: auto !important;
@@ -1104,12 +1127,12 @@ body.in-iframe .menu-btn:active, body.in-iframe .menu-btn.focused:active {
     box-shadow: 0 0px 0 #141414 !important;
 }
 body.in-iframe .menu-title {
-    font-size: 1.3rem !important;
-    margin-bottom: 6px !important;
+    font-size: clamp(1rem, 2.5vh, 1.3rem) !important;
+    margin-bottom: clamp(2px, 0.8vh, 6px) !important;
 }
 body.in-iframe .menu-content {
-    gap: 8px !important;
-    padding: 10px !important;
+    gap: clamp(4px, 1.2vh, 8px) !important;
+    padding: clamp(6px, 1.5vh, 12px) !important;
 }
 body.in-iframe .room-input, body.in-iframe .mp-input, body.in-iframe .name-input {
     font-size: 1rem !important;

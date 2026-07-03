@@ -848,7 +848,6 @@ a.apoie-btn {
 #game-board:has(#lobby-screen:not(.hidden)) ~ #controls-wrapper {
     display: none !important;
 }
-
 /* ==========================================================================
    AJUSTES PARA MODO CENTRALIZADO (IFRAME)
    ========================================================================== */
@@ -860,6 +859,7 @@ body.in-iframe .game-top-row {
 /* Propagação de altura para todos os ancestrais do game-board */
 body.in-iframe,
 body.in-iframe #app-container,
+body.in-iframe #boards-wrapper,
 body.in-iframe .screen,
 body.in-iframe .game-section {
     height: 100% !important;
@@ -874,14 +874,20 @@ body.in-iframe #app-container {
     max-width: 100% !important;
     width: 100% !important;
     height: 100% !important;
+    display: flex !important;
+    flex-direction: column !important;
 }
-
 
 body.in-iframe #boards-wrapper {
     flex: 1 !important;
     width: 100% !important;
     height: 100% !important;
     min-height: 0 !important;
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 0 !important;
 }
 
 body.in-iframe #game-board {

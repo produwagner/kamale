@@ -943,6 +943,10 @@
     function exitGame() {
         gameActive = false;
 
+        // Resetar foco do header
+        focusedHeaderIndex = -1;
+        updateHeaderFocus();
+
         // Resetar proporção da tela
         document.body.classList.remove('vertical-game');
 
@@ -970,6 +974,51 @@
         
         // Retornar o foco
         updateFocus();
+    }
+
+    // ═══ HEADER ITEMS (navegáveis mesmo com jogo ativo) ═══
+    const headerItems = [
+        document.getElementById('home-btn'),
+        document.getElementById('apoie-btn'),
+        document.getElementById('google-login-btn'),
+    ].filter(Boolean);
+    let focusedHeaderIndex = -1; // -1 = sem foco no header (jogo tem foco)
+
+    function updateHeaderFocus() {
+        headerItems.forEach((item, idx) => {
+            if (idx === focusedHeaderIndex) {
+                item.classList.add('focused');
+            } else {
+                item.classList.remove('focused');
+            }
+        });
+    }
+
+    function moveHeaderFocus(dir) {
+        if (headerItems.length === 0) return false;
+        if (focusedHeaderIndex === -1 && dir > 0) return false;
+        if (focusedHeaderIndex === -1 && dir < 0) {
+            focusedHeaderIndex = headerItems.length - 1;
+        } else {
+            focusedHeaderIndex += dir;
+            if (focusedHeaderIndex < 0) {
+                focusedHeaderIndex = -1; // sai do header, volta ao jogo
+                updateHeaderFocus();
+                return true;
+            }
+            if (focusedHeaderIndex >= headerItems.length) {
+                focusedHeaderIndex = headerItems.length - 1;
+            }
+        }
+        updateHeaderFocus();
+        return true;
+    }
+
+    function activateHeaderFocus() {
+        if (focusedHeaderIndex < 0 || focusedHeaderIndex >= headerItems.length) return false;
+        const item = headerItems[focusedHeaderIndex];
+        if (item) item.click();
+        return true;
     }
 
     // ═══ NAVEGAÇÃO DO MENU ═══
@@ -1102,21 +1151,27 @@
 
     setupButton(document.getElementById('dpad-up'),
         () => {
-            if (gameActive) sendKeyToIframe('ArrowUp', 'keydown');
-            else moveFocus(-1, 0);
+            if (gameActive) {
+                if (!moveHeaderFocus(-1)) {
+                    sendKeyToIframe('ArrowUp', 'keydown');
+                }
+            } else moveFocus(-1, 0);
         },
         () => {
-            if (gameActive) sendKeyToIframe('ArrowUp', 'keyup');
+            if (gameActive && focusedHeaderIndex === -1) sendKeyToIframe('ArrowUp', 'keyup');
         }
     );
 
     setupButton(document.getElementById('dpad-down'),
         () => {
-            if (gameActive) sendKeyToIframe('ArrowDown', 'keydown');
-            else moveFocus(1, 0);
+            if (gameActive) {
+                if (!moveHeaderFocus(1)) {
+                    sendKeyToIframe('ArrowDown', 'keydown');
+                }
+            } else moveFocus(1, 0);
         },
         () => {
-            if (gameActive) sendKeyToIframe('ArrowDown', 'keyup');
+            if (gameActive && focusedHeaderIndex === -1) sendKeyToIframe('ArrowDown', 'keyup');
         }
     );
 
@@ -1156,7 +1211,9 @@
     setupButton(document.getElementById('action-a'),
         () => {
             if (gameActive) {
-                sendKeyToIframe(currentGameActionKey, 'keydown');
+                if (!activateHeaderFocus()) {
+                    sendKeyToIframe(currentGameActionKey, 'keydown');
+                }
             } else if (apoieActive) {
                 const item = allItemsApoie[focusedIndexApoie];
                 if (item) item.click();
@@ -1171,7 +1228,7 @@
             }
         },
         () => {
-            if (gameActive) sendKeyToIframe(currentGameActionKey, 'keyup');
+            if (gameActive && focusedHeaderIndex === -1) sendKeyToIframe(currentGameActionKey, 'keyup');
         }
     );
 
@@ -1188,6 +1245,25 @@
                 exitGame();
                 e.preventDefault();
                 return;
+            }
+
+            // Navegação do header (home, apoie, login)
+            if (e.key === 'ArrowUp' || e.key === 'w' || e.key === 'W' || e.key === 'ArrowDown' || e.key === 's' || e.key === 'S') {
+                const dir = (e.key === 'ArrowUp' || e.key === 'w' || e.key === 'W') ? -1 : 1;
+                if (moveHeaderFocus(dir)) {
+                    document.getElementById('dpad-up')?.classList.add('active');
+                    e.preventDefault();
+                    return;
+                }
+            }
+
+            // Ativar botão do header se estiver focado
+            if ([' ', 'Enter', 'z', 'Z', 'x', 'X'].includes(e.key)) {
+                document.getElementById('action-a')?.classList.add('active');
+                if (activateHeaderFocus()) {
+                    e.preventDefault();
+                    return;
+                }
             }
 
             // Feedback visual nos botões do index
@@ -1262,12 +1338,14 @@
                 case 'p': case 'P': document.getElementById('mobile-pause-btn')?.classList.remove('active'); break;
             }
 
-            // Encaminhar keyup ao iframe via postMessage (com tradução para ação)
-            let keyToSend = e.key;
-            if ([' ', 'Enter', 'z', 'Z', 'x', 'X'].includes(e.key)) {
-                keyToSend = currentGameActionKey;
+            // Só encaminha keyup ao iframe se o header não estiver focado
+            if (focusedHeaderIndex === -1) {
+                let keyToSend = e.key;
+                if ([' ', 'Enter', 'z', 'Z', 'x', 'X'].includes(e.key)) {
+                    keyToSend = currentGameActionKey;
+                }
+                sendKeyToIframe(keyToSend, 'keyup');
             }
-            sendKeyToIframe(keyToSend, 'keyup');
             return;
         }
 

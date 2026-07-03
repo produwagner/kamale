@@ -994,20 +994,31 @@
         });
     }
 
-    function moveHeaderFocus(dir) {
+    function moveHeaderFocus(dir, wrap) {
         if (headerItems.length === 0) return false;
         if (focusedHeaderIndex === -1 && dir > 0) return false;
         if (focusedHeaderIndex === -1 && dir < 0) {
             focusedHeaderIndex = headerItems.length - 1;
         } else {
-            focusedHeaderIndex += dir;
-            if (focusedHeaderIndex < 0) {
-                focusedHeaderIndex = -1; // sai do header, volta ao jogo
-                updateHeaderFocus();
-                return true;
-            }
-            if (focusedHeaderIndex >= headerItems.length) {
-                focusedHeaderIndex = headerItems.length - 1;
+            const next = focusedHeaderIndex + dir;
+            if (next < 0) {
+                if (wrap) {
+                    focusedHeaderIndex = headerItems.length - 1;
+                } else {
+                    focusedHeaderIndex = -1; // sai do header, volta ao jogo
+                    updateHeaderFocus();
+                    return true;
+                }
+            } else if (next >= headerItems.length) {
+                if (wrap) {
+                    focusedHeaderIndex = 0;
+                } else {
+                    focusedHeaderIndex = -1; // sai do header, volta ao jogo
+                    updateHeaderFocus();
+                    return true;
+                }
+            } else {
+                focusedHeaderIndex = next;
             }
         }
         updateHeaderFocus();
@@ -1152,7 +1163,7 @@
     setupButton(document.getElementById('dpad-up'),
         () => {
             if (gameActive) {
-                if (!moveHeaderFocus(-1)) {
+                if (!moveHeaderFocus(-1, false)) {
                     sendKeyToIframe('ArrowUp', 'keydown');
                 }
             } else moveFocus(-1, 0);
@@ -1165,7 +1176,7 @@
     setupButton(document.getElementById('dpad-down'),
         () => {
             if (gameActive) {
-                if (!moveHeaderFocus(1)) {
+                if (!moveHeaderFocus(1, false)) {
                     sendKeyToIframe('ArrowDown', 'keydown');
                 }
             } else moveFocus(1, 0);
@@ -1181,7 +1192,7 @@
                 if (focusedHeaderIndex === -1) {
                     sendKeyToIframe('ArrowLeft', 'keydown');
                 } else {
-                    moveHeaderFocus(-1);
+                    moveHeaderFocus(-1, true);
                 }
             } else moveFocus(0, -1);
         },
@@ -1196,7 +1207,7 @@
                 if (focusedHeaderIndex === -1) {
                     sendKeyToIframe('ArrowRight', 'keydown');
                 } else {
-                    moveHeaderFocus(1);
+                    moveHeaderFocus(1, true);
                 }
             } else moveFocus(0, 1);
         },
@@ -1257,21 +1268,21 @@
                 return;
             }
 
-            // Navegação do header (home, apoie, login)
+            // Navegação vertical do header (sobe/desce entre header e jogo)
             if (e.key === 'ArrowUp' || e.key === 'w' || e.key === 'W' || e.key === 'ArrowDown' || e.key === 's' || e.key === 'S') {
                 const dir = (e.key === 'ArrowUp' || e.key === 'w' || e.key === 'W') ? -1 : 1;
-                if (moveHeaderFocus(dir)) {
+                if (moveHeaderFocus(dir, false)) {
                     document.getElementById('dpad-up')?.classList.add('active');
                     e.preventDefault();
                     return;
                 }
             }
 
-            // Navegação horizontal do header (quando já estiver focado)
+            // Navegação horizontal do header (lado a lado, quando já estiver focado)
             if (e.key === 'ArrowLeft' || e.key === 'a' || e.key === 'A' || e.key === 'ArrowRight' || e.key === 'd' || e.key === 'D') {
                 if (focusedHeaderIndex !== -1) {
                     const hdir = (e.key === 'ArrowLeft' || e.key === 'a' || e.key === 'A') ? -1 : 1;
-                    moveHeaderFocus(hdir);
+                    moveHeaderFocus(hdir, true);
                     document.getElementById('dpad-left')?.classList.add('active');
                     e.preventDefault();
                     return;

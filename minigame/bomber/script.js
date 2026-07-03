@@ -224,12 +224,21 @@ window.addEventListener('keydown', (e) => {
 
     const activeMenu = getActiveMenuScreen();
     if (activeMenu) {
+        try {
+            var _s = activeMenu, _e = _s ? getFocusableElements(_s) : [];
+            window.parent.postMessage({
+                type: 'KAMALE_MENU_STATE',
+                onMenu: true,
+                focusIndex: menuFocusIndex,
+                totalItems: _e.length
+            }, '*');
+        } catch(ex) {}
         let menuHandled = false;
         switch (e.key) {
-            case 'ArrowUp': case 'w': case 'W':
+            case 'ArrowUp': case 'w': case 'W': case 'ArrowLeft': case 'a': case 'A':
                 updateMenuFocus(-1);
                 menuHandled = true; break;
-            case 'ArrowDown': case 's': case 'S':
+            case 'ArrowDown': case 's': case 'S': case 'ArrowRight': case 'd': case 'D':
                 updateMenuFocus(1);
                 menuHandled = true; break;
             case ' ': case 'Enter': case 'z': case 'Z': case 'x': case 'X':
@@ -1963,7 +1972,7 @@ function getActiveMenuScreen() {
         document.getElementById('instructions-modal'),
         document.getElementById('instructions-modal-game')
     ];
-    return screens.find(s => s && !s.classList.contains('hidden'));
+    return screens.find(s => s && !s.classList.contains('hidden') && s.offsetParent !== null);
 }
 
 function getFocusableElements(screen) {
@@ -1984,7 +1993,7 @@ function getFocusableElements(screen) {
 
     return elements.filter(el => {
         const style = window.getComputedStyle(el);
-        return style.display !== 'none' && style.visibility !== 'hidden' && !el.disabled && !el.classList.contains('modal-close-btn');
+        return style.display !== 'none' && style.visibility !== 'hidden' && !el.disabled && el.offsetParent !== null && !el.classList.contains('modal-close-btn');
     });
 }
 

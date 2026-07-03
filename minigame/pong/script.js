@@ -1920,7 +1920,20 @@ function getActiveMenuScreen() {
 
 function getFocusableElements(screen) {
     if (!screen) return [];
-    const elements = Array.from(screen.querySelectorAll('button, input, a'));
+    const elements = Array.from(screen.querySelectorAll('button, input, a')).filter(el => {
+        return !el.classList.contains('modal-close-btn');
+    });
+
+    const topRow = document.querySelector('.game-top-row');
+    if (topRow) {
+        const topRowEls = Array.from(topRow.querySelectorAll('button, input, a')).filter(el => {
+            return !el.classList.contains('modal-close-btn');
+        });
+        topRowEls.forEach(el => {
+            if (!elements.includes(el)) elements.push(el);
+        });
+    }
+
     return elements.filter(el => {
         const style = window.getComputedStyle(el);
         return style.display !== 'none' && style.visibility !== 'hidden' && !el.disabled && el.offsetParent !== null && !el.classList.contains('modal-close-btn');
@@ -1991,4 +2004,6 @@ if (mobileResetBtn) {
     mobileResetBtn.addEventListener('click', handleReset);
 }
 showMenu(); // Ensure menu is initialized with focus on load
+
+
 

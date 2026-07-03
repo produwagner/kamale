@@ -598,6 +598,10 @@ window.addEventListener('keydown', (e) => {
         case 'ArrowUp':
         case 'w':
         case 'W':
+        case 'z':
+        case 'Z':
+        case 'x':
+        case 'X':
             rotatePiece();
             if (dpadUp) dpadUp.classList.add('active');
             if (actionA) actionA.classList.add('active');
@@ -637,7 +641,7 @@ window.addEventListener('keyup', (e) => {
         case 'ArrowDown': case 's': case 'S':
             if (dpadDown) dpadDown.classList.remove('active');
             break;
-        case 'ArrowUp': case 'w': case 'W':
+        case 'ArrowUp': case 'w': case 'W': case 'z': case 'Z': case 'x': case 'X':
             if (dpadUp) dpadUp.classList.remove('active');
             if (actionA) actionA.classList.remove('active');
             break;
@@ -776,10 +780,19 @@ function getActiveMenuScreen() {
 function getFocusableElements(screen) {
     if (!screen) return [];
     const elements = Array.from(screen.querySelectorAll('button, input, a')).filter(el => {
-        return !el.classList.contains('home-btn') && !el.classList.contains('apoie-btn') &&
-               !el.classList.contains('google-login-btn') && !el.classList.contains('help-btn') &&
-               !el.classList.contains('modal-close-btn');
+        return !el.classList.contains('modal-close-btn');
     });
+
+    const topRow = document.querySelector('.game-top-row');
+    if (topRow) {
+        const topRowEls = Array.from(topRow.querySelectorAll('button, input, a')).filter(el => {
+            return !el.classList.contains('modal-close-btn');
+        });
+        topRowEls.forEach(el => {
+            if (!elements.includes(el)) elements.push(el);
+        });
+    }
+
     return elements.filter(el => {
         const style = window.getComputedStyle(el);
         return style.display !== 'none' && style.visibility !== 'hidden' && !el.disabled && el.offsetParent !== null && !el.classList.contains('modal-close-btn');
@@ -1244,5 +1257,7 @@ Multiplayer.onAttackReceived = (linesCount) => {
 
 menuScreen.classList.remove('hidden');
 setTimeout(() => updateMenuFocus(0), 50);
+
+
 
 

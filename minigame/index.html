@@ -135,7 +135,7 @@
 
         /* ═══ GAMES GRID ═══ */
         .games-grid {
-            display:grid; grid-template-columns:1fr 1fr; grid-template-rows:1fr 1fr;
+            display:grid; grid-template-columns:1fr 1fr; grid-template-rows:repeat(3, 1fr);
             gap:clamp(6px,1.2vw,12px);
             width:100%;
             flex:1;
@@ -154,6 +154,7 @@
         .card-snake { --accent:#3acc7a; --glow:rgba(58,204,122,0.14); }
         .card-block { --accent:#bf00ff; --glow:rgba(191,0,255,0.14); }
         .card-velha { --accent:#ffd100; --glow:rgba(255,209,0,0.14); }
+        .card-soon  { --accent:#555555; --glow:rgba(85,85,85,0.14); }
         .card-preview { flex:1; width:100%; display:flex; align-items:center; justify-content:center; min-height:0; }
         .card-label { font-size:clamp(0.5rem,2.2vw,0.68rem); font-weight:bold; color:#bbbbbb; letter-spacing:2px; text-align:center; transition:color 0.2s; }
         .game-card:hover .card-label, .game-card.focused .card-label { color:var(--accent); }
@@ -256,8 +257,8 @@
         }
 
         .pause-btn {
-            width: 36px;
-            height: 36px;
+            width: 28px;
+            height: 28px;
             border-radius: 50%;
             background-color: #282828;
             border: 2px solid #444444;
@@ -298,8 +299,10 @@
 
         /* ═══ RESPONSIVIDADE ═══ */
         @media (max-width:420px) {
-            #game-board { width:95vw; height:auto; max-height:80vh; }
+            #game-board { width:95vw; height:auto !important; }
+            body.vertical-game #game-board { width: min(90vw, 48vh, 320px) !important; }
             #screen-header { width:95vw; }
+            body.vertical-game #screen-header { width: min(90vw, 48vh, 320px) !important; }
         }
         @media (max-height:560px) {
             .header { margin-bottom:4px; }
@@ -319,6 +322,73 @@
         }
         @media (min-width: 769px) {
             #controls-wrapper { display: none !important; }
+        }
+
+        /* ═══ TELA DE APOIO ═══ */
+        #apoie-screen {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100%;
+            width: 100%;
+        }
+        .hidden {
+            display: none !important;
+        }
+        .amount-btn {
+            background-color: #111;
+            border: 2px solid #333;
+            color: #aaa;
+            border-radius: 8px;
+            font-family: 'Share Tech Mono', monospace;
+            font-weight: bold;
+            cursor: pointer;
+            box-shadow: 0 3px 0 #1a1a1a;
+            transform: translateY(-2px);
+            transition: all 0.1s;
+        }
+        .amount-btn:hover, .amount-btn.focused {
+            background-color: #222;
+            border-color: #ffd100;
+            color: #ffd100;
+            box-shadow: 0 3px 0 #886a00;
+            outline: none;
+            transform: translateY(-1px) scale(1.02);
+        }
+        .amount-btn.selected {
+            background-color: #ffd100;
+            color: #1a1a1a;
+            border-color: #ffd100;
+            box-shadow: 0 3px 0 #886a00;
+        }
+        .amount-btn.selected:hover, .amount-btn.selected.focused {
+            background-color: #ffe04d;
+            border-color: #ffe04d;
+            color: #1a1a1a;
+        }
+        .amount-btn:active {
+            transform: translateY(1px);
+            box-shadow: 0 0px 0 #1a1a1a;
+        }
+        
+        .theme-light .amount-btn {
+            background-color: #f5f5f5;
+            border-color: #ccc;
+            color: #333;
+            box-shadow: 0 3px 0 #ddd;
+        }
+        .theme-light .amount-btn:hover, .theme-light .amount-btn.focused {
+            background-color: #eaeaea;
+            border-color: #ffd100;
+            color: #ffd100;
+            box-shadow: 0 3px 0 #cca700;
+        }
+        .theme-light .amount-btn.selected {
+            background-color: #ffd100;
+            color: #1a1a1a;
+            border-color: #ffd100;
+            box-shadow: 0 3px 0 #cca700;
         }
 
         /* ═══ GIFT MODAL ═══ */
@@ -426,13 +496,25 @@
 
         /* ═══ ASPECT RATIO FOR VERTICAL GAMES (BLOCK/TETRIS) ═══ */
         body.vertical-game #game-board {
-            aspect-ratio: 1 / 1.4 !important;
-            width: min(90vw, 55vh, 350px) !important;
+            aspect-ratio: 1 / 1.5 !important;
+            width: min(90vw, 50vh, 320px) !important;
             height: auto !important;
-            max-height: 80vh !important;
         }
         body.vertical-game #screen-header {
-            width: min(90vw, 55vh, 350px) !important;
+            width: min(90vw, 50vh, 320px) !important;
+        }
+
+
+        /* ═══ JOGO ATIVO: iframe cola nas bordas tracejadas ═══ */
+        body.game-active #game-board {
+            padding: 0 !important;
+            gap: 0 !important;
+        }
+        body.game-active #game-iframe {
+            border-radius: 17px; /* acompanha o border-radius do #game-board (20px - borda 3px) */
+            width: 100% !important;
+            height: 100% !important;
+            flex: 1;
         }
     </style>
 </head>
@@ -493,9 +575,55 @@
                 </div>
                 <div class="card-label">VEA GAME</div>
             </a>
+
+            <!-- EM BREVE -->
+            <div class="game-card card-soon" id="card-soon" style="opacity: 0.4; cursor: not-allowed; border-style: dotted;">
+                <div class="card-preview" style="font-size: clamp(1.2rem, 4vw, 1.8rem); display: flex; align-items: center; justify-content: center; height:100%; width:100%;">
+                    🔒
+                </div>
+                <div class="card-label">EM BREVE</div>
+            </div>
+
+            <!-- EM BREVE 2 -->
+            <div class="game-card card-soon" id="card-soon-2" style="opacity: 0.4; cursor: not-allowed; border-style: dotted;">
+                <div class="card-preview" style="font-size: clamp(1.2rem, 4vw, 1.8rem); display: flex; align-items: center; justify-content: center; height:100%; width:100%;">
+                    🔒
+                </div>
+                <div class="card-label">EM BREVE</div>
+            </div>
         </div>
         
         <iframe id="game-iframe" class="hidden" src="" style="width: 100%; flex: 1; border: none; background: #000; border-radius: 10px; display: none;"></iframe>
+
+        <!-- TELA DE APOIO -->
+        <div id="apoie-screen" class="hidden" style="width: 100%; flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: clamp(8px, 2vh, 18px); padding: clamp(10px, 3vw, 20px); box-sizing: border-box; overflow-y: auto;">
+            <div class="apoie-card" style="width: 100%; max-width: 320px; display: flex; flex-direction: column; align-items: center; gap: clamp(8px, 1.8vh, 16px);">
+                <div class="apoie-title" style="font-family: 'Press Start 2P', monospace; font-size: clamp(0.75rem, 3.5vw, 1.1rem); color: #ffd100; text-align: center; margin-bottom: 4px;">APOIE O KAMALE</div>
+                <div class="apoie-desc" style="font-size: clamp(0.65rem, 2.8vw, 0.8rem); color: #888; text-align: center; max-width: 320px; line-height: 1.4;">
+                    Ajude-nos a manter os minijogos gratuitos e sempre evoluindo! Sua contribuição garante novos recursos e skins!
+                </div>
+                
+                <div style="width: 100%; height: 1px; background: rgba(255,209,0,0.15); margin: 4px 0;"></div>
+                
+                <div class="amount-label" style="font-size: clamp(0.65rem, 2.5vw, 0.75rem); color: #ffd100; font-weight: bold; align-self: flex-start;">ESCOLHA O VALOR:</div>
+                <div class="amount-options" style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; width: 100%;">
+                    <button class="amount-btn" data-value="5" style="padding: clamp(8px, 1.8vh, 12px) 0; font-size: clamp(0.75rem, 3vw, 0.95rem);">R$ 5</button>
+                    <button class="amount-btn selected" data-value="10" style="padding: clamp(8px, 1.8vh, 12px) 0; font-size: clamp(0.75rem, 3vw, 0.95rem);">R$ 10</button>
+                    <button class="amount-btn" data-value="20" style="padding: clamp(8px, 1.8vh, 12px) 0; font-size: clamp(0.75rem, 3vw, 0.95rem);">R$ 20</button>
+                    <button class="amount-btn" data-value="50" style="padding: clamp(8px, 1.8vh, 12px) 0; font-size: clamp(0.75rem, 3vw, 0.95rem);">R$ 50</button>
+                </div>
+                
+                <div style="width: 100%; height: 1px; background: rgba(255,209,0,0.15); margin: 4px 0;"></div>
+                
+                <button class="pay-btn" id="apoie-pay-btn" style="width: 100%; background: #3acc7a; border: none; padding: clamp(10px, 2vh, 14px); border-radius: 12px; font-family: 'Share Tech Mono', monospace; font-size: clamp(0.9rem, 3.5vw, 1.1rem); font-weight: bold; color: #fff; cursor: pointer; box-shadow: 0 4px 0 #1e8a50; transform: translateY(-2px); transition: all 0.1s; display: flex; align-items: center; justify-content: center; gap: 8px;">
+                    APOIAR ❤️
+                </button>
+                
+                <button class="back-btn menu-btn-back" id="apoie-back-btn" style="font-family: 'Share Tech Mono', monospace; padding: clamp(6px, 1.5vh, 10px) 16px; border-radius: 9999px; background: transparent; border: 2px solid #555; color: #aaa; cursor: pointer; font-size: clamp(0.7rem, 2.5vw, 0.8rem); transition: all 0.1s;">
+                    ← VOLTAR
+                </button>
+            </div>
+        </div>
     </div>
 </div>
 
@@ -551,7 +679,7 @@
     <!-- Botão de Pause (Meio) - Oculto por padrão -->
     <div class="pause-btn-wrapper">
         <button id="mobile-pause-btn" class="pause-btn hidden" aria-label="Pausar jogo" style="display: none;">
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="12" height="12" fill="currentColor">
                 <rect x="5" y="4" width="4" height="16" rx="1"/>
                 <rect x="15" y="4" width="4" height="16" rx="1"/>
             </svg>
@@ -647,18 +775,116 @@
 
     // Estado do Jogo Centralizado
     let gameActive = false;
+    let hubPaused = false;
     const gameIframe = document.getElementById('game-iframe');
+    
+    // Injetar estilos de reset e escala no iframe dinamicamente para evitar cache de CSS no browser
+    if (gameIframe) {
+        gameIframe.onload = () => {
+            try {
+                const doc = gameIframe.contentDocument || gameIframe.contentWindow.document;
+                if (!doc) return;
+                if (doc.body) {
+                    doc.body.classList.add('in-iframe');
+                }
+                let style = doc.getElementById('kamale-iframe-styles');
+                if (!style) {
+                    style = doc.createElement('style');
+                    style.id = 'kamale-iframe-styles';
+                    doc.head.appendChild(style);
+                }
+                style.textContent = `
+                    #controls-wrapper, .game-top-row {
+                        display: none !important;
+                    }
+                    body, #app-container, .screen, .game-section {
+                        height: 100% !important;
+                        width: 100% !important;
+                        max-width: 100% !important;
+                        padding: 0 !important;
+                        margin: 0 !important;
+                    }
+                    #game-board {
+                        max-width: 100% !important;
+                        width: 100% !important;
+                        height: 100% !important;
+                        border: none !important;
+                        border-radius: 0 !important;
+                        box-shadow: none !important;
+                        padding: 0 !important;
+                        aspect-ratio: unset !important;
+                        overflow: unset !important;
+                        overflow-y: auto !important;
+                        display: flex !important;
+                        flex-direction: column !important;
+                        justify-content: center !important;
+                    }
+                    .overlay, #game-canvas, #mp-game-canvas {
+                        border-radius: 0 !important;
+                    }
+                    .menu-btn {
+                        padding: 6px 14px 10px 14px !important;
+                        font-size: 0.95rem !important;
+                        box-shadow: 0 3px 0 #141414 !important;
+                        transform: translateY(-2px) !important;
+                        width: auto !important;
+                        max-width: 240px !important;
+                    }
+                    .menu-btn:active, .menu-btn.focused:active {
+                        transform: translateY(1px) !important;
+                        box-shadow: 0 0px 0 #141414 !important;
+                    }
+                    .menu-title {
+                        font-size: 1.3rem !important;
+                        margin-bottom: 6px !important;
+                    }
+                    .menu-content {
+                        gap: 8px !important;
+                        padding: 10px !important;
+                    }
+                    .room-input, .mp-input, .name-input {
+                        font-size: 1rem !important;
+                        padding: 8px 12px !important;
+                        margin-top: 6px !important;
+                    }
+                    .instructions-title {
+                        font-size: 1rem !important;
+                    }
+                    .instructions-list li {
+                        font-size: 0.72rem !important;
+                        line-height: 1.3 !important;
+                    }
+                    .instructions-content {
+                        padding: 10px 15px !important;
+                    }
+                    .game-over-title {
+                        font-size: 1.2rem !important;
+                    }
+                    .spectator-text {
+                        font-size: 0.75rem !important;
+                    }
+                    .game-over-content {
+                        padding: 15px !important;
+                        gap: 8px !important;
+                    }
+                `;
+            } catch (e) {
+                console.error("Erro ao injetar estilos no iframe:", e);
+            }
+        };
+    }
+    
     const gamesGrid = document.getElementById('games-grid');
     const homeBtn = document.getElementById('home-btn');
     const screenHeaderRight = document.getElementById('screen-header-right');
     const mobilePauseBtn = document.getElementById('mobile-pause-btn');
 
-    // Mapeamento de tecla do botão A por jogo
+    // Mapeamento de tecla e ícone do botão A por jogo
     const GAME_ACTION_MAP = {
-        snake:   { key: 'z',        label: '↔' },
-        pong:    { key: 'z',        label: '⚡' },
-        block:   { key: 'ArrowUp',  label: '↻' },
-        veagame: { key: 'Enter',    label: '✓' },
+        snake:   { key: 'z',   label: 'Y', dpadLabel: 'Língua' },
+        pong:    { key: ' ',   label: '⚡', dpadLabel: 'Poder'  },
+        block:   { key: 'z', label: '↻', dpadLabel: 'Girar' },
+        veagame: { key: 'Enter',   label: '✓', dpadLabel: 'OK'    },
     };
     let currentGameActionKey = 'z';
 
@@ -688,20 +914,40 @@
         // Ocultar a grid de jogos
         gamesGrid.style.display = 'none';
 
-        // Exibir botão home
+        // Ativar modo jogo no body (remove padding do game-board)
+        document.body.classList.add('game-active');
+
+        // Exibir botão home (evitar UI duplicada)
         homeBtn.style.display = 'flex';
         homeBtn.classList.remove('hidden');
 
-        // Exibir botão de pause
+        // Exibir botão de pause com ícone de pause e resetar estado de pause
+        hubPaused = false;
         mobilePauseBtn.style.display = 'flex';
         mobilePauseBtn.classList.remove('hidden');
+        setPauseBtnIcon(false);
+    }
+
+    // Atualiza ícone do botão pause/play no hub
+    function setPauseBtnIcon(isPaused) {
+        if (!mobilePauseBtn) return;
+        if (isPaused) {
+            // Ícone de Play
+            mobilePauseBtn.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="12" height="12" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>';
+        } else {
+            // Ícone de Pause
+            mobilePauseBtn.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="12" height="12" fill="currentColor"><rect x="5" y="4" width="4" height="16" rx="1"/><rect x="15" y="4" width="4" height="16" rx="1"/></svg>';
+        }
     }
 
     function exitGame() {
         gameActive = false;
-        
+
         // Resetar proporção da tela
         document.body.classList.remove('vertical-game');
+
+        // Remover modo jogo (restaura padding do game-board)
+        document.body.classList.remove('game-active');
 
         // Limpar e ocultar o iframe
         gameIframe.src = 'about:blank';
@@ -711,16 +957,16 @@
         // Mostrar a grid de jogos
         gamesGrid.style.display = 'grid';
         
+        // Ocultar botão de pause e resetar ícone e estado de pause
+        hubPaused = false;
+        mobilePauseBtn.style.display = 'none';
+        mobilePauseBtn.classList.add('hidden');
+        setPauseBtnIcon(false);
+
+        
         // Ocultar botão home
         homeBtn.style.display = 'none';
         homeBtn.classList.add('hidden');
-        
-        // Mostrar cabeçalho direito (login/apoie)
-        screenHeaderRight.style.display = 'flex';
-        
-        // Ocultar botão de pause
-        mobilePauseBtn.style.display = 'none';
-        mobilePauseBtn.classList.add('hidden');
         
         // Retornar o foco
         updateFocus();
@@ -733,10 +979,12 @@
         document.getElementById('card-snake'),
         document.getElementById('card-pong'),
         document.getElementById('card-block'),
-        document.getElementById('card-velha')
+        document.getElementById('card-velha'),
+        document.getElementById('card-soon'),
+        document.getElementById('card-soon-2')
     ];
     let focusedIndex = 2;
-    const ROWS = [[0, 1], [2, 3], [4, 5]];
+    const ROWS = [[0, 1], [2, 3], [4, 5], [6, 7]];
 
     function findPos(idx) {
         for (let r = 0; r < ROWS.length; r++) {
@@ -773,29 +1021,46 @@
         card.addEventListener('click', (e) => {
             e.preventDefault();
             const url = card.getAttribute('href');
-            startGame(url);
+            if (url) startGame(url);
         });
     });
 
     function moveFocus(dr, dc) {
         if (gameActive) return;
-        const { r, c } = findPos(focusedIndex);
+        const currentRows = apoieActive ? ROWS_APOIE : ROWS;
+        const currentItems = apoieActive ? allItemsApoie : allItems;
+        let currentIdx = apoieActive ? focusedIndexApoie : focusedIndex;
+
+        function findPosInternal(idx) {
+            for (let r = 0; r < currentRows.length; r++) {
+                const c = currentRows[r].indexOf(idx);
+                if (c !== -1) return { r, c };
+            }
+            return { r: 0, c: 0 };
+        }
+
+        const { r, c } = findPosInternal(currentIdx);
         let nr = r + dr;
-        const totalRows = ROWS.length;
+        const totalRows = currentRows.length;
 
         // Wrap-around vertical
         if (nr < 0) nr = totalRows - 1;
         if (nr >= totalRows) nr = 0;
 
-        const row = ROWS[nr];
+        const row = currentRows[nr];
         let nc = dc === 0 ? c : c + dc;
 
         // Wrap-around horizontal
         if (nc < 0) nc = row.length - 1;
         if (nc >= row.length) nc = 0;
 
-        focusedIndex = row[nc];
-        updateFocus();
+        if (apoieActive) {
+            focusedIndexApoie = row[nc];
+            updateFocusApoie();
+        } else {
+            focusedIndex = row[nc];
+            updateFocus();
+        }
     }
 
     // Configuração dos Botões Físicos / D-pad
@@ -877,7 +1142,11 @@
 
     setupButton(document.getElementById('mobile-pause-btn'),
         () => {
-            if (gameActive) sendKeyToIframe('p', 'keydown');
+            if (gameActive) {
+                hubPaused = !hubPaused;
+                setPauseBtnIcon(hubPaused);
+                sendKeyToIframe('p', 'keydown');
+            }
         },
         () => {
             if (gameActive) sendKeyToIframe('p', 'keyup');
@@ -888,6 +1157,9 @@
         () => {
             if (gameActive) {
                 sendKeyToIframe(currentGameActionKey, 'keydown');
+            } else if (apoieActive) {
+                const item = allItemsApoie[focusedIndexApoie];
+                if (item) item.click();
             } else {
                 const item = allItems[focusedIndex];
                 if (item.tagName === 'A') {
@@ -904,7 +1176,10 @@
     );
 
     // Evento do Botão Home
-    homeBtn.addEventListener('click', exitGame);
+    homeBtn.addEventListener('click', () => {
+        if (apoieActive) closeApoieScreen();
+        else exitGame();
+    });
 
     // Repasse de Inputs de Teclado ao iframe via postMessage
     window.addEventListener('keydown', (e) => {
@@ -922,11 +1197,19 @@
                 case 'ArrowLeft': case 'a': case 'A': document.getElementById('dpad-left')?.classList.add('active'); break;
                 case 'ArrowRight': case 'd': case 'D': document.getElementById('dpad-right')?.classList.add('active'); break;
                 case ' ': case 'Enter': case 'z': case 'Z': case 'x': case 'X': document.getElementById('action-a')?.classList.add('active'); break;
-                case 'p': case 'P': document.getElementById('mobile-pause-btn')?.classList.add('active'); break;
+                case 'p': case 'P':
+                    document.getElementById('mobile-pause-btn')?.classList.add('active');
+                    hubPaused = !hubPaused;
+                    setPauseBtnIcon(hubPaused);
+                    break;
             }
 
-            // Encaminhar tecla ao iframe via postMessage
-            sendKeyToIframe(e.key, 'keydown');
+            // Encaminhar tecla ao iframe via postMessage (com tradução para ação)
+            let keyToSend = e.key;
+            if ([' ', 'Enter', 'z', 'Z', 'x', 'X'].includes(e.key)) {
+                keyToSend = currentGameActionKey;
+            }
+            sendKeyToIframe(keyToSend, 'keydown');
             e.preventDefault();
             return;
         }
@@ -951,12 +1234,17 @@
                 handled = true; break;
             case ' ': case 'Enter': case 'z': case 'Z': case 'x': case 'X':
                 document.getElementById('action-a')?.classList.add('active');
-                const item = allItems[focusedIndex];
-                if (item.tagName === 'A') {
-                    const url = item.getAttribute('href');
-                    startGame(url);
+                if (apoieActive) {
+                    const item = allItemsApoie[focusedIndexApoie];
+                    if (item) item.click();
                 } else {
-                    item.click();
+                    const item = allItems[focusedIndex];
+                    if (item.tagName === 'A') {
+                        const url = item.getAttribute('href');
+                        startGame(url);
+                    } else {
+                        item.click();
+                    }
                 }
                 handled = true; break;
         }
@@ -974,8 +1262,12 @@
                 case 'p': case 'P': document.getElementById('mobile-pause-btn')?.classList.remove('active'); break;
             }
 
-            // Encaminhar keyup ao iframe via postMessage
-            sendKeyToIframe(e.key, 'keyup');
+            // Encaminhar keyup ao iframe via postMessage (com tradução para ação)
+            let keyToSend = e.key;
+            if ([' ', 'Enter', 'z', 'Z', 'x', 'X'].includes(e.key)) {
+                keyToSend = currentGameActionKey;
+            }
+            sendKeyToIframe(keyToSend, 'keyup');
             return;
         }
 
@@ -985,6 +1277,90 @@
             case 'ArrowLeft': case 'a': case 'A': document.getElementById('dpad-left')?.classList.remove('active'); break;
             case 'ArrowRight': case 'd': case 'D': document.getElementById('dpad-right')?.classList.remove('active'); break;
             case ' ': case 'Enter': case 'z': case 'Z': case 'x': case 'X': document.getElementById('action-a')?.classList.remove('active'); break;
+        }
+    });
+
+    // Apoie Screen Setup
+    let apoieActive = false;
+    let focusedIndexApoie = 1; // Default to R$ 10
+    let allItemsApoie = [];
+    const ROWS_APOIE = [[0, 1, 2, 3], [4], [5]];
+    let selectedAmount = 10;
+
+    function updateFocusApoie() {
+        if (!apoieActive) return;
+        allItemsApoie.forEach((item, idx) => {
+            if (idx === focusedIndexApoie) {
+                item.classList.add('focused');
+                item.focus();
+            } else {
+                item.classList.remove('focused');
+            }
+        });
+    }
+
+    function openApoieScreen() {
+        apoieActive = true;
+        gamesGrid.classList.add('hidden');
+        document.getElementById('apoie-screen').classList.remove('hidden');
+        
+        homeBtn.style.display = 'block';
+        homeBtn.classList.remove('hidden');
+        
+        if (allItemsApoie.length === 0) {
+            const amountBtns = document.querySelectorAll('#apoie-screen .amount-btn');
+            amountBtns.forEach((btn, idx) => {
+                if (!allItemsApoie.includes(btn)) allItemsApoie.push(btn);
+                
+                btn.addEventListener('click', () => {
+                    amountBtns.forEach(b => b.classList.remove('selected'));
+                    btn.classList.add('selected');
+                    selectedAmount = parseInt(btn.dataset.value);
+                });
+            });
+            allItemsApoie.push(document.getElementById('apoie-pay-btn'));
+            allItemsApoie.push(document.getElementById('apoie-back-btn'));
+            
+            allItemsApoie.forEach((item, idx) => {
+                item.addEventListener('mouseenter', () => {
+                    if (apoieActive) {
+                        focusedIndexApoie = idx;
+                        updateFocusApoie();
+                    }
+                });
+            });
+        }
+        
+        focusedIndexApoie = 1;
+        updateFocusApoie();
+    }
+
+    function closeApoieScreen() {
+        apoieActive = false;
+        document.getElementById('apoie-screen').classList.add('hidden');
+        gamesGrid.classList.remove('hidden');
+        
+        homeBtn.style.display = 'none';
+        homeBtn.classList.add('hidden');
+        
+        focusedIndex = 0; // Focus the apoie-btn in the main menu
+        updateFocus();
+    }
+
+    // Intercept click on apoie-btn in main menu
+    const mainApoieBtn = document.getElementById('apoie-btn');
+    if (mainApoieBtn) {
+        mainApoieBtn.addEventListener('click', (e) => {
+            e.preventDefault();
+            openApoieScreen();
+        });
+    }
+
+    // Escape key handling to close apoie screen
+    window.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape' && apoieActive) {
+            closeApoieScreen();
+            e.preventDefault();
         }
     });
 

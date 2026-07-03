@@ -364,7 +364,12 @@
             '.theme-light .mp-room-code-label,' +
             '.theme-light .mp-player-count {' +
                 'color:#555;' +
-            '}';
+            '}' +
+            /* Global Focused states for top buttons (both themes) */
+            '.home-btn.focused { background-color:#e07777!important;border-color:#ffaaaa!important;outline:none!important;transform:translateY(-1px) scale(1.08)!important; }' +
+            '.google-login-btn.focused { background-color:#353535!important;border-color:#ffd100!important;outline:none!important;transform:translateY(-1px) scale(1.08)!important; }' +
+            '.help-btn.focused { background-color:#ffd100!important;border-color:#cca700!important;color:#000!important;outline:none!important;transform:translateY(-1px) scale(1.08)!important; }' +
+            '.apoie-btn.focused { background-color:#ffd100!important;border-color:#cca700!important;color:#000!important;box-shadow:0 0 15px rgba(255,209,0,0.5),0 4px 0 #cca700!important; }';
         document.head.appendChild(s);
     }
 
@@ -390,7 +395,8 @@
                 '.pause-btn { width: 42px !important; height: 42px !important; padding: 0 !important; border-radius: 50% !important; font-size: 1rem !important; display: flex !important; align-items: center !important; justify-content: center !important; }' +
                 '.reset-btn { padding: 6px 14px !important; font-size: clamp(0.72rem, 2.2vw, 0.82rem) !important; border-radius: 9999px !important; }' +
                 'body:has(.games-grid) #app-container, body:has(.games-grid) .app-container { justify-content: center !important; gap: clamp(14px, 2.5vh, 26px) !important; }' +
-                'body:has(.games-grid) #game-board { width: min(94vw, calc(100vh - 245px), calc(100dvh - 245px), 440px) !important; height: min(94vw, calc(100vh - 245px), calc(100dvh - 245px), 440px) !important; aspect-ratio: 1 / 1 !important; padding: clamp(10px, 3vw, 18px) !important; gap: clamp(8px, 2vw, 14px) !important; }' +
+                'body:has(.games-grid) #game-board { width: min(94vw, calc(100vh - 245px), calc(100dvh - 245px), 440px) !important; height: min(94vw, calc(100vh - 245px), calc(100dvh - 245px), 440px) !important; aspect-ratio: 1 / 1 !important; }' +
+                'body:has(.games-grid):not(.game-active) #game-board { padding: clamp(10px, 3vw, 18px) !important; gap: clamp(8px, 2vw, 14px) !important; }' +
                 'body:has(.games-grid) #controls-wrapper { margin-top: 15px !important; margin-bottom: clamp(24px, 5vh, 55px) !important; }' +
             '}';
         document.head.appendChild(s);

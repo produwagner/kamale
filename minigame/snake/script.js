@@ -2122,9 +2122,7 @@ function getActiveMenuScreen() {
 function getFocusableElements(screen) {
     if (!screen) return [];
     const elements = Array.from(screen.querySelectorAll('button, input, a')).filter(el => {
-        return !el.classList.contains('home-btn') && !el.classList.contains('apoie-btn') &&
-               !el.classList.contains('google-login-btn') && !el.classList.contains('help-btn') &&
-               !el.classList.contains('modal-close-btn');
+        return !el.classList.contains('modal-close-btn');
     });
 
     const gameScreen = document.getElementById('game-screen');
@@ -2133,7 +2131,9 @@ function getFocusableElements(screen) {
         if (gs && !gs.classList.contains('hidden') && gs.offsetParent !== null) {
             const topRow = gs.querySelector('.game-top-row');
             if (topRow && screen !== topRow) {
-                const topRowEls = Array.from(topRow.querySelectorAll('button, input, a'));
+                const topRowEls = Array.from(topRow.querySelectorAll('button, input, a')).filter(el => {
+                    return !el.classList.contains('modal-close-btn');
+                });
                 topRowEls.forEach(el => { if (!elements.includes(el)) elements.push(el); });
             }
         }
@@ -2210,3 +2210,5 @@ if (mobileResetBtn) {
 }
 
 showMenu();
+
+

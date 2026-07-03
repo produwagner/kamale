@@ -244,7 +244,7 @@ function updateTurnIndicator() {
 btnVsCpu.addEventListener('click', () => {
     gameMode = 'vs_cpu';
     player1Name = 'Você';
-    player2Name = 'Computador';
+    player2Name = 'Máquina';
     initGame();
     showScreen(null); // Oculta todas as telas para exibir o tabuleiro
 });
@@ -984,8 +984,20 @@ function getActiveMenuScreen() {
 
 function getFocusableElements(screen) {
     if (!screen) return [];
-    // Captura botões, links, inputs e itens de sala
-    const elements = Array.from(screen.querySelectorAll('button, input, .room-item, a'));
+    const elements = Array.from(screen.querySelectorAll('button, input, .room-item, a')).filter(el => {
+        return !el.classList.contains('modal-close-btn');
+    });
+
+    const topRow = document.querySelector('.game-top-row');
+    if (topRow) {
+        const topRowEls = Array.from(topRow.querySelectorAll('button, input, a')).filter(el => {
+            return !el.classList.contains('modal-close-btn');
+        });
+        topRowEls.forEach(el => {
+            if (!elements.includes(el)) elements.push(el);
+        });
+    }
+
     return elements.filter(el => {
         const style = window.getComputedStyle(el);
         return style.display !== 'none' && style.visibility !== 'hidden' && !el.disabled && el.offsetParent !== null && !el.classList.contains('modal-close-btn');
@@ -1210,3 +1222,5 @@ firebase.auth().onAuthStateChanged(function () { loadSoccerBall(); loadUserNickn
 
 // Inicializa no menu principal
 showMenu();
+
+

@@ -1177,21 +1177,31 @@
 
     setupButton(document.getElementById('dpad-left'),
         () => {
-            if (gameActive) sendKeyToIframe('ArrowLeft', 'keydown');
-            else moveFocus(0, -1);
+            if (gameActive) {
+                if (focusedHeaderIndex === -1) {
+                    sendKeyToIframe('ArrowLeft', 'keydown');
+                } else {
+                    moveHeaderFocus(-1);
+                }
+            } else moveFocus(0, -1);
         },
         () => {
-            if (gameActive) sendKeyToIframe('ArrowLeft', 'keyup');
+            if (gameActive && focusedHeaderIndex === -1) sendKeyToIframe('ArrowLeft', 'keyup');
         }
     );
 
     setupButton(document.getElementById('dpad-right'),
         () => {
-            if (gameActive) sendKeyToIframe('ArrowRight', 'keydown');
-            else moveFocus(0, 1);
+            if (gameActive) {
+                if (focusedHeaderIndex === -1) {
+                    sendKeyToIframe('ArrowRight', 'keydown');
+                } else {
+                    moveHeaderFocus(1);
+                }
+            } else moveFocus(0, 1);
         },
         () => {
-            if (gameActive) sendKeyToIframe('ArrowRight', 'keyup');
+            if (gameActive && focusedHeaderIndex === -1) sendKeyToIframe('ArrowRight', 'keyup');
         }
     );
 
@@ -1252,6 +1262,17 @@
                 const dir = (e.key === 'ArrowUp' || e.key === 'w' || e.key === 'W') ? -1 : 1;
                 if (moveHeaderFocus(dir)) {
                     document.getElementById('dpad-up')?.classList.add('active');
+                    e.preventDefault();
+                    return;
+                }
+            }
+
+            // Navegação horizontal do header (quando já estiver focado)
+            if (e.key === 'ArrowLeft' || e.key === 'a' || e.key === 'A' || e.key === 'ArrowRight' || e.key === 'd' || e.key === 'D') {
+                if (focusedHeaderIndex !== -1) {
+                    const hdir = (e.key === 'ArrowLeft' || e.key === 'a' || e.key === 'A') ? -1 : 1;
+                    moveHeaderFocus(hdir);
+                    document.getElementById('dpad-left')?.classList.add('active');
                     e.preventDefault();
                     return;
                 }

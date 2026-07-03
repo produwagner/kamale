@@ -313,6 +313,8 @@
             var toggleInput = document.getElementById('theme-toggle-input');
             if (toggleInput) {
                 toggleInput.checked = theme === 'dark';
+                var knob = document.getElementById('tgl-knob');
+                if (knob) knob.textContent = theme === 'dark' ? '🌙' : '☀️';
             }
         } catch(e) {}
     }

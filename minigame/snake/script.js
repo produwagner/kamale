@@ -2116,7 +2116,8 @@ function getActiveMenuScreen() {
         document.getElementById('mp-instructions-modal'),
         document.getElementById('spectator-overlay'),
         document.getElementById('victory-overlay'),
-        document.getElementById('pause-overlay-mp')
+        document.getElementById('pause-overlay-mp'),
+        document.getElementById('pause-overlay')
     ];
     return screens.find(s => s && !s.classList.contains('hidden') && s.offsetParent !== null);
 }
@@ -2133,10 +2134,13 @@ function getFocusableElements(screen) {
         if (gs && !gs.classList.contains('hidden') && gs.offsetParent !== null) {
             const topRow = gs.querySelector('.game-top-row');
             if (topRow && screen !== topRow) {
-                const topRowEls = Array.from(topRow.querySelectorAll('button, input, a')).filter(el => {
-                    return !el.classList.contains('modal-close-btn');
+                // Adiciona em ordem fixa: Entrar → apoie → voltar (home)
+                const loginBtn = topRow.querySelector('#google-login-btn');
+                const apoieBtn = topRow.querySelector('.apoie-btn');
+                const homeBtn = topRow.querySelector('.home-btn');
+                [loginBtn, apoieBtn, homeBtn].forEach(el => {
+                    if (el && !elements.includes(el)) elements.push(el);
                 });
-                topRowEls.forEach(el => { if (!elements.includes(el)) elements.push(el); });
             }
         }
     });
@@ -2195,7 +2199,40 @@ function activateFocusedElement() {
     return false;
 }
 
-// Reset Button
+// ─── BOTÕES DO PAUSE OVERLAY ──────────────────────────────────────────────────
+const pauseResetBtn = document.getElementById('pause-reset-btn');
+const pauseMenuBtn = document.getElementById('pause-menu-btn');
+
+if (pauseResetBtn) {
+    const handlePauseReset = (e) => {
+        e.preventDefault();
+        // Fechar overlay de pausa e reiniciar o jogo
+        const pOverlay = document.getElementById('pause-overlay');
+        if (pOverlay) pOverlay.classList.add('hidden');
+        isPaused = false;
+        gameRunning = false;  // Libera o guard de startGame
+        if (gameTimeoutId) clearTimeout(gameTimeoutId);
+        startGame();
+    };
+    pauseResetBtn.addEventListener('click', handlePauseReset);
+    pauseResetBtn.addEventListener('touchstart', handlePauseReset, { passive: false });
+}
+
+if (pauseMenuBtn) {
+    const handlePauseMenu = (e) => {
+        e.preventDefault();
+        const pOverlay = document.getElementById('pause-overlay');
+        if (pOverlay) pOverlay.classList.add('hidden');
+        isPaused = false;
+        gameRunning = false;
+        if (gameTimeoutId) clearTimeout(gameTimeoutId);
+        showMenu();
+    };
+    pauseMenuBtn.addEventListener('click', handlePauseMenu);
+    pauseMenuBtn.addEventListener('touchstart', handlePauseMenu, { passive: false });
+}
+
+// Reset Button (mobile)
 const mobileResetBtn = document.getElementById('mobile-reset-btn');
 if (mobileResetBtn) {
     const handleReset = (e) => {

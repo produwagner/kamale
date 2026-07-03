@@ -1915,7 +1915,8 @@ function getActiveMenuScreen() {
         document.getElementById('lobby-screen'),
         document.getElementById('game-over-screen'),
         document.getElementById('instructions-modal'),
-        document.getElementById('pause-overlay-mp')
+        document.getElementById('pause-overlay-mp'),
+        document.getElementById('pause-overlay')
     ];
     return screens.find(s => s && !s.classList.contains('hidden') && s.offsetParent !== null);
 }
@@ -1928,11 +1929,12 @@ function getFocusableElements(screen) {
 
     const topRow = document.querySelector('.game-top-row');
     if (topRow) {
-        const topRowEls = Array.from(topRow.querySelectorAll('button, input, a')).filter(el => {
-            return !el.classList.contains('modal-close-btn');
-        });
-        topRowEls.forEach(el => {
-            if (!elements.includes(el)) elements.push(el);
+        // Adiciona em ordem fixa: Entrar → apoie → voltar (home)
+        const loginBtn = topRow.querySelector('#google-login-btn');
+        const apoieBtn = topRow.querySelector('.apoie-btn');
+        const homeBtn = topRow.querySelector('.home-btn');
+        [loginBtn, apoieBtn, homeBtn].forEach(el => {
+            if (el && !elements.includes(el)) elements.push(el);
         });
     }
 
@@ -1990,7 +1992,38 @@ function activateFocusedElement() {
     return false;
 }
 
-// Reset Button
+// ─── BOTÕES DO PAUSE OVERLAY ──────────────────────────────────────────────────
+const pauseResetBtn = document.getElementById('pause-reset-btn');
+const pauseMenuBtn = document.getElementById('pause-menu-btn');
+
+if (pauseResetBtn) {
+    const handlePauseReset = (e) => {
+        e.preventDefault();
+        const pOverlay = document.getElementById('pause-overlay');
+        if (pOverlay) pOverlay.classList.add('hidden');
+        isPaused = false;
+        gameRunning = false; // Permite reiniciar sem ser bloqueado pelo guard
+        startGame(vsCpu);
+    };
+    pauseResetBtn.addEventListener('click', handlePauseReset);
+    pauseResetBtn.addEventListener('touchstart', handlePauseReset, { passive: false });
+}
+
+if (pauseMenuBtn) {
+    const handlePauseMenu = (e) => {
+        e.preventDefault();
+        const pOverlay = document.getElementById('pause-overlay');
+        if (pOverlay) pOverlay.classList.add('hidden');
+        isPaused = false;
+        gameRunning = false;
+        if (gameTimeoutId) clearTimeout(gameTimeoutId);
+        showMenu();
+    };
+    pauseMenuBtn.addEventListener('click', handlePauseMenu);
+    pauseMenuBtn.addEventListener('touchstart', handlePauseMenu, { passive: false });
+}
+
+// Reset Button (mobile)
 const mobileResetBtn = document.getElementById('mobile-reset-btn');
 if (mobileResetBtn) {
     const handleReset = (e) => {

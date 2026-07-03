@@ -154,6 +154,7 @@
         .card-snake { --accent:#3acc7a; --glow:rgba(58,204,122,0.14); }
         .card-block { --accent:#bf00ff; --glow:rgba(191,0,255,0.14); }
         .card-velha { --accent:#ffd100; --glow:rgba(255,209,0,0.14); }
+        .card-bomber { --accent:#ff6400; --glow:rgba(255,100,0,0.14); }
         .card-soon  { --accent:#555555; --glow:rgba(85,85,85,0.14); }
         .card-preview { flex:1; width:100%; display:flex; align-items:center; justify-content:center; min-height:0; }
         .card-label { font-size:clamp(0.5rem,2.2vw,0.68rem); font-weight:bold; color:#bbbbbb; letter-spacing:2px; text-align:center; transition:color 0.2s; }
@@ -339,35 +340,38 @@
         }
         .apoie-card {
             width: 100%;
-            max-width: 320px;
+            height: 100%;
             display: flex;
             flex-direction: column;
             align-items: center;
-            gap: clamp(8px, 1.8vh, 16px);
-            border: 3px dashed rgba(255, 209, 0, 0.25);
-            border-radius: 20px;
-            padding: clamp(16px, 4vw, 28px);
-            background: rgba(255, 209, 0, 0.03);
+            justify-content: center;
+            gap: clamp(6px, 1.4vh, 12px);
+            padding: clamp(6px, 1.5vh, 12px) 0;
+            background: transparent;
+            border: none;
         }
         .apoie-title {
             font-family: 'Press Start 2P', monospace;
-            font-size: clamp(0.7rem, 3.2vw, 1rem);
+            font-size: clamp(0.7rem, 3vw, 0.95rem);
             color: #ffd100;
             text-align: center;
-            line-height: 1.5;
+            line-height: 1.4;
+            flex-shrink: 0;
         }
         .apoie-desc {
-            font-size: clamp(0.6rem, 2.5vw, 0.75rem);
-            color: #999;
+            font-size: clamp(0.6rem, 2.2vw, 0.72rem);
+            color: #aaaaaa;
             text-align: center;
-            line-height: 1.5;
-            max-width: 280px;
+            line-height: 1.4;
+            max-width: 290px;
+            flex-shrink: 0;
         }
         .apoie-divider {
             width: 100%;
             height: 1px;
-            background: linear-gradient(90deg, transparent, rgba(255,209,0,0.2), transparent);
-            margin: 4px 0;
+            background: linear-gradient(90deg, transparent, rgba(255,209,0,0.15), transparent);
+            margin: 2px 0;
+            flex-shrink: 0;
         }
         .apoie-label {
             font-size: clamp(0.55rem, 2.2vw, 0.65rem);
@@ -375,20 +379,23 @@
             font-weight: bold;
             letter-spacing: 1px;
             align-self: flex-start;
+            margin-left: 10px;
+            flex-shrink: 0;
         }
         .amount-btn {
             background-color: #111;
             border: 2px solid #333;
             color: #aaa;
-            border-radius: 10px;
+            border-radius: 8px;
             font-family: 'Share Tech Mono', monospace;
             font-weight: bold;
             cursor: pointer;
             box-shadow: 0 3px 0 #1a1a1a;
             transform: translateY(-2px);
             transition: all 0.1s;
-            padding: clamp(8px, 1.8vh, 12px) 0;
-            font-size: clamp(0.7rem, 2.8vw, 0.9rem);
+            padding: clamp(6px, 1.2vh, 10px) 0;
+            font-size: clamp(0.75rem, 2.5vw, 0.85rem);
+            flex-shrink: 0;
         }
         .amount-btn:hover, .amount-btn.focused {
             background-color: #1a1a1a;
@@ -415,12 +422,13 @@
         }
         .apoie-pay-btn {
             width: 100%;
+            max-width: 280px;
             background: #ffd100;
             border: none;
-            padding: clamp(10px, 2vh, 14px);
-            border-radius: 12px;
+            padding: clamp(8px, 1.8vh, 12px);
+            border-radius: 10px;
             font-family: 'Press Start 2P', monospace;
-            font-size: clamp(0.65rem, 2.8vw, 0.85rem);
+            font-size: clamp(0.65rem, 2.5vw, 0.8rem);
             font-weight: bold;
             color: #0a0a0a;
             cursor: pointer;
@@ -432,6 +440,7 @@
             justify-content: center;
             gap: 8px;
             letter-spacing: 1px;
+            flex-shrink: 0;
         }
         .apoie-pay-btn:hover, .apoie-pay-btn.focused {
             background: #ffe44d;
@@ -445,15 +454,17 @@
         }
         .apoie-back-btn {
             font-family: 'Share Tech Mono', monospace;
-            padding: clamp(6px, 1.5vh, 10px) 20px;
+            padding: clamp(5px, 1.2vh, 8px) 16px;
             border-radius: 9999px;
             background: transparent;
             border: 2px solid #444;
             color: #888;
             cursor: pointer;
-            font-size: clamp(0.6rem, 2.2vw, 0.7rem);
+            font-size: clamp(0.65rem, 2.2vw, 0.75rem);
             transition: all 0.1s;
             letter-spacing: 1px;
+            flex-shrink: 0;
+            margin-top: 2px;
         }
         .apoie-back-btn:hover, .apoie-back-btn.focused {
             border-color: #ffd100;
@@ -647,13 +658,13 @@
                 <div class="card-label">VEA GAME</div>
             </a>
 
-            <!-- EM BREVE -->
-            <div class="game-card card-soon" id="card-soon" style="opacity: 0.4; cursor: not-allowed; border-style: dotted;">
-                <div class="card-preview" style="font-size: clamp(1.2rem, 4vw, 1.8rem); display: flex; align-items: center; justify-content: center; height:100%; width:100%;">
-                    🔒
+            <!-- BOMBER -->
+            <a href="bomber/index.html" class="game-card card-bomber" id="card-bomber" aria-label="Jogar Bomba">
+                <div class="card-preview">
+                    <img src="assets/previews/bomba-preview.png" alt="Bomba" class="card-preview-img">
                 </div>
-                <div class="card-label">EM BREVE</div>
-            </div>
+                <div class="card-label">BOMBA</div>
+            </a>
 
             <!-- EM BREVE 2 -->
             <div class="game-card card-soon" id="card-soon-2" style="opacity: 0.4; cursor: not-allowed; border-style: dotted;">
@@ -956,6 +967,7 @@
         pong:    { key: ' ',   label: '⚡', dpadLabel: 'Poder'  },
         block:   { key: 'z', label: '↻', dpadLabel: 'Girar' },
         veagame: { key: 'Enter',   label: '✓', dpadLabel: 'OK'    },
+        bomber:  { key: ' ',   label: '💣', dpadLabel: 'Bomba'   },
     };
     let currentGameActionKey = 'z';
 
@@ -1042,6 +1054,10 @@
         // Ocultar botão home
         homeBtn.style.display = 'none';
         homeBtn.classList.add('hidden');
+
+        // Resetar o botão de ação para ficar sem ícone de jogo (volta a ser 'A')
+        const actionBtn = document.getElementById('action-a');
+        if (actionBtn) actionBtn.textContent = 'A';
         
         // Retornar o foco
         updateFocus();
@@ -1073,6 +1089,8 @@
 
     function moveHeaderFocus(dir, wrap) {
         if (headerItems.length === 0) return false;
+        // Bloquear header enquanto jogo está ativo e não pausado, exceto se estiver nas telas de menu do jogo
+        if (gameActive && !hubPaused && !gameMenuState.onMenu) return false;
 
         const atGameFirst = gameMenuState.onMenu && gameMenuState.totalItems > 0 && gameMenuState.focusIndex === 0;
         const atGameLast = gameMenuState.onMenu && gameMenuState.totalItems > 0 && gameMenuState.focusIndex === gameMenuState.totalItems - 1;
@@ -1080,12 +1098,16 @@
         // Jogo focado e em menu: UP do primeiro item → header, DOWN do último → header
         if (focusedHeaderIndex === -1 && gameMenuState.onMenu) {
             if (dir < 0 && atGameFirst) {
-                focusedHeaderIndex = 0; // volta ao home
+                const loginBtn = document.getElementById('google-login-btn');
+                const idx = headerItems.indexOf(loginBtn);
+                focusedHeaderIndex = idx !== -1 ? idx : 0;
                 updateHeaderFocus();
                 return true;
             }
             if (dir > 0 && atGameLast) {
-                focusedHeaderIndex = 0; // volta ao home
+                const loginBtn = document.getElementById('google-login-btn');
+                const idx = headerItems.indexOf(loginBtn);
+                focusedHeaderIndex = idx !== -1 ? idx : 0;
                 updateHeaderFocus();
                 return true;
             }
@@ -1146,7 +1168,7 @@
         document.getElementById('card-pong'),
         document.getElementById('card-block'),
         document.getElementById('card-velha'),
-        document.getElementById('card-soon'),
+        document.getElementById('card-bomber'),
         document.getElementById('card-soon-2')
     ];
     let focusedIndex = 2;
@@ -1534,8 +1556,40 @@
                     selectedAmount = parseInt(btn.dataset.value);
                 });
             });
-            allItemsApoie.push(document.getElementById('apoie-pay-btn'));
-            allItemsApoie.push(document.getElementById('apoie-back-btn'));
+            
+            const payBtn = document.getElementById('apoie-pay-btn');
+            const backBtn = document.getElementById('apoie-back-btn');
+            
+            if (!allItemsApoie.includes(payBtn)) allItemsApoie.push(payBtn);
+            if (!allItemsApoie.includes(backBtn)) allItemsApoie.push(backBtn);
+
+            payBtn.addEventListener('click', () => {
+                if (selectedAmount <= 0 || isNaN(selectedAmount)) {
+                    showToast('Selecione um valor válido', 'info');
+                    return;
+                }
+                var user = window.KamaleAuth ? window.KamaleAuth.getUser() : firebase.auth().currentUser;
+                if (!user) {
+                    showToast('Faça login para apoiar', 'info');
+                    return;
+                }
+                firebase.database().ref('supporters/' + user.uid).set({
+                    name: user.displayName || '',
+                    email: user.email || '',
+                    amount: selectedAmount,
+                    date: new Date().toISOString()
+                }).then(() => {
+                    showToast('Obrigado pelo apoio! Você ganhou um presente surpresa!', 'success', 2500);
+                    setTimeout(() => {
+                        closeApoieScreen();
+                        showGiftModal();
+                    }, 1500);
+                });
+            });
+
+            backBtn.addEventListener('click', () => {
+                closeApoieScreen();
+            });
             
             allItemsApoie.forEach((item, idx) => {
                 item.addEventListener('mouseenter', () => {
@@ -1563,11 +1617,14 @@
         updateFocus();
     }
 
-    // Intercept click on apoie-btn in main menu
+    // Intercept click on apoie-btn (including during active gameplay)
     const mainApoieBtn = document.getElementById('apoie-btn');
     if (mainApoieBtn) {
         mainApoieBtn.addEventListener('click', (e) => {
             e.preventDefault();
+            if (gameActive) {
+                exitGame();
+            }
             openApoieScreen();
         });
     }

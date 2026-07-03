@@ -40,7 +40,7 @@ body {
     display: flex;
     flex-direction: row;
     align-items: center;
-    justify-content: flex-start;
+    justify-content: space-between;
     width: 100%;
     max-width: min(95vw, calc(100vh - 200px), 360px);
     margin-bottom: 4px;
@@ -527,29 +527,30 @@ body:not(.in-iframe) #controls-wrapper {
 
 /* ═══ HOME BTN ══════════════════════════════════════════════════════════════ */
 .home-btn {
-    width: 36px;
-    height: 36px;
-    border-radius: 50%;
-    background-color: #cf6666;
-    border: 2px solid #df8888;
-    color: #ffffff;
     display: flex;
-    justify-content: center;
     align-items: center;
+    justify-content: center;
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    background: #1e1e1e;
+    border: 2px solid #3a3a3a;
+    color: #fff;
     cursor: pointer;
-    outline: none;
-    box-shadow: 0 4px 0 #8a3c3c;
-    transform: translateY(-3px);
-    transition: background-color 0.1s, transform 0.1s, border-color 0.1s, box-shadow 0.1s, color 0.1s;
     text-decoration: none;
+    box-shadow: 0 3px 0 #080808;
+    transform: translateY(-2px);
+    transition: border-color 0.1s, transform 0.1s, box-shadow 0.1s;
+    outline: none;
     user-select: none;
     flex-shrink: 0;
 }
-
+.home-btn:hover, .home-btn.focused {
+    border-color: #ffd100;
+}
 .home-btn:active {
-    background-color: #ba5757;
     transform: translateY(1px);
-    box-shadow: 0 1px 0 #8a3c3c;
+    box-shadow: 0 0 0 #080808;
 }
 
 /* ═══ GOOGLE LOGIN BTN ═══════════════════════════════════════════════════════ */

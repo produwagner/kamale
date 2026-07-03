@@ -1013,6 +1013,8 @@ window.addEventListener('keydown', (e) => {
     const isInput = (tag === 'INPUT' || tag === 'TEXTAREA');
     if (isInput) return;
 
+    try { var _s = getActiveMenuScreen(), _e = _s ? getFocusableElements(_s) : []; window.parent.postMessage({ type: 'KAMALE_MENU_STATE', onMenu: !!_s, focusIndex: _s ? menuFocusIndex : 0, totalItems: _e.length }, '*'); } catch(ex) {}
+
     const activeMenu = getActiveMenuScreen();
     if (activeMenu) {
         let menuHandled = false;
@@ -2150,11 +2152,15 @@ function updateMenuFocus(direction = 0) {
     if (!activeScreen) {
         lastActiveScreen = null;
         document.querySelectorAll('.menu-btn, .menu-btn-secondary, .menu-btn-back, .room-input, .mp-input, .name-input').forEach(el => el.classList.remove('focused'));
+        try { window.parent.postMessage({ type: 'KAMALE_MENU_STATE', onMenu: false }, '*'); } catch(e) {}
         return false;
     }
 
     const elements = getFocusableElements(activeScreen);
-    if (elements.length === 0) return false;
+    if (elements.length === 0) {
+        try { window.parent.postMessage({ type: 'KAMALE_MENU_STATE', onMenu: true, focusIndex: 0, totalItems: 0 }, '*'); } catch(e) {}
+        return false;
+    }
 
     if (activeScreen !== lastActiveScreen) {
         lastActiveScreen = activeScreen;
@@ -2168,6 +2174,7 @@ function updateMenuFocus(direction = 0) {
     if (currentEl) {
         currentEl.classList.add('focused');
     }
+    try { window.parent.postMessage({ type: 'KAMALE_MENU_STATE', onMenu: true, focusIndex: menuFocusIndex, totalItems: elements.length }, '*'); } catch(e) {}
     return true;
 }
 

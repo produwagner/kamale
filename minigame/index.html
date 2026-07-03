@@ -332,24 +332,66 @@
             justify-content: center;
             height: 100%;
             width: 100%;
+            overflow-y: auto;
         }
         .hidden {
             display: none !important;
+        }
+        .apoie-card {
+            width: 100%;
+            max-width: 320px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: clamp(8px, 1.8vh, 16px);
+            border: 3px dashed rgba(255, 209, 0, 0.25);
+            border-radius: 20px;
+            padding: clamp(16px, 4vw, 28px);
+            background: rgba(255, 209, 0, 0.03);
+        }
+        .apoie-title {
+            font-family: 'Press Start 2P', monospace;
+            font-size: clamp(0.7rem, 3.2vw, 1rem);
+            color: #ffd100;
+            text-align: center;
+            line-height: 1.5;
+        }
+        .apoie-desc {
+            font-size: clamp(0.6rem, 2.5vw, 0.75rem);
+            color: #999;
+            text-align: center;
+            line-height: 1.5;
+            max-width: 280px;
+        }
+        .apoie-divider {
+            width: 100%;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, rgba(255,209,0,0.2), transparent);
+            margin: 4px 0;
+        }
+        .apoie-label {
+            font-size: clamp(0.55rem, 2.2vw, 0.65rem);
+            color: #ffd100;
+            font-weight: bold;
+            letter-spacing: 1px;
+            align-self: flex-start;
         }
         .amount-btn {
             background-color: #111;
             border: 2px solid #333;
             color: #aaa;
-            border-radius: 8px;
+            border-radius: 10px;
             font-family: 'Share Tech Mono', monospace;
             font-weight: bold;
             cursor: pointer;
             box-shadow: 0 3px 0 #1a1a1a;
             transform: translateY(-2px);
             transition: all 0.1s;
+            padding: clamp(8px, 1.8vh, 12px) 0;
+            font-size: clamp(0.7rem, 2.8vw, 0.9rem);
         }
         .amount-btn:hover, .amount-btn.focused {
-            background-color: #222;
+            background-color: #1a1a1a;
             border-color: #ffd100;
             color: #ffd100;
             box-shadow: 0 3px 0 #886a00;
@@ -358,37 +400,66 @@
         }
         .amount-btn.selected {
             background-color: #ffd100;
-            color: #1a1a1a;
+            color: #0a0a0a;
             border-color: #ffd100;
             box-shadow: 0 3px 0 #886a00;
         }
         .amount-btn.selected:hover, .amount-btn.selected.focused {
             background-color: #ffe04d;
             border-color: #ffe04d;
-            color: #1a1a1a;
+            color: #0a0a0a;
         }
         .amount-btn:active {
             transform: translateY(1px);
             box-shadow: 0 0px 0 #1a1a1a;
         }
-        
-        .theme-light .amount-btn {
-            background-color: #f5f5f5;
-            border-color: #ccc;
-            color: #333;
-            box-shadow: 0 3px 0 #ddd;
+        .apoie-pay-btn {
+            width: 100%;
+            background: #ffd100;
+            border: none;
+            padding: clamp(10px, 2vh, 14px);
+            border-radius: 12px;
+            font-family: 'Press Start 2P', monospace;
+            font-size: clamp(0.65rem, 2.8vw, 0.85rem);
+            font-weight: bold;
+            color: #0a0a0a;
+            cursor: pointer;
+            box-shadow: 0 4px 0 #b38f00;
+            transform: translateY(-2px);
+            transition: all 0.1s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            letter-spacing: 1px;
         }
-        .theme-light .amount-btn:hover, .theme-light .amount-btn.focused {
-            background-color: #eaeaea;
+        .apoie-pay-btn:hover, .apoie-pay-btn.focused {
+            background: #ffe44d;
+            box-shadow: 0 4px 0 #cca700;
+            transform: translateY(-2px);
+            outline: none;
+        }
+        .apoie-pay-btn:active {
+            transform: translateY(1px);
+            box-shadow: 0 1px 0 #b38f00;
+        }
+        .apoie-back-btn {
+            font-family: 'Share Tech Mono', monospace;
+            padding: clamp(6px, 1.5vh, 10px) 20px;
+            border-radius: 9999px;
+            background: transparent;
+            border: 2px solid #444;
+            color: #888;
+            cursor: pointer;
+            font-size: clamp(0.6rem, 2.2vw, 0.7rem);
+            transition: all 0.1s;
+            letter-spacing: 1px;
+        }
+        .apoie-back-btn:hover, .apoie-back-btn.focused {
             border-color: #ffd100;
             color: #ffd100;
-            box-shadow: 0 3px 0 #cca700;
-        }
-        .theme-light .amount-btn.selected {
-            background-color: #ffd100;
-            color: #1a1a1a;
-            border-color: #ffd100;
-            box-shadow: 0 3px 0 #cca700;
+            background: rgba(255, 209, 0, 0.08);
+            outline: none;
         }
 
         /* ═══ GIFT MODAL ═══ */
@@ -596,30 +667,30 @@
         <iframe id="game-iframe" class="hidden" src="" style="width: 100%; flex: 1; border: none; background: #000; border-radius: 10px; display: none;"></iframe>
 
         <!-- TELA DE APOIO -->
-        <div id="apoie-screen" class="hidden" style="width: 100%; flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: clamp(8px, 2vh, 18px); padding: clamp(10px, 3vw, 20px); box-sizing: border-box; overflow-y: auto;">
-            <div class="apoie-card" style="width: 100%; max-width: 320px; display: flex; flex-direction: column; align-items: center; gap: clamp(8px, 1.8vh, 16px);">
-                <div class="apoie-title" style="font-family: 'Press Start 2P', monospace; font-size: clamp(0.75rem, 3.5vw, 1.1rem); color: #ffd100; text-align: center; margin-bottom: 4px;">APOIE O KAMALE</div>
-                <div class="apoie-desc" style="font-size: clamp(0.65rem, 2.8vw, 0.8rem); color: #888; text-align: center; max-width: 320px; line-height: 1.4;">
+        <div id="apoie-screen" class="hidden">
+            <div class="apoie-card">
+                <div class="apoie-title">APOIE O KAMALE</div>
+                <div class="apoie-desc">
                     Ajude-nos a manter os minijogos gratuitos e sempre evoluindo! Sua contribuição garante novos recursos e skins!
                 </div>
                 
-                <div style="width: 100%; height: 1px; background: rgba(255,209,0,0.15); margin: 4px 0;"></div>
+                <div class="apoie-divider"></div>
                 
-                <div class="amount-label" style="font-size: clamp(0.65rem, 2.5vw, 0.75rem); color: #ffd100; font-weight: bold; align-self: flex-start;">ESCOLHA O VALOR:</div>
+                <div class="apoie-label">ESCOLHA O VALOR:</div>
                 <div class="amount-options" style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; width: 100%;">
-                    <button class="amount-btn" data-value="5" style="padding: clamp(8px, 1.8vh, 12px) 0; font-size: clamp(0.75rem, 3vw, 0.95rem);">R$ 5</button>
-                    <button class="amount-btn selected" data-value="10" style="padding: clamp(8px, 1.8vh, 12px) 0; font-size: clamp(0.75rem, 3vw, 0.95rem);">R$ 10</button>
-                    <button class="amount-btn" data-value="20" style="padding: clamp(8px, 1.8vh, 12px) 0; font-size: clamp(0.75rem, 3vw, 0.95rem);">R$ 20</button>
-                    <button class="amount-btn" data-value="50" style="padding: clamp(8px, 1.8vh, 12px) 0; font-size: clamp(0.75rem, 3vw, 0.95rem);">R$ 50</button>
+                    <button class="amount-btn" data-value="5">R$ 5</button>
+                    <button class="amount-btn selected" data-value="10">R$ 10</button>
+                    <button class="amount-btn" data-value="20">R$ 20</button>
+                    <button class="amount-btn" data-value="50">R$ 50</button>
                 </div>
                 
-                <div style="width: 100%; height: 1px; background: rgba(255,209,0,0.15); margin: 4px 0;"></div>
+                <div class="apoie-divider"></div>
                 
-                <button class="pay-btn" id="apoie-pay-btn" style="width: 100%; background: #3acc7a; border: none; padding: clamp(10px, 2vh, 14px); border-radius: 12px; font-family: 'Share Tech Mono', monospace; font-size: clamp(0.9rem, 3.5vw, 1.1rem); font-weight: bold; color: #fff; cursor: pointer; box-shadow: 0 4px 0 #1e8a50; transform: translateY(-2px); transition: all 0.1s; display: flex; align-items: center; justify-content: center; gap: 8px;">
+                <button class="apoie-pay-btn" id="apoie-pay-btn">
                     APOIAR ❤️
                 </button>
                 
-                <button class="back-btn menu-btn-back" id="apoie-back-btn" style="font-family: 'Share Tech Mono', monospace; padding: clamp(6px, 1.5vh, 10px) 16px; border-radius: 9999px; background: transparent; border: 2px solid #555; color: #aaa; cursor: pointer; font-size: clamp(0.7rem, 2.5vw, 0.8rem); transition: all 0.1s;">
+                <button class="apoie-back-btn" id="apoie-back-btn">
                     ← VOLTAR
                 </button>
             </div>
@@ -983,6 +1054,12 @@
         document.getElementById('google-login-btn'),
     ].filter(Boolean);
     let focusedHeaderIndex = -1; // -1 = sem foco no header (jogo tem foco)
+    let gameMenuState = { onMenu: false, focusIndex: 0, totalItems: 0 };
+    window.addEventListener('message', (e) => {
+        if (e.data && e.data.type === 'KAMALE_MENU_STATE') {
+            gameMenuState = e.data;
+        }
+    });
 
     function updateHeaderFocus() {
         headerItems.forEach((item, idx) => {
@@ -996,6 +1073,25 @@
 
     function moveHeaderFocus(dir, wrap) {
         if (headerItems.length === 0) return false;
+
+        const atGameFirst = gameMenuState.onMenu && gameMenuState.totalItems > 0 && gameMenuState.focusIndex === 0;
+        const atGameLast = gameMenuState.onMenu && gameMenuState.totalItems > 0 && gameMenuState.focusIndex === gameMenuState.totalItems - 1;
+
+        // Jogo focado e em menu: UP do primeiro item → header, DOWN do último → header
+        if (focusedHeaderIndex === -1 && gameMenuState.onMenu) {
+            if (dir < 0 && atGameFirst) {
+                focusedHeaderIndex = 0; // volta ao home
+                updateHeaderFocus();
+                return true;
+            }
+            if (dir > 0 && atGameLast) {
+                focusedHeaderIndex = 0; // volta ao home
+                updateHeaderFocus();
+                return true;
+            }
+            return false; // deixa a tecla ir para o jogo
+        }
+
         if (focusedHeaderIndex === -1 && dir > 0) return false;
         if (focusedHeaderIndex === -1 && dir < 0) {
             focusedHeaderIndex = headerItems.length - 1;
@@ -1004,16 +1100,26 @@
             if (next < 0) {
                 if (wrap) {
                     focusedHeaderIndex = headerItems.length - 1;
+                } else if (gameMenuState.onMenu) {
+                    // UP do home → jogo vai para o último (deixa tecla passar)
+                    focusedHeaderIndex = -1;
+                    updateHeaderFocus();
+                    return false;
                 } else {
-                    focusedHeaderIndex = -1; // sai do header, volta ao jogo
+                    focusedHeaderIndex = -1;
                     updateHeaderFocus();
                     return true;
                 }
             } else if (next >= headerItems.length) {
                 if (wrap) {
                     focusedHeaderIndex = 0;
+                } else if (gameMenuState.onMenu) {
+                    // DOWN do último header → jogo vai para o primeiro (deixa tecla passar)
+                    focusedHeaderIndex = -1;
+                    updateHeaderFocus();
+                    return false;
                 } else {
-                    focusedHeaderIndex = -1; // sai do header, volta ao jogo
+                    focusedHeaderIndex = -1;
                     updateHeaderFocus();
                     return true;
                 }

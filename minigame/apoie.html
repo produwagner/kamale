@@ -6,7 +6,7 @@
     <title>Apoie o Kamale MiniGame</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Share+Tech+Mono&display=swap" rel="stylesheet">
     <style>
         * {
             margin: 0;
@@ -20,8 +20,8 @@
             height: 100vh;
             overflow: hidden;
             position: fixed;
-            background-color: #1a1a2e;
-            color: #e0e0e0;
+            background-color: #0a0a0a;
+            color: #ffffff;
             font-family: 'Share Tech Mono', 'Courier New', Courier, monospace;
             display: flex;
             justify-content: center;
@@ -42,41 +42,41 @@
         .back-btn {
             align-self: flex-start;
             background: none;
-            border: 1px solid #555;
-            color: #aaa;
-            padding: 6px 14px;
-            border-radius: 8px;
+            border: 2px solid #444;
+            color: #888;
+            padding: 6px 16px;
+            border-radius: 9999px;
             font-family: 'Share Tech Mono', monospace;
-            font-size: 0.85rem;
+            font-size: 0.75rem;
             cursor: pointer;
-            transition: color 0.2s, border-color 0.2s;
+            transition: all 0.15s;
             text-decoration: none;
+            letter-spacing: 1px;
         }
-        .back-btn:hover { color: #3acc7a; border-color: #3acc7a; }
+        .back-btn:hover { color: #ffd100; border-color: #ffd100; background: rgba(255,209,0,0.06); }
 
         .card {
             width: 100%;
-            background-color: #16213e;
-            border: 2px solid #0f3460;
-            border-radius: 16px;
-            padding: 30px 24px;
+            background: rgba(255, 209, 0, 0.03);
+            border: 3px dashed rgba(255, 209, 0, 0.25);
+            border-radius: 20px;
+            padding: clamp(20px, 4vw, 32px);
             display: flex;
             flex-direction: column;
             align-items: center;
-            gap: 24px;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+            gap: 16px;
         }
 
         .card-icon {
             width: 64px;
             height: 64px;
-            background-color: #0f3460;
-            border: 2px solid #1a73e8;
+            border: 2px dashed rgba(255,209,0,0.3);
             border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
             font-size: 1.8rem;
+            background: rgba(255,209,0,0.05);
         }
         .card-icon img {
             width: 100%;
@@ -86,100 +86,108 @@
         }
 
         .card-title {
-            font-size: 1.3rem;
-            font-weight: bold;
+            font-family: 'Press Start 2P', monospace;
+            font-size: clamp(0.7rem, 3vw, 1rem);
             color: #ffd100;
-            text-shadow: 1px 1px 2px rgba(0,0,0,0.5);
             text-align: center;
+            line-height: 1.5;
         }
 
         .card-desc {
-            font-size: 0.85rem;
-            color: #666;
+            font-size: 0.75rem;
+            color: #999;
             text-align: center;
             line-height: 1.5;
+            max-width: 280px;
         }
 
         .divider {
             width: 100%;
             height: 1px;
-            background-color: #e0e0e0;
+            background: linear-gradient(90deg, transparent, rgba(255,209,0,0.2), transparent);
         }
 
         .amount-section {
             width: 100%;
             display: flex;
             flex-direction: column;
-            gap: 12px;
+            gap: 10px;
         }
 
         .amount-label {
-            font-size: 0.8rem;
-            color: #888;
+            font-size: 0.65rem;
+            color: #ffd100;
+            font-weight: bold;
+            letter-spacing: 1px;
         }
 
         .amount-options {
             display: grid;
             grid-template-columns: repeat(4, 1fr);
-            gap: 10px;
+            gap: 6px;
         }
 
         .amount-btn {
-            background-color: #f9f9f9;
-            border: 2px solid #ddd;
-            color: #333;
-            padding: 12px 0;
+            background-color: #111;
+            border: 2px solid #333;
+            color: #aaa;
+            padding: 10px 0;
             border-radius: 10px;
             font-family: 'Share Tech Mono', monospace;
-            font-size: 1rem;
+            font-size: 0.85rem;
             font-weight: bold;
             cursor: pointer;
-            transition: all 0.15s;
-            box-shadow: 0 3px 0 #e0e0e0;
+            transition: all 0.1s;
+            box-shadow: 0 3px 0 #1a1a1a;
+            transform: translateY(-2px);
         }
         .amount-btn:hover {
-            background-color: #f0f0f0;
-            border-color: #3acc7a;
+            background-color: #1a1a1a;
+            border-color: #ffd100;
+            color: #ffd100;
+            box-shadow: 0 3px 0 #886a00;
+            transform: translateY(-1px) scale(1.02);
         }
         .amount-btn:active {
-            transform: translateY(2px);
-            box-shadow: 0 1px 0 #e0e0e0;
+            transform: translateY(1px);
+            box-shadow: 0 1px 0 #1a1a1a;
         }
         .amount-btn.selected {
-            background-color: #3acc7a;
-            color: #ffffff;
-            border-color: #2ea862;
-            box-shadow: 0 3px 0 #1e8a50;
+            background-color: #ffd100;
+            color: #0a0a0a;
+            border-color: #ffd100;
+            box-shadow: 0 3px 0 #886a00;
         }
 
         .pay-btn {
             width: 100%;
-            background-color: #3acc7a;
-            color: #ffffff;
+            background: #ffd100;
             border: none;
-            padding: 14px 0;
+            padding: 12px 0;
             border-radius: 12px;
-            font-family: 'Share Tech Mono', monospace;
-            font-size: 1.1rem;
+            font-family: 'Press Start 2P', monospace;
+            font-size: clamp(0.6rem, 2.5vw, 0.8rem);
             font-weight: bold;
+            color: #0a0a0a;
             cursor: pointer;
-            box-shadow: 0 5px 0 #1e8a50;
-            transform: translateY(-3px);
+            box-shadow: 0 4px 0 #b38f00;
+            transform: translateY(-2px);
             transition: all 0.1s;
             display: flex;
             align-items: center;
             justify-content: center;
             gap: 8px;
+            letter-spacing: 1px;
         }
-        .pay-btn:hover { background-color: #4ddb8b; }
+        .pay-btn:hover { background: #ffe44d; box-shadow: 0 4px 0 #cca700; }
         .pay-btn:active {
-            transform: translateY(2px);
-            box-shadow: 0 1px 0 #1e8a50;
+            transform: translateY(1px);
+            box-shadow: 0 1px 0 #b38f00;
         }
 
         .secure-text {
-            font-size: 0.7rem;
-            color: #999;
+            font-size: 0.6rem;
+            color: #666;
             text-align: center;
             display: flex;
             align-items: center;
@@ -217,8 +225,8 @@
         }
         .toast.show { opacity: 1; transform: translateY(0); }
         .toast.hide { opacity: 0; transform: translateY(-20px); }
-        .toast.toast-success { border-color: #3acc7a; background-color: #eafaf1; color: #2ea862; }
-        .toast.toast-info { border-color: #ddd; background-color: #ffffff; color: #333; }
+        .toast.toast-success { border-color: #ffd100; background-color: #1a1a0a; color: #ffd100; }
+        .toast.toast-info { border-color: #444; background-color: #111; color: #ccc; }
 
         @media (min-width: 769px) {
             .container { max-width: 420px; }
@@ -229,13 +237,13 @@
     <div class="toast-container" id="toastContainer"></div>
 
     <div class="container">
-        <a href="index.html" class="back-btn">← Voltar</a>
+        <a href="index.html" class="back-btn">← VOLTAR</a>
 
         <div class="card">
             <div class="card-icon">
-                <img src="logo1.png" alt="Kamale Logo">
+                <img src="assets/shared/logo1.png" alt="Kamale Logo">
             </div>
-            <div class="card-title">Apoie o Kamale MiniGame</div>
+            <div class="card-title">APOIE O KAMALE MINIGAME</div>
             <div class="card-desc">
                 Ajude-nos a manter os jogos gratuitos e sempre melhorando.
                 Sua contribuição faz a diferença!
@@ -244,7 +252,7 @@
             <div class="divider"></div>
 
             <div class="amount-section">
-                <div class="amount-label">Escolha o valor:</div>
+                <div class="amount-label">ESCOLHA O VALOR:</div>
                 <div class="amount-options">
                     <button class="amount-btn" data-value="5">R$ 5</button>
                     <button class="amount-btn selected" data-value="10">R$ 10</button>
@@ -256,14 +264,14 @@
             <div class="divider"></div>
 
             <button class="pay-btn" id="payBtn">
-                Apoiar <span style="color: #ff4444;">❤️</span>
+                APOIAR ❤️
             </button>
 
             <div class="secure-text">
-                <svg width="12" height="12" viewBox="0 0 24 24" fill="#999">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="#666">
                     <path d="M18 8h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zm-6 9c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2zm3.1-9H8.9V6c0-1.71 1.39-3.1 3.1-3.1 1.71 0 3.1 1.39 3.1 3.1v2z"/>
                 </svg>
-                Pagamento seguro e criptografado
+                PAGAMENTO SEGURO E CRIPTOGRAFADO
             </div>
         </div>
     </div>

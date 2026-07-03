@@ -309,6 +309,12 @@
                 iframe.contentWindow.postMessage({ type: 'KAMALE_THEME', theme: theme }, '*');
             }
         } catch(e) {}
+        try {
+            var toggleInput = document.getElementById('theme-toggle-input');
+            if (toggleInput) {
+                toggleInput.checked = theme === 'dark';
+            }
+        } catch(e) {}
     }
 
     function toggleTheme() {

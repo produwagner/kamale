@@ -82,29 +82,37 @@
         .apoie-btn:active { transform: translateY(1px); box-shadow: 0 1px 0 #3a9a6a; }
 
         /* ═══ THEME TOGGLE ═══ */
-        .theme-toggle-btn {
-            width: 30px; height: 30px; border-radius: 50%;
-            background-color: #282828; border: 2px solid #444;
-            color: #ffd100; cursor: pointer; outline: none;
-            display: flex; align-items: center; justify-content: center;
-            font-size: 0.85rem; flex-shrink: 0; line-height: 1;
-            box-shadow: 0 3px 0 #141414; transform: translateY(-2px);
-            transition: background-color 0.1s, transform 0.1s, border-color 0.1s, box-shadow 0.1s;
-            user-select: none; padding: 0;
+        .theme-toggle-switch {
+            position: relative; display: inline-flex; align-items: center; gap: 4px;
+            cursor: pointer; user-select: none; flex-shrink: 0; height: 26px;
+            outline: none; border-radius: 4px;
         }
-        .theme-toggle-btn:hover { background-color: #353535; border-color: #ffd100; }
-        .theme-toggle-btn.focused {
-            background-color: #353535; border-color: #ffd100;
-            outline: none; transform: translateY(-1px) scale(1.08);
+        .theme-toggle-switch input { opacity: 0; width: 0; height: 0; position: absolute; }
+        .tgl-sun, .tgl-moon { font-size: 0.75rem; line-height: 1; z-index: 1; pointer-events: none; }
+        .tgl-track {
+            width: 36px; height: 20px; background-color: #444; border-radius: 10px;
+            position: relative; transition: background-color 0.3s; flex-shrink: 0;
+            box-shadow: 0 2px 0 #141414;
         }
-        .theme-toggle-btn:active {
-            transform: translateY(1px); box-shadow: 0 1px 0 #141414;
+        .tgl-track::after {
+            content: ''; position: absolute; height: 16px; width: 16px;
+            left: 2px; bottom: 2px; background-color: #fff; border-radius: 50%;
+            transition: transform 0.3s, background-color 0.3s; z-index: 2;
         }
-        .theme-light .theme-toggle-btn {
-            background-color: #e8e8e8; border-color: #ccc; color: #f39c12;
-            box-shadow: 0 3px 0 #bbb; transform: translateY(-2px);
+        .theme-toggle-switch input:checked ~ .tgl-track { background-color: #ffd100; }
+        .theme-toggle-switch input:checked ~ .tgl-track::after {
+            transform: translateX(16px); background-color: #1a1a2e;
         }
-        .theme-light .theme-toggle-btn:hover { background-color: #ddd; border-color: #f39c12; }
+        .theme-toggle-switch.focused .tgl-track {
+            outline: 2px solid #ffd100; outline-offset: 2px;
+        }
+        .theme-light .tgl-track { background-color: #ccc; box-shadow: 0 2px 0 #aaa; }
+        .theme-light .theme-toggle-switch input:checked ~ .tgl-track { background-color: #f39c12; }
+        .theme-light .tgl-track::after { background-color: #fff; }
+        .theme-light .theme-toggle-switch input:checked ~ .tgl-track::after { background-color: #333; }
+        .theme-light .theme-toggle-switch.focused .tgl-track {
+            outline-color: #f39c12;
+        }
 
         /* ═══ GOOGLE LOGIN ═══ */
         .google-login-btn {
@@ -642,7 +650,12 @@
     
     <!-- Área de Login/Apoie à direita -->
     <div id="screen-header-right" style="display: flex; align-items: center; gap: 8px; margin-left: auto;">
-        <button class="theme-toggle-btn" id="theme-toggle-btn" aria-label="Alternar tema claro/escuro" title="Alternar tema">🌙</button>
+        <label class="theme-toggle-switch" id="theme-toggle-switch" title="Alternar tema">
+            <span class="tgl-sun">☀️</span>
+            <input type="checkbox" id="theme-toggle-input">
+            <span class="tgl-track"></span>
+            <span class="tgl-moon">🌙</span>
+        </label>
         <a href="apoie.html" class="apoie-btn" id="apoie-btn" aria-label="Apoie o Kamale Games">apoie ❤️</a>
         <button class="google-login-btn" id="google-login-btn" aria-label="Entrar"></button>
     </div>
@@ -1099,7 +1112,7 @@
 
     // ═══ HEADER ITEMS (navegáveis mesmo com jogo ativo) ═══
     const headerItems = [
-        document.getElementById('theme-toggle-btn'),
+        document.getElementById('theme-toggle-switch'),
         document.getElementById('home-btn'),
         document.getElementById('apoie-btn'),
         document.getElementById('google-login-btn'),
@@ -1658,21 +1671,17 @@
         updateFocus();
     }
 
-    // Theme toggle button
-    const themeToggleBtn = document.getElementById('theme-toggle-btn');
-    if (themeToggleBtn) {
-        themeToggleBtn.addEventListener('click', () => {
+    // Theme toggle switch
+    const themeToggleInput = document.getElementById('theme-toggle-input');
+    if (themeToggleInput) {
+        themeToggleInput.addEventListener('change', function() {
             if (window.KamaleAuth && window.KamaleAuth.toggleTheme) {
-                var newTheme = window.KamaleAuth.toggleTheme();
-                themeToggleBtn.textContent = newTheme === 'dark' ? '🌙' : '☀️';
+                window.KamaleAuth.toggleTheme();
             }
         });
-        // Update icon on load
-        setTimeout(() => {
-            if (window.KamaleAuth && window.KamaleAuth.getTheme) {
-                themeToggleBtn.textContent = window.KamaleAuth.getTheme() === 'dark' ? '🌙' : '☀️';
-            }
-        }, 100);
+        // Sync checkbox with current theme
+        var isDark = !document.body.classList.contains('theme-light');
+        themeToggleInput.checked = isDark;
     }
 
     // Intercept click on apoie-btn (including during active gameplay)

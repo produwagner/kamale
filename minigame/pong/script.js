@@ -541,7 +541,8 @@ function update() {
 }
 
 function draw() {
-    ctx.fillStyle = '#000000';
+    var bgColor = document.body && document.body.dataset.theme === 'light' ? '#e0e0e0' : '#000000';
+    ctx.fillStyle = bgColor;
     ctx.fillRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
 
     ctx.strokeStyle = '#222222';

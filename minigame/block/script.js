@@ -481,8 +481,8 @@ function drawParticles() {
 
 // Renderiza o grid e a peça ativa no Canvas (Sem divisões, ocupando toda a largura horizontalmente)
 function draw() {
-    // Limpa com fundo preto
-    ctx.fillStyle = '#000000';
+    var bgColor = document.body && document.body.dataset.theme === 'light' ? '#e0e0e0' : '#000000';
+    ctx.fillStyle = bgColor;
     ctx.fillRect(0, 0, canvas.width, canvas.height);
     
     // 1. Desenha blocos fixos do grid
@@ -1270,7 +1270,8 @@ Multiplayer.onOpponentGridUpdate = (data) => {
     const w = opponentCanvas.width / COLS;
     const h = opponentCanvas.height / ROWS;
     
-    opponentCtx.fillStyle = '#000000';
+    var oppBg = document.body && document.body.dataset.theme === 'light' ? '#e0e0e0' : '#000000';
+    opponentCtx.fillStyle = oppBg;
     opponentCtx.fillRect(0, 0, opponentCanvas.width, opponentCanvas.height);
     
     for (let r = 0; r < ROWS; r++) {

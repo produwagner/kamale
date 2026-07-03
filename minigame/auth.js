@@ -262,11 +262,68 @@
     }
 
     function applyTheme(theme) {
-        if (theme === 'light') {
+        var isLight = theme === 'light';
+        if (isLight) {
             document.body.classList.add('theme-light');
         } else {
             document.body.classList.remove('theme-light');
         }
+        var isInIframe = window.self !== window.top;
+        document.body.style.backgroundColor = isLight ? (isInIframe ? '#e0e0e0' : '#d4d4d4') : '';
+        document.body.style.color = isLight ? '#1a1a1a' : '';
+        document.body.dataset.theme = theme;
+        localStorage.setItem('kamale_cached_theme', theme);
+        try {
+            var boards = document.querySelectorAll('#game-board');
+            boards.forEach(function(b) {
+                b.style.backgroundColor = isLight ? '#e0e0e0' : '';
+            });
+        } catch(e) {}
+        try {
+            var menus = document.querySelectorAll('#menu-screen');
+            menus.forEach(function(m) {
+                m.style.backgroundColor = isLight ? '#e0e0e0' : '';
+            });
+        } catch(e) {}
+        try {
+            var screens = document.querySelectorAll('.screen');
+            screens.forEach(function(s) {
+                s.style.backgroundColor = isLight ? '#e0e0e0' : '';
+            });
+        } catch(e) {}
+        try {
+            var containers = document.querySelectorAll('#app-container');
+            containers.forEach(function(c) {
+                c.style.backgroundColor = isLight ? '#e0e0e0' : '';
+            });
+        } catch(e) {}
+        try {
+            var canvases = document.querySelectorAll('canvas');
+            canvases.forEach(function(c) {
+                c.style.backgroundColor = isLight ? '#e0e0e0' : '';
+            });
+        } catch(e) {}
+        try {
+            var iframe = document.getElementById('game-iframe');
+            if (iframe && iframe.contentWindow) {
+                iframe.contentWindow.postMessage({ type: 'KAMALE_THEME', theme: theme }, '*');
+            }
+        } catch(e) {}
+    }
+
+    function toggleTheme() {
+        var current = document.body.classList.contains('theme-light') ? 'light' : 'dark';
+        var next = current === 'light' ? 'dark' : 'light';
+        applyTheme(next);
+        var user = firebase.auth().currentUser;
+        if (user) {
+            firebase.database().ref('users/' + user.uid + '/theme').set(next);
+        }
+        return next;
+    }
+
+    function getTheme() {
+        return document.body.classList.contains('theme-light') ? 'light' : 'dark';
     }
 
     function injectThemeCSS() {
@@ -274,102 +331,47 @@
         var s = document.createElement('style');
         s.id = 'kamale-theme-css';
         s.textContent =
-            /* Botões escuros → claros */
-            '.theme-light .menu-btn,' +
-            '.theme-light .menu-btn-primary,' +
-            '.theme-light .menu-btn-secondary,' +
-            '.theme-light .menu-btn-back,' +
-            '.theme-light .menu-btn-mp,' +
-            '.theme-light .dpad-btn,' +
-            '.theme-light .action-btn,' +
-            '.theme-light .pause-btn,' +
-            '.theme-light .reset-btn,' +
-            '.theme-light .help-btn,' +
-            '.theme-light .back-btn,' +
-            '.theme-light .google-login-btn,' +
-            '.theme-light .apoie-btn,' +
-            '.theme-light .modal-close-btn {' +
-                'background-color:#e8e8e8;border-color:#ccc;color:#1a1a1a;box-shadow:0 4px 0 #bbb;' +
+            '.theme-light, .theme-light body {' +
+                'background-color:#d4d4d4 !important;' +
+                'color:#1a1a1a !important;' +
             '}' +
-            /* Hover */
-            '.theme-light .menu-btn:hover,' +
-            '.theme-light .menu-btn-primary:hover,' +
-            '.theme-light .menu-btn-secondary:hover,' +
-            '.theme-light .menu-btn-mp:hover,' +
-            '.theme-light .dpad-btn:hover,' +
-            '.theme-light .action-btn:hover,' +
-            '.theme-light .pause-btn:hover,' +
-            '.theme-light .help-btn:hover,' +
-            '.theme-light .back-btn:hover,' +
-            '.theme-light .google-login-btn:hover,' +
-            '.theme-light .apoie-btn:hover {' +
-                'background-color:#ddd;color:#1a1a1a;border-color:#bbb;' +
+            '.theme-light .header-sub { color:#777; }' +
+            '.theme-light .footer { color:#999; }' +
+            '.theme-light #game-board {' +
+                'border-color:rgba(0,0,0,0.08) !important;' +
+                'background-color:#e0e0e0 !important;' +
             '}' +
-            /* Active */
-            '.theme-light .menu-btn:active,' +
-            '.theme-light .menu-btn-primary:active,' +
-            '.theme-light .menu-btn-secondary:active,' +
-            '.theme-light .menu-btn-mp:active,' +
-            '.theme-light .dpad-btn:active,' +
-            '.theme-light .action-btn:active,' +
-            '.theme-light .pause-btn:active,' +
-            '.theme-light .help-btn:active,' +
-            '.theme-light .back-btn:active,' +
-            '.theme-light .google-login-btn:active,' +
-            '.theme-light .apoie-btn:active {' +
-                'transform:translateY(1px);box-shadow:0 1px 0 #bbb;' +
+            '.theme-light .header-logo { color:#ffd100; }' +
+            '.theme-light .logo-mini { color:#282828 !important; }' +
+            '.theme-light .card-label { color:#777; }' +
+            '.theme-light #apoie-screen .apoie-desc { color:#555; }' +
+            '.theme-light .apoie-back-btn { color:#888;border-color:#bbb; }' +
+            '.theme-light .toast { background-color:#cfcfcf;color:#333;border-color:#bbb; }' +
+            '.theme-light .toast.toast-info { background-color:#c0c0c0;color:#333;border-color:#bbb; }' +
+            '.theme-light .toast.toast-success { background-color:#b8d8b8;color:#2e7d32;border-color:#8fbc8f; }' +
+            '.theme-light #app-container { background-color:#e0e0e0 !important; }' +
+            '.theme-light #menu-screen { background-color:#e0e0e0 !important; }' +
+            '.theme-light .screen { background-color:#e0e0e0 !important; }' +
+            '.theme-light .game-section { background-color:#e0e0e0 !important; }' +
+            '.theme-light .overlay { background-color:rgba(224,224,224,0.92) !important; }' +
+            '.theme-light .menu-content { background-color:#e0e0e0 !important;border-color:rgba(0,0,0,0.08) !important; }' +
+            '.theme-light .game-over-content { background-color:#e0e0e0 !important;border-color:rgba(0,0,0,0.08) !important; }' +
+            '.theme-light .instructions-content { background-color:#e0e0e0 !important;border-color:rgba(0,0,0,0.08) !important; }' +
+            '.theme-light .room-item { border-color:#bbb !important;background-color:#e8e8e8 !important; }' +
+            '.theme-light .lobby-player-card { border-color:#bbb !important; }' +
+            '.theme-light .mp-room-code, .theme-light .lobby-code {' +
+                'background-color:#e0e0e0 !important;border-color:#bbb !important;color:#1a1a1a !important;' +
             '}' +
-            /* Focused (apoie e google) */
-            '.theme-light .apoie-btn.focused,' +
-            '.theme-light .google-login-btn.focused {' +
-                'background-color:#ffd100;border-color:#cca700;color:#000;box-shadow:0 0 15px rgba(255,209,0,0.5),0 4px 0 #cca700;' +
-            '}' +
-            /* D-pad center */
-            '.theme-light .dpad-center-dot { background-color:#ddd; }' +
-            /* Menu-btn-back sem fundo */
-            '.theme-light .menu-btn-back { background-color:transparent;border-color:#ccc;color:#666; }' +
-            '.theme-light .menu-btn-back:hover { background-color:#eee;color:#1a1a1a; }' +
-            /* Menu-btn-secondary com texto colorido preservado */
-            '.theme-light .menu-btn-secondary { color:#1a1a1a; }' +
-            /* Inputs */
-            '.theme-light .room-input,' +
-            '.theme-light .mp-input,' +
-            '.theme-light .room-input.name-input {' +
-                'background-color:#f5f5f5;border-color:#ccc;color:#1a1a1a;' +
-            '}' +
-            '.theme-light .room-input::placeholder,' +
-            '.theme-light .mp-input::placeholder { color:#888; }' +
-            /* Game board */
-            '.theme-light #game-board,' +
-            '.theme-light .game-section > #game-board {' +
-                'border-color:rgba(0,0,0,0.15);background-color:#ffffff;box-shadow:0 0 20px rgba(0,0,0,0.05);' +
-            '}' +
-            /* Toast */
-            '.theme-light .toast { background-color:#fff;color:#333;border-color:#ddd; }' +
-            '.theme-light .toast.toast-info { background-color:#f5f5f5;border-color:#ccc;color:#333; }' +
-            /* Sala/Lobby */
-            '.theme-light .room-item,' +
-            '.theme-light .lobby-player-card {' +
-                'border-color:#ddd;' +
-            '}' +
-            '.theme-light .mp-room-code,' +
-            '.theme-light .lobby-code {' +
-                'background-color:#f5f5f5;border-color:#ccc;color:#1a1a1a;' +
-            '}' +
-            '.theme-light .mp-divider { color:#aaa; }' +
-            '.theme-light .instructions-list li .key-hint { border-color:#ccc;background-color:#f0f0f0;color:#333; }' +
-            /* Score displays */
-            '.theme-light #highscore-display,' +
-            '.theme-light #score-display,' +
-            '.theme-light .mp-room-code-label,' +
-            '.theme-light .mp-player-count {' +
-                'color:#555;' +
-            '}' +
-            /* Global Focused states for top buttons (both themes) */
+            '.theme-light .mp-divider { color:#999 !important; }' +
+            '.theme-light .instructions-list li .key-hint { border-color:#bbb !important;background-color:#e0e0e0 !important;color:#333 !important; }' +
+            '.theme-light #highscore-display, .theme-light #score-display,' +
+            '.theme-light .mp-room-code-label, .theme-light .mp-player-count { color:#444 !important; }' +
+            '.theme-light .level-btn { background-color:#cfcfcf !important;color:#1a1a1a !important;border-color:#bbb !important; }' +
             '.home-btn.focused { background-color:#e07777!important;border-color:#ffaaaa!important;outline:none!important;transform:translateY(-1px) scale(1.08)!important; }' +
             '.google-login-btn.focused { background-color:#353535!important;border-color:#ffd100!important;outline:none!important;transform:translateY(-1px) scale(1.08)!important; }' +
             '.help-btn.focused { background-color:#ffd100!important;border-color:#cca700!important;color:#000!important;outline:none!important;transform:translateY(-1px) scale(1.08)!important; }' +
             '.apoie-btn.focused { background-color:#ffd100!important;border-color:#cca700!important;color:#000!important;box-shadow:0 0 15px rgba(255,209,0,0.5),0 4px 0 #cca700!important; }';
+            
         document.head.appendChild(s);
     }
 
@@ -707,6 +709,18 @@
                 }
             });
         });
+
+        // Listen for theme changes from parent hub
+        window.addEventListener('message', function (e) {
+            if (e.data && e.data.type === 'KAMALE_THEME') {
+                applyTheme(e.data.theme);
+            }
+        });
+
+        // Request current theme from parent (in case we're in an iframe)
+        if (window.self !== window.top) {
+            window.parent.postMessage({ type: 'KAMALE_THEME_REQUEST' }, '*');
+        }
     }
 
     window.KamaleAuth = {
@@ -724,7 +738,10 @@
                 }
             }
             return user;
-        }
+        },
+        applyTheme: applyTheme,
+        toggleTheme: toggleTheme,
+        getTheme: getTheme
     };
 
     if (document.readyState === 'loading') {

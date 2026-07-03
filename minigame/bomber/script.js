@@ -1347,8 +1347,8 @@ function getLevelTheme() {
 
 function render() {
     const theme = getLevelTheme();
-    // Limpa o canvas com a cor de chão do tema
-    ctx.fillStyle = theme.floorFill;
+    var bgColor = document.body && document.body.dataset.theme === 'light' ? '#e0e0e0' : theme.floorFill;
+    ctx.fillStyle = bgColor;
     ctx.fillRect(0, 0, canvas.width, canvas.height);
 
     // Desenha o grid

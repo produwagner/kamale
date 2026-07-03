@@ -21,6 +21,7 @@
         }
         .header { display:flex; flex-direction:column; align-items:center; gap:4px; margin-bottom:clamp(6px,1.5vh,16px); user-select:none; }
         .header-logo { font-family:'Press Start 2P',monospace; font-size:clamp(0.85rem,4.5vw,1.4rem); font-weight:bold; color:#ffd100; letter-spacing:2px; }
+        .logo-mini { color:#ffffff; }
         .header-sub { font-size:clamp(0.6rem,2.5vw,0.75rem); color:#777777; letter-spacing:2px; text-align:center; max-width:90vw; }
         
         #game-board {
@@ -79,6 +80,31 @@
             50% { box-shadow: 0 0 25px rgba(255,209,0,0.8), 0 4px 0 #cca700; }
         }
         .apoie-btn:active { transform: translateY(1px); box-shadow: 0 1px 0 #3a9a6a; }
+
+        /* ═══ THEME TOGGLE ═══ */
+        .theme-toggle-btn {
+            width: 30px; height: 30px; border-radius: 50%;
+            background-color: #282828; border: 2px solid #444;
+            color: #ffd100; cursor: pointer; outline: none;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 0.85rem; flex-shrink: 0; line-height: 1;
+            box-shadow: 0 3px 0 #141414; transform: translateY(-2px);
+            transition: background-color 0.1s, transform 0.1s, border-color 0.1s, box-shadow 0.1s;
+            user-select: none; padding: 0;
+        }
+        .theme-toggle-btn:hover { background-color: #353535; border-color: #ffd100; }
+        .theme-toggle-btn.focused {
+            background-color: #353535; border-color: #ffd100;
+            outline: none; transform: translateY(-1px) scale(1.08);
+        }
+        .theme-toggle-btn:active {
+            transform: translateY(1px); box-shadow: 0 1px 0 #141414;
+        }
+        .theme-light .theme-toggle-btn {
+            background-color: #e8e8e8; border-color: #ccc; color: #f39c12;
+            box-shadow: 0 3px 0 #bbb; transform: translateY(-2px);
+        }
+        .theme-light .theme-toggle-btn:hover { background-color: #ddd; border-color: #f39c12; }
 
         /* ═══ GOOGLE LOGIN ═══ */
         .google-login-btn {
@@ -603,7 +629,7 @@
 <body>
 
 <div class="header">
-    <div class="header-logo">KAMALE<span style="color:#ffffff">MINI</span>GAME</div>
+    <div class="header-logo">KAMALE<span class="logo-mini">MINI</span>GAME</div>
     <div class="header-sub">Passe o tempo e divirta-se com seus amigos</div>
 </div>
 
@@ -616,6 +642,7 @@
     
     <!-- Área de Login/Apoie à direita -->
     <div id="screen-header-right" style="display: flex; align-items: center; gap: 8px; margin-left: auto;">
+        <button class="theme-toggle-btn" id="theme-toggle-btn" aria-label="Alternar tema claro/escuro" title="Alternar tema">🌙</button>
         <a href="apoie.html" class="apoie-btn" id="apoie-btn" aria-label="Apoie o Kamale Games">apoie ❤️</a>
         <button class="google-login-btn" id="google-login-btn" aria-label="Entrar"></button>
     </div>
@@ -626,6 +653,14 @@
     <!-- Container de Conteúdo -->
     <div id="screen-content" style="width: 100%; flex: 1; min-height: 0; display: flex; flex-direction: column;">
         <div class="games-grid" id="games-grid">
+            <!-- BOMBA -->
+            <a href="bomber/index.html" class="game-card card-bomber" id="card-bomber" aria-label="Jogar Bomba">
+                <div class="card-preview">
+                    <img src="assets/previews/bomba-preview.png" alt="Bomba" class="card-preview-img">
+                </div>
+                <div class="card-label">BOMBA</div>
+            </a>
+
             <!-- SNAKE -->
             <a href="snake/index.html" class="game-card card-snake" id="card-snake" aria-label="Jogar Snake">
                 <div class="card-preview">
@@ -642,14 +677,6 @@
                 <div class="card-label">PONG</div>
             </a>
 
-            <!-- BLOCK -->
-            <a href="block/index.html" class="game-card card-block" id="card-block" aria-label="Jogar Block Game">
-                <div class="card-preview">
-                    <img src="assets/previews/block-preview.png" alt="Block Game" class="card-preview-img">
-                </div>
-                <div class="card-label">BLOCK GAME</div>
-            </a>
-
             <!-- VEA GAME -->
             <a href="veagame/index.html" class="game-card card-velha" id="card-velha" aria-label="Jogar Vea Game">
                 <div class="card-preview">
@@ -658,12 +685,12 @@
                 <div class="card-label">VEA GAME</div>
             </a>
 
-            <!-- BOMBER -->
-            <a href="bomber/index.html" class="game-card card-bomber" id="card-bomber" aria-label="Jogar Bomba">
+            <!-- BLOCK -->
+            <a href="block/index.html" class="game-card card-block" id="card-block" aria-label="Jogar Block Game">
                 <div class="card-preview">
-                    <img src="assets/previews/bomba-preview.png" alt="Bomba" class="card-preview-img">
+                    <img src="assets/previews/block-preview.png" alt="Block Game" class="card-preview-img">
                 </div>
-                <div class="card-label">BOMBA</div>
+                <div class="card-label">BLOCK GAME</div>
             </a>
 
             <!-- EM BREVE 2 -->
@@ -950,6 +977,13 @@
                         gap: 8px !important;
                     }
                 `;
+                // Send current theme to the iframe
+                var currentTheme = document.body.classList.contains('theme-light') ? 'light' : 'dark';
+                try {
+                    if (gameIframe.contentWindow) {
+                        gameIframe.contentWindow.postMessage({ type: 'KAMALE_THEME', theme: currentTheme }, '*');
+                    }
+                } catch(e) {}
             } catch (e) {
                 console.error("Erro ao injetar estilos no iframe:", e);
             }
@@ -1065,6 +1099,7 @@
 
     // ═══ HEADER ITEMS (navegáveis mesmo com jogo ativo) ═══
     const headerItems = [
+        document.getElementById('theme-toggle-btn'),
         document.getElementById('home-btn'),
         document.getElementById('apoie-btn'),
         document.getElementById('google-login-btn'),
@@ -1074,6 +1109,12 @@
     window.addEventListener('message', (e) => {
         if (e.data && e.data.type === 'KAMALE_MENU_STATE') {
             gameMenuState = e.data;
+        }
+        if (e.data && e.data.type === 'KAMALE_THEME_REQUEST') {
+            var currentTheme = document.body.classList.contains('theme-light') ? 'light' : 'dark';
+            if (e.source) {
+                e.source.postMessage({ type: 'KAMALE_THEME', theme: currentTheme }, '*');
+            }
         }
     });
 
@@ -1164,11 +1205,11 @@
     const allItems = [
         document.getElementById('apoie-btn'),
         document.getElementById('google-login-btn'),
+        document.getElementById('card-bomber'),
         document.getElementById('card-snake'),
         document.getElementById('card-pong'),
-        document.getElementById('card-block'),
         document.getElementById('card-velha'),
-        document.getElementById('card-bomber'),
+        document.getElementById('card-block'),
         document.getElementById('card-soon-2')
     ];
     let focusedIndex = 2;
@@ -1615,6 +1656,23 @@
         
         focusedIndex = 0; // Focus the apoie-btn in the main menu
         updateFocus();
+    }
+
+    // Theme toggle button
+    const themeToggleBtn = document.getElementById('theme-toggle-btn');
+    if (themeToggleBtn) {
+        themeToggleBtn.addEventListener('click', () => {
+            if (window.KamaleAuth && window.KamaleAuth.toggleTheme) {
+                var newTheme = window.KamaleAuth.toggleTheme();
+                themeToggleBtn.textContent = newTheme === 'dark' ? '🌙' : '☀️';
+            }
+        });
+        // Update icon on load
+        setTimeout(() => {
+            if (window.KamaleAuth && window.KamaleAuth.getTheme) {
+                themeToggleBtn.textContent = window.KamaleAuth.getTheme() === 'dark' ? '🌙' : '☀️';
+            }
+        }, 100);
     }
 
     // Intercept click on apoie-btn (including during active gameplay)

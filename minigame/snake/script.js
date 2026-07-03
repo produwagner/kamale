@@ -858,7 +858,8 @@ function triggerLocalTongueAnimation(player) {
 // ═══ DESENHO (SINGLEPLAYER) ══════════════════════════════════════════════════
 
 function draw() {
-    ctx.fillStyle = '#000000';
+    var bgColor = document.body && document.body.dataset.theme === 'light' ? '#e0e0e0' : '#000000';
+    ctx.fillStyle = bgColor;
     ctx.fillRect(0, 0, canvas.width, canvas.height);
 
     // Comida (círculo)
@@ -1601,7 +1602,8 @@ function mpDraw() {
     const c = mpCtx;
     const cv = mpCanvas;
 
-    c.fillStyle = '#000000';
+    var bgColor = document.body && document.body.dataset.theme === 'light' ? '#e0e0e0' : '#000000';
+    c.fillStyle = bgColor;
     c.fillRect(0, 0, cv.width, cv.height);
 
     // Comida (círculo)
@@ -2009,7 +2011,8 @@ function localDraw() {
     if (!mpCtx) return;
     const c = mpCtx;
 
-    c.fillStyle = '#000';
+    var mpBg = document.body && document.body.dataset.theme === 'light' ? '#e0e0e0' : '#000';
+    c.fillStyle = mpBg;
     c.fillRect(0, 0, mpCanvas.width, mpCanvas.height);
 
     const localCell = mpCanvas.width / GRID_SIZE;

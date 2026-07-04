@@ -2003,8 +2003,46 @@ function updateEnemies(dt) {
                 enemy.aiTimer -= dt;
                 enemy.bombCooldown -= dt;
                 
-                // Máquina de estados
-                if (enemy.aiTimer <= 0) {
+                // Detecção de perigo: foge se alguma bomba ou fogo ativo vai atingir o chefão
+                let inDanger = false;
+                let fleeDx = 0, fleeDy = 0;
+                bombs.forEach(bomb => {
+                    const dirs = [{x:0,y:-1},{x:0,y:1},{x:-1,y:0},{x:1,y:0}];
+                    let hits = bomb.col === enemyCol && bomb.row === enemyRow;
+                    dirs.forEach(d => {
+                        for (let i = 1; i <= bomb.range; i++) {
+                            const c = bomb.col + d.x * i, r = bomb.row + d.y * i;
+                            if (c < 0 || c >= COLS || r < 0 || r >= ROWS) break;
+                            if (grid[r][c] === 1) break;
+                            if (c === enemyCol && r === enemyRow) hits = true;
+                            if (grid[r][c] === 2) break;
+                        }
+                    });
+                    if (hits) {
+                        inDanger = true;
+                        fleeDx += enemyCol - bomb.col;
+                        fleeDy += enemyRow - bomb.row;
+                    }
+                });
+                if (!inDanger) {
+                    explosions.forEach(exp => {
+                        exp.cells.forEach(cell => {
+                            if (cell.col === enemyCol && cell.row === enemyRow) inDanger = true;
+                        });
+                    });
+                }
+                if (inDanger) {
+                    if (enemy.aiState !== 'flee') {
+                        enemy.prevAiState = enemy.aiState;
+                    }
+                    enemy.aiState = 'flee';
+                } else if (enemy.aiState === 'flee') {
+                    enemy.aiState = enemy.prevAiState || 'chase';
+                    enemy.aiTimer = 500;
+                }
+                
+                // Máquina de estados (só transiciona se não estiver fugindo)
+                if (enemy.aiTimer <= 0 && enemy.aiState !== 'flee') {
                     const r = Math.random();
                     if (isEnraged && r < 0.3) {
                         enemy.aiState = 'charge';
@@ -2030,7 +2068,17 @@ function updateEnemies(dt) {
                     enemy.speed = 0.8;
                 }
                 
-                if (enemy.aiState === 'chase') {
+                if (enemy.aiState === 'flee') {
+                    if (fleeDx > 0) enemy.direction = 'right';
+                    else if (fleeDx < 0) enemy.direction = 'left';
+                    else if (fleeDy > 0) enemy.direction = 'down';
+                    else if (fleeDy < 0) enemy.direction = 'up';
+                    // Se está em cima da bomba (fleeDx=0, fleeDy=0), tenta qualquer saída
+                    if (fleeDx === 0 && fleeDy === 0) {
+                        enemy.direction = ['up','down','left','right'][Math.floor(Math.random()*4)];
+                    }
+                    enemy.changeDirTimer = 200;
+                } else if (enemy.aiState === 'chase') {
                     if (enemy.collisionCooldown > 0) {
                         enemy.collisionCooldown -= dt;
                     } else {

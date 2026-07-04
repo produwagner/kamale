@@ -154,6 +154,7 @@ let enemies = [];
 let doorPos = { r: -1, c: -1 };
 let doorRevealed = false;
 let doorActive = false;
+let bossFire = []; // rastro de fogo do chefão
 
 // Configurações de Teclas Pressionadas
 const keys = {};
@@ -393,6 +394,7 @@ function initGame(mode) {
     isGameOver = false;
     bombs = [];
     explosions = [];
+    bossFire = [];
     
     buildMap();
 
@@ -625,8 +627,8 @@ function spawnEnemiesForLevel(level) {
         } else if (type === 'boss') {
             color = '#8e44ad';
             speed = 0.8;
-            hp = 5;
-            maxHp = 5;
+            hp = 8;
+            maxHp = 8;
         }
         
         const enemy = {
@@ -1442,27 +1444,41 @@ function drawEnemy(ctx, enemy) {
             ctx.fillRect(barX, barY, barW * (enemy.hp / enemy.maxHp), barH);
         }
     } else if (enemy.type === 'boss') {
-        // Chefão - Grande e imponente
         const bossR = r + 6;
-        const bossSize = bossR * 2;
+        const isEnraged = enemy.hp <= 2;
+        const isWounded = enemy.hp <= 3;
         
-        // Aura pulsante
-        ctx.shadowColor = '#8e44ad';
-        ctx.shadowBlur = 15;
-        ctx.fillStyle = '#6c3483';
+        // Aura pulsante (muda com a fase)
+        ctx.shadowColor = isEnraged ? '#e74c3c' : isWounded ? '#f39c12' : '#8e44ad';
+        ctx.shadowBlur = isEnraged ? 25 : 15;
+        ctx.fillStyle = isEnraged ? '#6c1a1a' : '#6c3483';
         ctx.beginPath();
         ctx.arc(cx, cy, bossR + 3, 0, Math.PI * 2);
         ctx.fill();
+        
+        // Partículas da aura (enfurecido)
+        if (isEnraged) {
+            const t = Date.now() / 100;
+            for (let i = 0; i < 4; i++) {
+                const angle = t + (i * Math.PI / 2);
+                const px2 = cx + Math.cos(angle) * (bossR + 8);
+                const py2 = cy + Math.sin(angle) * (bossR + 8);
+                ctx.fillStyle = '#ff4444';
+                ctx.beginPath();
+                ctx.arc(px2, py2, 2, 0, Math.PI * 2);
+                ctx.fill();
+            }
+        }
         ctx.shadowBlur = 0;
         
-        // Corpo principal
-        ctx.fillStyle = enemy.hp <= 2 ? '#e74c3c' : enemy.hp <= 3 ? '#f39c12' : '#8e44ad';
+        // Corpo principal (muda de cor conforme a vida)
+        ctx.fillStyle = isEnraged ? '#c0392b' : isWounded ? '#e67e22' : '#8e44ad';
         ctx.beginPath();
         ctx.arc(cx, cy, bossR, 0, Math.PI * 2);
         ctx.fill();
         
         // Coroa
-        ctx.fillStyle = '#f1c40f';
+        ctx.fillStyle = isEnraged ? '#ff6b6b' : '#f1c40f';
         ctx.beginPath();
         ctx.moveTo(cx - 8, cy - bossR + 2);
         ctx.lineTo(cx - 6, cy - bossR - 6);
@@ -1474,37 +1490,50 @@ function drawEnemy(ctx, enemy) {
         ctx.closePath();
         ctx.fill();
         
-        // Olhos brilhantes vermelhos
-        ctx.fillStyle = '#ff0000';
-        ctx.shadowColor = '#ff0000';
-        ctx.shadowBlur = 8;
+        // Olhos brilhantes
+        ctx.fillStyle = isEnraged ? '#ffff00' : '#ff0000';
+        ctx.shadowColor = isEnraged ? '#ffff00' : '#ff0000';
+        ctx.shadowBlur = 10;
         ctx.beginPath();
         ctx.arc(cx - 4, cy - 2, 3, 0, Math.PI * 2);
         ctx.arc(cx + 4, cy - 2, 3, 0, Math.PI * 2);
         ctx.fill();
         ctx.shadowBlur = 0;
         
-        // Sorriso
+        // Boca (raiva ou sorriso)
         ctx.strokeStyle = '#fff';
         ctx.lineWidth = 1.5;
         ctx.beginPath();
-        ctx.arc(cx, cy + 3, 5, 0.2, Math.PI - 0.2);
+        if (isEnraged) {
+            ctx.arc(cx, cy + 6, 4, Math.PI + 0.3, -0.3);
+        } else {
+            ctx.arc(cx, cy + 3, 5, 0.2, Math.PI - 0.2);
+        }
         ctx.stroke();
         
         // Barra de HP do chefão
         if (enemy.hp !== undefined && enemy.maxHp) {
-            const barW = 40;
+            const barW = 44;
             const barH = 4;
             const barX = cx - barW / 2;
-            const barY = enemy.y - 8;
-            ctx.fillStyle = '#333';
-            ctx.fillRect(barX, barY, barW, barH);
+            const barY = enemy.y - 10;
+            ctx.fillStyle = '#222';
+            ctx.fillRect(barX - 1, barY - 1, barW + 2, barH + 2);
             const hpRatio = enemy.hp / enemy.maxHp;
             ctx.fillStyle = hpRatio > 0.5 ? '#2ecc71' : hpRatio > 0.25 ? '#f39c12' : '#e74c3c';
             ctx.fillRect(barX, barY, barW * hpRatio, barH);
             ctx.strokeStyle = '#fff';
             ctx.lineWidth = 1;
             ctx.strokeRect(barX, barY, barW, barH);
+        }
+        
+        // Indicador de estado da IA
+        if (enemy.aiState) {
+            ctx.fillStyle = 'rgba(255,255,255,0.7)';
+            ctx.font = '8px monospace';
+            ctx.textAlign = 'center';
+            const stateLabel = enemy.aiState === 'chase' ? '⚔️' : enemy.aiState === 'bomb' ? '💣' : enemy.aiState === 'retreat' ? '⬅️' : '⚡';
+            ctx.fillText(stateLabel, cx, cy + 14);
         }
     }
     ctx.restore();
@@ -1814,6 +1843,17 @@ function render() {
         });
     });
 
+    // Desenha rastro de fogo do chefão
+    bossFire.forEach(f => {
+        const x = f.col * TILE_SIZE;
+        const y = f.row * TILE_SIZE;
+        const alpha = Math.min(1, f.timer / 1000);
+        ctx.fillStyle = `rgba(150, 0, 255, ${alpha * 0.6})`;
+        ctx.fillRect(x + 2, y + 2, TILE_SIZE - 4, TILE_SIZE - 4);
+        ctx.fillStyle = `rgba(200, 50, 255, ${alpha * 0.4})`;
+        ctx.fillRect(x + 5, y + 5, TILE_SIZE - 10, TILE_SIZE - 10);
+    });
+
     // Desenha jogadores (triângulos apontados para direção)
     players.forEach(player => {
         if (!player.alive) return;
@@ -1927,7 +1967,7 @@ function updateEnemies(dt) {
             }
         }
 
-        // Chefão: Persegue o jogador sempre
+        // Chefão: IA com estados (perseguir, bombar, recuar, carga)
         if (enemy.type === 'boss') {
             let targetPlayer = null;
             let minDist = Infinity;
@@ -1944,16 +1984,95 @@ function updateEnemies(dt) {
             if (targetPlayer) {
                 const tpCol = Math.floor((targetPlayer.x + targetPlayer.w / 2) / TILE_SIZE);
                 const tpRow = Math.floor((targetPlayer.y + targetPlayer.h / 2) / TILE_SIZE);
-                if (enemyCol === tpCol) {
-                    enemy.direction = tpRow > enemyRow ? 'down' : 'up';
-                } else if (enemyRow === tpRow) {
-                    enemy.direction = tpCol > enemyCol ? 'right' : 'left';
-                } else if (Math.abs(tpCol - enemyCol) > Math.abs(tpRow - enemyRow)) {
-                    enemy.direction = tpCol > enemyCol ? 'right' : 'left';
-                } else {
-                    enemy.direction = tpRow > enemyRow ? 'down' : 'up';
+                
+                if (enemy.aiState === undefined) enemy.aiState = 'chase';
+                if (enemy.aiTimer === undefined) enemy.aiTimer = 2000;
+                if (enemy.bombCooldown === undefined) enemy.bombCooldown = 0;
+                
+                const isEnraged = enemy.hp <= 2;
+                enemy.aiTimer -= dt;
+                enemy.bombCooldown -= dt;
+                
+                // Máquina de estados
+                if (enemy.aiTimer <= 0) {
+                    const r = Math.random();
+                    if (isEnraged && r < 0.3) {
+                        enemy.aiState = 'charge';
+                        enemy.aiTimer = 1200;
+                    } else if (enemy.bombCooldown <= 0 && r < 0.45) {
+                        enemy.aiState = 'bomb';
+                        enemy.aiTimer = 300;
+                    } else if (r < 0.6) {
+                        enemy.aiState = 'retreat';
+                        enemy.aiTimer = 800;
+                    } else {
+                        enemy.aiState = 'chase';
+                        enemy.aiTimer = 1000 + Math.random() * 1000;
+                    }
                 }
-                enemy.changeDirTimer = 500;
+                
+                // Velocidade por fase
+                if (isEnraged) {
+                    enemy.speed = 1.3;
+                } else if (enemy.hp <= 3) {
+                    enemy.speed = 1.0;
+                } else {
+                    enemy.speed = 0.8;
+                }
+                
+                if (enemy.aiState === 'chase') {
+                    if (enemyCol === tpCol) {
+                        enemy.direction = tpRow > enemyRow ? 'down' : 'up';
+                    } else if (enemyRow === tpRow) {
+                        enemy.direction = tpCol > enemyCol ? 'right' : 'left';
+                    } else if (Math.abs(tpCol - enemyCol) > Math.abs(tpRow - enemyRow)) {
+                        enemy.direction = tpCol > enemyCol ? 'right' : 'left';
+                    } else {
+                        enemy.direction = tpRow > enemyRow ? 'down' : 'up';
+                    }
+                    enemy.changeDirTimer = 300;
+                } else if (enemy.aiState === 'bomb') {
+                    const bCol = Math.floor((enemy.x + enemy.w / 2) / TILE_SIZE);
+                    const bRow = Math.floor((enemy.y + enemy.h / 2) / TILE_SIZE);
+                    const taken = bombs.some(b => b.col === bCol && b.row === bRow);
+                    if (!taken) {
+                        bombs.push({
+                            col: bCol, row: bRow, timer: 2000,
+                            range: isEnraged ? 3 : 2, owner: null
+                        });
+                        enemy.bombCooldown = isEnraged ? 2000 : 3000;
+                    }
+                    enemy.aiState = 'retreat';
+                    enemy.aiTimer = 600;
+                    enemy.direction = tpRow <= enemyRow ? 'down' : 'up';
+                    if (enemy.direction === 'down' && enemyRow >= ROWS - 2) enemy.direction = 'left';
+                    if (enemy.direction === 'up' && enemyRow <= 1) enemy.direction = 'right';
+                    enemy.changeDirTimer = 500;
+                } else if (enemy.aiState === 'retreat') {
+                    if (Math.abs(tpCol - enemyCol) > Math.abs(tpRow - enemyRow)) {
+                        enemy.direction = tpCol > enemyCol ? 'left' : 'right';
+                    } else {
+                        enemy.direction = tpRow > enemyRow ? 'up' : 'down';
+                    }
+                    enemy.changeDirTimer = 400;
+                } else if (enemy.aiState === 'charge') {
+                    enemy.speed = 2.5;
+                    if (Math.abs(tpCol - enemyCol) > Math.abs(tpRow - enemyRow)) {
+                        enemy.direction = tpCol > enemyCol ? 'right' : 'left';
+                    } else {
+                        enemy.direction = tpRow > enemyRow ? 'down' : 'up';
+                    }
+                    enemy.changeDirTimer = 200;
+                    // Rastro de fogo na carga (apenas enfurecido)
+                    if (isEnraged && enemy.bombCooldown <= -500) {
+                        const fCol = Math.floor((enemy.x + enemy.w / 2) / TILE_SIZE);
+                        const fRow = Math.floor((enemy.y + enemy.h / 2) / TILE_SIZE);
+                        if (!bossFire.some(f => f.col === fCol && f.row === fRow)) {
+                            bossFire.push({ col: fCol, row: fRow, timer: 3000 });
+                        }
+                        enemy.bombCooldown = -200;
+                    }
+                }
             }
         }
 
@@ -2182,6 +2301,33 @@ function update(timestamp) {
                     } else {
                         enemy.alive = false;
                         showToast('Inimigo derrotado!', 'success');
+                    }
+                }
+            });
+        }
+    }
+
+    // Rastro de fogo do chefão: timer e dano ao jogador
+    for (let i = bossFire.length - 1; i >= 0; i--) {
+        const f = bossFire[i];
+        f.timer -= dt;
+        if (f.timer <= 0) {
+            bossFire.splice(i, 1);
+        } else if (f.timer > 0) {
+            players.forEach(player => {
+                if (!player.alive) return;
+                const px = Math.floor((player.x + player.w / 2) / TILE_SIZE);
+                const py = Math.floor((player.y + player.h / 2) / TILE_SIZE);
+                if (px === f.col && py === f.row) {
+                    if (player.invulTimer > 0) return;
+                    if (player.shield) {
+                        player.shield = false;
+                        player.invulTimer = 1500;
+                        showToast('🛡 Escudo quebrado!', 'error');
+                        updateHUD();
+                    } else {
+                        player.alive = false;
+                        showToast(player.id === 'p1' ? 'P1 morreu!' : 'P2/Bot morreu!', 'error');
                     }
                 }
             });

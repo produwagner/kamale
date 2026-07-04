@@ -565,6 +565,17 @@ function spawnEnemiesForLevel(level) {
         types = ['mamona', 'mamona', 'rat', 'rat', 'pepper', 'pepper'];
     } else if (level === 6) {
         types = ['boss'];
+        // Limpa uma área 3x3 no centro para o chefão ter espaço
+        for (let dr = -1; dr <= 1; dr++) {
+            for (let dc = -1; dc <= 1; dc++) {
+                const rr = 6 + dr, cc = 6 + dc;
+                if (rr > 0 && rr < ROWS - 1 && cc > 0 && cc < COLS - 1) {
+                    if (grid[rr][cc] === 2 || grid[rr][cc] === 1) {
+                        grid[rr][cc] = 0;
+                    }
+                }
+            }
+        }
     } else if (level === 7) {
         types = ['pepper', 'pepper', 'rat', 'rat', 'mamona', 'square', 'circle'];
     } else if (level === 8) {
@@ -590,8 +601,6 @@ function spawnEnemiesForLevel(level) {
         let cell;
         if (type === 'boss') {
             cell = { r: 6, c: 6 };
-            // Garante que o centro do mapa esteja livre
-            if (grid[6][6] === 2) grid[6][6] = 0;
         } else {
             let cellIndex = Math.floor(Math.random() * validCells.length);
             cell = validCells.splice(cellIndex, 1)[0] || { r: 11, c: 11 };
@@ -1988,6 +1997,7 @@ function updateEnemies(dt) {
                 if (enemy.aiState === undefined) enemy.aiState = 'chase';
                 if (enemy.aiTimer === undefined) enemy.aiTimer = 2000;
                 if (enemy.bombCooldown === undefined) enemy.bombCooldown = 0;
+                if (enemy.collisionCooldown === undefined) enemy.collisionCooldown = 0;
                 
                 const isEnraged = enemy.hp <= 2;
                 enemy.aiTimer -= dt;
@@ -2021,14 +2031,18 @@ function updateEnemies(dt) {
                 }
                 
                 if (enemy.aiState === 'chase') {
-                    if (enemyCol === tpCol) {
-                        enemy.direction = tpRow > enemyRow ? 'down' : 'up';
-                    } else if (enemyRow === tpRow) {
-                        enemy.direction = tpCol > enemyCol ? 'right' : 'left';
-                    } else if (Math.abs(tpCol - enemyCol) > Math.abs(tpRow - enemyRow)) {
-                        enemy.direction = tpCol > enemyCol ? 'right' : 'left';
+                    if (enemy.collisionCooldown > 0) {
+                        enemy.collisionCooldown -= dt;
                     } else {
-                        enemy.direction = tpRow > enemyRow ? 'down' : 'up';
+                        if (enemyCol === tpCol) {
+                            enemy.direction = tpRow > enemyRow ? 'down' : 'up';
+                        } else if (enemyRow === tpRow) {
+                            enemy.direction = tpCol > enemyCol ? 'right' : 'left';
+                        } else if (Math.abs(tpCol - enemyCol) > Math.abs(tpRow - enemyRow)) {
+                            enemy.direction = tpCol > enemyCol ? 'right' : 'left';
+                        } else {
+                            enemy.direction = tpRow > enemyRow ? 'down' : 'up';
+                        }
                     }
                     enemy.changeDirTimer = 300;
                 } else if (enemy.aiState === 'bomb') {
@@ -2049,18 +2063,26 @@ function updateEnemies(dt) {
                     if (enemy.direction === 'up' && enemyRow <= 1) enemy.direction = 'right';
                     enemy.changeDirTimer = 500;
                 } else if (enemy.aiState === 'retreat') {
-                    if (Math.abs(tpCol - enemyCol) > Math.abs(tpRow - enemyRow)) {
-                        enemy.direction = tpCol > enemyCol ? 'left' : 'right';
+                    if (enemy.collisionCooldown > 0) {
+                        enemy.collisionCooldown -= dt;
                     } else {
-                        enemy.direction = tpRow > enemyRow ? 'up' : 'down';
+                        if (Math.abs(tpCol - enemyCol) > Math.abs(tpRow - enemyRow)) {
+                            enemy.direction = tpCol > enemyCol ? 'left' : 'right';
+                        } else {
+                            enemy.direction = tpRow > enemyRow ? 'up' : 'down';
+                        }
                     }
                     enemy.changeDirTimer = 400;
                 } else if (enemy.aiState === 'charge') {
                     enemy.speed = 2.5;
-                    if (Math.abs(tpCol - enemyCol) > Math.abs(tpRow - enemyRow)) {
-                        enemy.direction = tpCol > enemyCol ? 'right' : 'left';
+                    if (enemy.collisionCooldown > 0) {
+                        enemy.collisionCooldown -= dt;
                     } else {
-                        enemy.direction = tpRow > enemyRow ? 'down' : 'up';
+                        if (Math.abs(tpCol - enemyCol) > Math.abs(tpRow - enemyRow)) {
+                            enemy.direction = tpCol > enemyCol ? 'right' : 'left';
+                        } else {
+                            enemy.direction = tpRow > enemyRow ? 'down' : 'up';
+                        }
                     }
                     enemy.changeDirTimer = 200;
                     // Rastro de fogo na carga (apenas enfurecido)
@@ -2076,8 +2098,8 @@ function updateEnemies(dt) {
             }
         }
 
-        // Timer de mudança de direção
-        if (enemy.changeDirTimer <= 0) {
+        // Timer de mudança de direção (não afeta chefão que tem IA própria)
+        if (enemy.changeDirTimer <= 0 && enemy.type !== 'boss') {
             enemy.direction = getRandomDirection();
             enemy.changeDirTimer = Math.random() * 2000 + 1000;
         }
@@ -2092,10 +2114,19 @@ function updateEnemies(dt) {
         const nextX = enemy.x + dx * enemy.speed;
         const nextY = enemy.y + dy * enemy.speed;
         
-        // Fantasma atravessa paredes
+        // Fantasma atravessa paredes; chefão tenta direção alternativa na colisão
         if (enemy.type === 'ghost' || !checkCollision(nextX, nextY, enemy.w, enemy.h, null)) {
             enemy.x = nextX;
             enemy.y = nextY;
+        } else if (enemy.type === 'boss') {
+            // Tenta direção perpendicular à que estava indo
+            if (enemy.direction === 'up' || enemy.direction === 'down') {
+                enemy.direction = Math.random() < 0.5 ? 'left' : 'right';
+            } else {
+                enemy.direction = Math.random() < 0.5 ? 'up' : 'down';
+            }
+            enemy.changeDirTimer = 200;
+            enemy.collisionCooldown = 300; // não deixa o AI reverter por 300ms
         } else {
             enemy.direction = getRandomDirection();
             enemy.changeDirTimer = Math.random() * 1000 + 500;

@@ -1486,6 +1486,22 @@ function drawEnemy(ctx, enemy) {
         ctx.arc(cx, cy, bossR, 0, Math.PI * 2);
         ctx.fill();
         
+        // Barra de HP do chefão (desenhada antes da coroa para não sobrepor)
+        if (enemy.hp !== undefined && enemy.maxHp) {
+            const barW = 44;
+            const barH = 4;
+            const barX = cx - barW / 2;
+            const barY = enemy.y - 12;
+            ctx.fillStyle = '#222';
+            ctx.fillRect(barX - 1, barY - 1, barW + 2, barH + 2);
+            const hpRatio = enemy.hp / enemy.maxHp;
+            ctx.fillStyle = hpRatio > 0.5 ? '#2ecc71' : hpRatio > 0.25 ? '#f39c12' : '#e74c3c';
+            ctx.fillRect(barX, barY, barW * hpRatio, barH);
+            ctx.strokeStyle = '#fff';
+            ctx.lineWidth = 1;
+            ctx.strokeRect(barX, barY, barW, barH);
+        }
+        
         // Coroa
         ctx.fillStyle = isEnraged ? '#ff6b6b' : '#f1c40f';
         ctx.beginPath();
@@ -1519,22 +1535,6 @@ function drawEnemy(ctx, enemy) {
             ctx.arc(cx, cy + 3, 5, 0.2, Math.PI - 0.2);
         }
         ctx.stroke();
-        
-        // Barra de HP do chefão
-        if (enemy.hp !== undefined && enemy.maxHp) {
-            const barW = 44;
-            const barH = 4;
-            const barX = cx - barW / 2;
-            const barY = enemy.y - 10;
-            ctx.fillStyle = '#222';
-            ctx.fillRect(barX - 1, barY - 1, barW + 2, barH + 2);
-            const hpRatio = enemy.hp / enemy.maxHp;
-            ctx.fillStyle = hpRatio > 0.5 ? '#2ecc71' : hpRatio > 0.25 ? '#f39c12' : '#e74c3c';
-            ctx.fillRect(barX, barY, barW * hpRatio, barH);
-            ctx.strokeStyle = '#fff';
-            ctx.lineWidth = 1;
-            ctx.strokeRect(barX, barY, barW, barH);
-        }
         
         // Indicador de estado da IA
         if (enemy.aiState) {
@@ -2114,8 +2114,11 @@ function updateEnemies(dt) {
         const nextX = enemy.x + dx * enemy.speed;
         const nextY = enemy.y + dy * enemy.speed;
         
-        // Fantasma atravessa paredes; chefão tenta direção alternativa na colisão
-        if (enemy.type === 'ghost' || !checkCollision(nextX, nextY, enemy.w, enemy.h, null)) {
+        // Fantasma atravessa paredes (mas não sai da arena); chefão tenta direção alternativa na colisão
+        if (enemy.type === 'ghost') {
+            enemy.x = Math.max(TILE_SIZE, Math.min(COLS * TILE_SIZE - TILE_SIZE - enemy.w, nextX));
+            enemy.y = Math.max(TILE_SIZE, Math.min(ROWS * TILE_SIZE - TILE_SIZE - enemy.h, nextY));
+        } else if (!checkCollision(nextX, nextY, enemy.w, enemy.h, null)) {
             enemy.x = nextX;
             enemy.y = nextY;
         } else if (enemy.type === 'boss') {

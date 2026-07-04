@@ -296,11 +296,17 @@ window.addEventListener('keydown', (e) => {
         } catch(ex) {}
         let menuHandled = false;
         switch (e.key) {
-            case 'ArrowUp': case 'w': case 'W': case 'ArrowLeft': case 'a': case 'A':
-                updateMenuFocus(-1);
+            case 'ArrowUp': case 'w': case 'W':
+                updateMenuFocus(-1, 'y');
                 menuHandled = true; break;
-            case 'ArrowDown': case 's': case 'S': case 'ArrowRight': case 'd': case 'D':
-                updateMenuFocus(1);
+            case 'ArrowDown': case 's': case 'S':
+                updateMenuFocus(1, 'y');
+                menuHandled = true; break;
+            case 'ArrowLeft': case 'a': case 'A':
+                updateMenuFocus(-1, 'x');
+                menuHandled = true; break;
+            case 'ArrowRight': case 'd': case 'D':
+                updateMenuFocus(1, 'x');
                 menuHandled = true; break;
             case ' ': case 'Enter': case 'z': case 'Z': case 'x': case 'X':
                 activateFocusedElement();
@@ -3305,7 +3311,7 @@ function getFocusableElements(screen) {
     });
 }
 
-function updateMenuFocus(direction = 0) {
+function updateMenuFocus(direction = 0, axis = 'x') {
     const activeScreen = getActiveMenuScreen();
     if (!activeScreen) {
         lastActiveScreen = null;
@@ -3326,7 +3332,44 @@ function updateMenuFocus(direction = 0) {
     }
 
     elements.forEach(el => el.classList.remove('focused'));
-    menuFocusIndex = (menuFocusIndex + direction + elements.length) % elements.length;
+
+    const isLevelGrid = activeScreen.id === 'level-screen';
+    const GRID_COLS = 4;
+
+    if (isLevelGrid && direction !== 0) {
+        const currentEl = elements[menuFocusIndex];
+        const isLevelBtn = currentEl && currentEl.classList.contains('level-btn');
+
+        if (isLevelBtn && axis === 'y') {
+            const newIdx = menuFocusIndex + direction * GRID_COLS;
+            if (newIdx >= 1 && newIdx < elements.length) {
+                menuFocusIndex = newIdx;
+            } else if (direction === -1) {
+                menuFocusIndex = 0; // vai para o botão voltar
+            }
+        } else if (isLevelBtn && axis === 'x') {
+            const rowStart = Math.floor((menuFocusIndex - 1) / GRID_COLS) * GRID_COLS + 1;
+            const rowEnd = Math.min(rowStart + GRID_COLS - 1, elements.length - 1);
+            const newIdx = menuFocusIndex + direction;
+            if (newIdx >= rowStart && newIdx <= rowEnd) {
+                menuFocusIndex = newIdx;
+            } else if (newIdx < rowStart && direction === -1) {
+                // Primeira coluna: vai para botão voltar (linha 1) ou última coluna da linha anterior
+                if (menuFocusIndex === 1) {
+                    menuFocusIndex = 0;
+                } else {
+                    menuFocusIndex = rowStart - 1;
+                }
+            }
+        } else if (menuFocusIndex === 0 && isLevelGrid) {
+            // Botão voltar: direita ou baixo vai para primeiro level
+            if (direction === 1) menuFocusIndex = 1;
+        } else {
+            menuFocusIndex = (menuFocusIndex + direction + elements.length) % elements.length;
+        }
+    } else {
+        menuFocusIndex = (menuFocusIndex + direction + elements.length) % elements.length;
+    }
 
     const currentEl = elements[menuFocusIndex];
     if (currentEl) {

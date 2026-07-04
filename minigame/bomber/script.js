@@ -559,8 +559,20 @@ function spawnEnemiesForLevel(level) {
         types = ['circle', 'square', 'mamona', 'rat', 'pepper'];
     } else if (level === 4) {
         types = ['square', 'mamona', 'rat', 'pepper', 'pepper'];
-    } else {
+    } else if (level === 5) {
         types = ['mamona', 'mamona', 'rat', 'rat', 'pepper', 'pepper'];
+    } else if (level === 6) {
+        types = ['boss'];
+    } else if (level === 7) {
+        types = ['pepper', 'pepper', 'rat', 'rat', 'mamona', 'square', 'circle'];
+    } else if (level === 8) {
+        types = ['ghost', 'ghost', 'pepper', 'rat', 'mamona'];
+    } else if (level === 9) {
+        types = ['ghost', 'rat', 'rat', 'pepper', 'pepper', 'tank'];
+    } else if (level === 10) {
+        types = ['tank', 'tank', 'ghost', 'pepper', 'rat', 'mamona'];
+    } else {
+        types = ['tank', 'ghost', 'pepper', 'pepper', 'rat', 'mamona', 'square'];
     }
     
     const validCells = [];
@@ -573,11 +585,20 @@ function spawnEnemiesForLevel(level) {
     }
     
     types.forEach(type => {
-        let cellIndex = Math.floor(Math.random() * validCells.length);
-        let cell = validCells.splice(cellIndex, 1)[0] || { r: 11, c: 11 };
+        let cell;
+        if (type === 'boss') {
+            cell = { r: 6, c: 6 };
+            // Garante que o centro do mapa esteja livre
+            if (grid[6][6] === 2) grid[6][6] = 0;
+        } else {
+            let cellIndex = Math.floor(Math.random() * validCells.length);
+            cell = validCells.splice(cellIndex, 1)[0] || { r: 11, c: 11 };
+        }
         
         let color = '#ffffff';
         let speed = 1.0;
+        let hp = undefined;
+        let maxHp = undefined;
         if (type === 'circle') {
             color = '#ffffff';
             speed = 0.8;
@@ -593,9 +614,22 @@ function spawnEnemiesForLevel(level) {
         } else if (type === 'pepper') {
             color = '#d50000';
             speed = 1.4;
+        } else if (type === 'ghost') {
+            color = '#80d4ff';
+            speed = 1.0;
+        } else if (type === 'tank') {
+            color = '#e67e22';
+            speed = 0.6;
+            hp = 3;
+            maxHp = 3;
+        } else if (type === 'boss') {
+            color = '#8e44ad';
+            speed = 0.8;
+            hp = 5;
+            maxHp = 5;
         }
         
-        enemies.push({
+        const enemy = {
             type,
             x: cell.c * TILE_SIZE + 5,
             y: cell.r * TILE_SIZE + 5,
@@ -606,7 +640,12 @@ function spawnEnemiesForLevel(level) {
             color,
             alive: true,
             changeDirTimer: Math.random() * 1000 + 1000
-        });
+        };
+        if (hp !== undefined) {
+            enemy.hp = hp;
+            enemy.maxHp = maxHp;
+        }
+        enemies.push(enemy);
     });
 }
 
@@ -832,7 +871,8 @@ function triggerExplosion(bomb) {
     // Cria a explosão física
     explosions.push({
         cells: affectedCells,
-        timer: 400 // dura 400ms
+        timer: 400, // dura 400ms
+        hitEnemies: new Set() // rastreia inimigos já atingidos por esta explosão
     });
 
     // Remove blocos atingidos e rola chance de spawnar itens
@@ -1351,6 +1391,121 @@ function drawEnemy(ctx, enemy) {
         ctx.moveTo(cx, cy - 5);
         ctx.quadraticCurveTo(cx - 2, cy - 8, cx - 4, cy - 7);
         ctx.stroke();
+    } else if (enemy.type === 'ghost') {
+        // Fantasma translúcido
+        ctx.globalAlpha = 0.7;
+        ctx.fillStyle = '#80d4ff';
+        ctx.beginPath();
+        ctx.arc(cx, cy - 2, r, Math.PI, 0);
+        ctx.quadraticCurveTo(cx + r, cy + r * 0.6, cx + r * 0.5, cy + r * 0.3);
+        ctx.quadraticCurveTo(cx, cy + r * 0.7, cx - r * 0.5, cy + r * 0.3);
+        ctx.quadraticCurveTo(cx - r, cy + r * 0.6, cx - r, cy - 2);
+        ctx.fill();
+        ctx.globalAlpha = 1;
+        
+        // Olhos escuros
+        ctx.fillStyle = '#1a1a2e';
+        ctx.beginPath();
+        ctx.arc(cx - 3, cy - 3, 2, 0, Math.PI * 2);
+        ctx.arc(cx + 3, cy - 3, 2, 0, Math.PI * 2);
+        ctx.fill();
+    } else if (enemy.type === 'tank') {
+        // Tanque blindado - laranja escuro
+        ctx.fillStyle = '#d35400';
+        ctx.beginPath();
+        ctx.roundRect(enemy.x + 1, enemy.y + 1, enemy.w - 2, enemy.h - 2, 3);
+        ctx.fill();
+        
+        // Armadura (borda mais grossa)
+        ctx.strokeStyle = '#a04000';
+        ctx.lineWidth = 3;
+        ctx.beginPath();
+        ctx.roundRect(enemy.x + 2, enemy.y + 2, enemy.w - 4, enemy.h - 4, 2);
+        ctx.stroke();
+        
+        // Olhos amarelos
+        ctx.fillStyle = '#f1c40f';
+        ctx.beginPath();
+        ctx.arc(cx - 3, cy - 1, 2, 0, Math.PI * 2);
+        ctx.arc(cx + 3, cy - 1, 2, 0, Math.PI * 2);
+        ctx.fill();
+        
+        // Barra de HP
+        if (enemy.hp !== undefined && enemy.maxHp > 1) {
+            const barW = enemy.w - 4;
+            const barH = 3;
+            const barX = enemy.x + 2;
+            const barY = enemy.y - 5;
+            ctx.fillStyle = '#333';
+            ctx.fillRect(barX, barY, barW, barH);
+            ctx.fillStyle = enemy.hp / enemy.maxHp > 0.5 ? '#2ecc71' : enemy.hp / enemy.maxHp > 0.25 ? '#f39c12' : '#e74c3c';
+            ctx.fillRect(barX, barY, barW * (enemy.hp / enemy.maxHp), barH);
+        }
+    } else if (enemy.type === 'boss') {
+        // Chefão - Grande e imponente
+        const bossR = r + 6;
+        const bossSize = bossR * 2;
+        
+        // Aura pulsante
+        ctx.shadowColor = '#8e44ad';
+        ctx.shadowBlur = 15;
+        ctx.fillStyle = '#6c3483';
+        ctx.beginPath();
+        ctx.arc(cx, cy, bossR + 3, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.shadowBlur = 0;
+        
+        // Corpo principal
+        ctx.fillStyle = enemy.hp <= 2 ? '#e74c3c' : enemy.hp <= 3 ? '#f39c12' : '#8e44ad';
+        ctx.beginPath();
+        ctx.arc(cx, cy, bossR, 0, Math.PI * 2);
+        ctx.fill();
+        
+        // Coroa
+        ctx.fillStyle = '#f1c40f';
+        ctx.beginPath();
+        ctx.moveTo(cx - 8, cy - bossR + 2);
+        ctx.lineTo(cx - 6, cy - bossR - 6);
+        ctx.lineTo(cx - 3, cy - bossR + 0);
+        ctx.lineTo(cx, cy - bossR - 8);
+        ctx.lineTo(cx + 3, cy - bossR + 0);
+        ctx.lineTo(cx + 6, cy - bossR - 6);
+        ctx.lineTo(cx + 8, cy - bossR + 2);
+        ctx.closePath();
+        ctx.fill();
+        
+        // Olhos brilhantes vermelhos
+        ctx.fillStyle = '#ff0000';
+        ctx.shadowColor = '#ff0000';
+        ctx.shadowBlur = 8;
+        ctx.beginPath();
+        ctx.arc(cx - 4, cy - 2, 3, 0, Math.PI * 2);
+        ctx.arc(cx + 4, cy - 2, 3, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.shadowBlur = 0;
+        
+        // Sorriso
+        ctx.strokeStyle = '#fff';
+        ctx.lineWidth = 1.5;
+        ctx.beginPath();
+        ctx.arc(cx, cy + 3, 5, 0.2, Math.PI - 0.2);
+        ctx.stroke();
+        
+        // Barra de HP do chefão
+        if (enemy.hp !== undefined && enemy.maxHp) {
+            const barW = 40;
+            const barH = 4;
+            const barX = cx - barW / 2;
+            const barY = enemy.y - 8;
+            ctx.fillStyle = '#333';
+            ctx.fillRect(barX, barY, barW, barH);
+            const hpRatio = enemy.hp / enemy.maxHp;
+            ctx.fillStyle = hpRatio > 0.5 ? '#2ecc71' : hpRatio > 0.25 ? '#f39c12' : '#e74c3c';
+            ctx.fillRect(barX, barY, barW * hpRatio, barH);
+            ctx.strokeStyle = '#fff';
+            ctx.lineWidth = 1;
+            ctx.strokeRect(barX, barY, barW, barH);
+        }
     }
     ctx.restore();
 }
@@ -1427,6 +1582,54 @@ function getLevelTheme() {
                 blockBorder: '#e94560',
                 blockFill: '#8a2be2',
                 floorFill: '#0e0b16'
+            };
+        case 6: // Boss - Templo Sombrio (Roxo Escuro)
+            return {
+                wallFill: '#0d0d1a',
+                wallStroke: '#2d1b4e',
+                blockBorder: '#6c3483',
+                blockFill: '#4a235a',
+                floorFill: '#1a0a2e'
+            };
+        case 7: // Caos (Laranja/Vermelho)
+            return {
+                wallFill: '#1a0d0d',
+                wallStroke: '#4a1a1a',
+                blockBorder: '#ff4500',
+                blockFill: '#cc3700',
+                floorFill: '#2a0d0d'
+            };
+        case 8: // Floresta Assombrada (Verde Musgo)
+            return {
+                wallFill: '#1a2614',
+                wallStroke: '#2d3d22',
+                blockBorder: '#4a6b3a',
+                blockFill: '#3d5a2e',
+                floorFill: '#0f1a0b'
+            };
+        case 9: // Fundo do Mar (Azul Profundo)
+            return {
+                wallFill: '#0a1628',
+                wallStroke: '#1a3a5c',
+                blockBorder: '#00bcd4',
+                blockFill: '#00838f',
+                floorFill: '#060e1a'
+            };
+        case 10: // Vulcão Ativo (Vermelho/Fogo)
+            return {
+                wallFill: '#1c0e0e',
+                wallStroke: '#3d1a1a',
+                blockBorder: '#ff6600',
+                blockFill: '#cc4400',
+                floorFill: '#2a0a05'
+            };
+        case 11: // Final - Galáxia (Roxo/Anil)
+            return {
+                wallFill: '#0a0a1a',
+                wallStroke: '#1a1a4a',
+                blockBorder: '#aa55ff',
+                blockFill: '#6a2be0',
+                floorFill: '#0d061a'
             };
         case 1:
         default: // Clássico (Moss Green)
@@ -1724,6 +1927,36 @@ function updateEnemies(dt) {
             }
         }
 
+        // Chefão: Persegue o jogador sempre
+        if (enemy.type === 'boss') {
+            let targetPlayer = null;
+            let minDist = Infinity;
+            players.forEach(p => {
+                if (!p.alive) return;
+                const pCol = Math.floor((p.x + p.w / 2) / TILE_SIZE);
+                const pRow = Math.floor((p.y + p.h / 2) / TILE_SIZE);
+                const dist = Math.abs(pCol - enemyCol) + Math.abs(pRow - enemyRow);
+                if (dist < minDist) {
+                    minDist = dist;
+                    targetPlayer = p;
+                }
+            });
+            if (targetPlayer) {
+                const tpCol = Math.floor((targetPlayer.x + targetPlayer.w / 2) / TILE_SIZE);
+                const tpRow = Math.floor((targetPlayer.y + targetPlayer.h / 2) / TILE_SIZE);
+                if (enemyCol === tpCol) {
+                    enemy.direction = tpRow > enemyRow ? 'down' : 'up';
+                } else if (enemyRow === tpRow) {
+                    enemy.direction = tpCol > enemyCol ? 'right' : 'left';
+                } else if (Math.abs(tpCol - enemyCol) > Math.abs(tpRow - enemyRow)) {
+                    enemy.direction = tpCol > enemyCol ? 'right' : 'left';
+                } else {
+                    enemy.direction = tpRow > enemyRow ? 'down' : 'up';
+                }
+                enemy.changeDirTimer = 500;
+            }
+        }
+
         // Timer de mudança de direção
         if (enemy.changeDirTimer <= 0) {
             enemy.direction = getRandomDirection();
@@ -1740,8 +1973,8 @@ function updateEnemies(dt) {
         const nextX = enemy.x + dx * enemy.speed;
         const nextY = enemy.y + dy * enemy.speed;
         
-        // Usa checkCollision diretamente passsando null
-        if (!checkCollision(nextX, nextY, enemy.w, enemy.h, null)) {
+        // Fantasma atravessa paredes
+        if (enemy.type === 'ghost' || !checkCollision(nextX, nextY, enemy.w, enemy.h, null)) {
             enemy.x = nextX;
             enemy.y = nextY;
         } else {
@@ -1793,18 +2026,18 @@ function clearLevel() {
     isGameOver = true;
     if (gameLoopId) cancelAnimationFrame(gameLoopId);
     
-    if (currentLevel === unlockedLevel && unlockedLevel < 5) {
+    if (currentLevel === unlockedLevel && unlockedLevel < 11) {
         unlockedLevel++;
         localStorage.setItem('bomber_unlocked_level', unlockedLevel);
     }
     
     goTitle.textContent = `Nível ${currentLevel} Concluído!`;
-    goSubtitle.textContent = currentLevel < 5 ? 'Avançar para a próxima fase?' : 'Você completou todas as fases!';
+    goSubtitle.textContent = currentLevel < 11 ? 'Avançar para a próxima fase?' : 'Você completou todas as fases!';
     goEmoji.textContent = '🎉';
     
     const restartBtn = document.getElementById('restart-btn');
     if (restartBtn) {
-        if (currentLevel < 5) {
+        if (currentLevel < 11) {
             restartBtn.innerHTML = 'Próxima Fase <span class="btn-emoji">➡️</span>';
         } else {
             restartBtn.innerHTML = 'Menu Principal <span class="btn-emoji">🏠</span>';
@@ -1928,6 +2161,7 @@ function update(timestamp) {
             // Valida dano de fogo nos inimigos
             enemies.forEach(enemy => {
                 if (!enemy.alive) return;
+                if (exp.hitEnemies.has(enemy)) return; // já atingido por esta explosão
                 
                 const ex = enemy.x + enemy.w / 2;
                 const ey = enemy.y + enemy.h / 2;
@@ -1936,8 +2170,19 @@ function update(timestamp) {
 
                 const hit = exp.cells.some(cell => cell.col === eCol && cell.row === eRow);
                 if (hit) {
-                    enemy.alive = false;
-                    showToast('Inimigo derrotado!', 'success');
+                    exp.hitEnemies.add(enemy);
+                    if (enemy.hp !== undefined) {
+                        enemy.hp--;
+                        if (enemy.hp <= 0) {
+                            enemy.alive = false;
+                            showToast('Inimigo derrotado!', 'success');
+                        } else {
+                            showToast(`💥 Chefão atingido! (${enemy.hp}/${enemy.maxHp})`, 'info');
+                        }
+                    } else {
+                        enemy.alive = false;
+                        showToast('Inimigo derrotado!', 'success');
+                    }
                 }
             });
         }
@@ -2506,7 +2751,7 @@ if (btnRestart) {
         if (gameMode === 'levels') {
             const p1 = players[0];
             if (p1 && p1.alive) {
-                if (currentLevel < 5) {
+                if (currentLevel < 11) {
                     currentLevel++;
                     initGame('levels');
                 } else {

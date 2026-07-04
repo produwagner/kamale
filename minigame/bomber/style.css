@@ -572,22 +572,22 @@ body {
 /* Estilos para Seleção de Fases */
 .level-grid {
     display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 12px;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 8px;
     width: 100%;
-    max-width: 240px;
-    margin: 15px auto;
+    max-width: 300px;
+    margin: 12px auto;
 }
 
 .level-btn {
-    padding: 10px 0 !important;
-    font-size: 1.2rem !important;
-    min-width: 50px;
-    height: 50px;
+    padding: 6px 0 !important;
+    font-size: 1.1rem !important;
+    min-width: 40px;
+    height: 42px;
     display: flex;
     justify-content: center;
     align-items: center;
-    border-radius: 10px;
+    border-radius: 8px;
 }
 
 .level-btn.locked {
@@ -697,17 +697,17 @@ body.in-iframe .game-over-content {
 
 /* Overrides específicos para o grid de fases no iframe */
 body.in-iframe .level-grid {
-    gap: 6px !important;
-    max-width: 180px !important;
-    margin: 8px auto !important;
+    gap: 4px !important;
+    max-width: 280px !important;
+    margin: 6px auto !important;
 }
 body.in-iframe .level-btn {
-    width: 32px !important;
-    height: 32px !important;
+    width: 28px !important;
+    height: 28px !important;
     min-width: 0 !important;
     padding: 0 !important;
-    font-size: 0.85rem !important;
-    border-radius: 6px !important;
+    font-size: 0.7rem !important;
+    border-radius: 4px !important;
 }
 
 /* ═══ MENU FOCUS NAVIGATION ═══ */

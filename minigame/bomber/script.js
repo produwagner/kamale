@@ -512,7 +512,11 @@ function renderLevels() {
         const lvl = parseInt(btn.getAttribute('data-level'));
         if (lvl <= unlockedLevel) {
             btn.classList.remove('locked');
-            btn.innerHTML = `${lvl}`;
+            if (lvl === 6 || lvl === 11 || lvl === 17) {
+                btn.innerHTML = '👑';
+            } else {
+                btn.innerHTML = `${lvl}`;
+            }
             btn.onclick = () => {
                 currentLevel = lvl;
                 initGame('levels');
@@ -549,6 +553,19 @@ function selectDoorPosition() {
     doorActive = false;
 }
 
+function clearBossArea(center) {
+    for (let dr = -1; dr <= 1; dr++) {
+        for (let dc = -1; dc <= 1; dc++) {
+            const rr = center + dr, cc = center + dc;
+            if (rr > 0 && rr < ROWS - 1 && cc > 0 && cc < COLS - 1) {
+                if (grid[rr][cc] === 2 || grid[rr][cc] === 1) {
+                    grid[rr][cc] = 0;
+                }
+            }
+        }
+    }
+}
+
 function spawnEnemiesForLevel(level) {
     enemies = [];
     
@@ -565,17 +582,7 @@ function spawnEnemiesForLevel(level) {
         types = ['mamona', 'mamona', 'rat', 'rat', 'pepper', 'pepper'];
     } else if (level === 6) {
         types = ['boss'];
-        // Limpa uma área 3x3 no centro para o chefão ter espaço
-        for (let dr = -1; dr <= 1; dr++) {
-            for (let dc = -1; dc <= 1; dc++) {
-                const rr = 6 + dr, cc = 6 + dc;
-                if (rr > 0 && rr < ROWS - 1 && cc > 0 && cc < COLS - 1) {
-                    if (grid[rr][cc] === 2 || grid[rr][cc] === 1) {
-                        grid[rr][cc] = 0;
-                    }
-                }
-            }
-        }
+        clearBossArea(6);
     } else if (level === 7) {
         types = ['pepper', 'pepper', 'rat', 'rat', 'mamona', 'square', 'circle'];
     } else if (level === 8) {
@@ -584,8 +591,32 @@ function spawnEnemiesForLevel(level) {
         types = ['ghost', 'rat', 'rat', 'pepper', 'pepper', 'tank'];
     } else if (level === 10) {
         types = ['tank', 'tank', 'ghost', 'pepper', 'rat', 'mamona'];
+    } else if (level === 11) {
+        types = ['boss2'];
+        clearBossArea(6);
+    } else if (level === 12) {
+        types = ['icicle', 'ninja', 'ghost', 'tank', 'pepper'];
+    } else if (level === 13) {
+        types = ['ninja', 'ninja', 'icicle', 'ghost', 'rat'];
+    } else if (level === 14) {
+        types = ['icicle', 'ninja', 'tank', 'pepper', 'ghost', 'mamona'];
+    } else if (level === 15) {
+        types = ['ninja', 'icicle', 'ghost', 'tank', 'pepper', 'rat', 'square'];
+    } else if (level === 16) {
+        types = ['icicle', 'ninja', 'ghost', 'tank', 'pepper', 'rat', 'mamona', 'circle'];
+    } else if (level === 17) {
+        types = ['boss3'];
+        clearBossArea(6);
+    } else if (level === 18) {
+        types = ['icicle', 'icicle', 'ninja', 'ghost', 'tank', 'pepper'];
+    } else if (level === 19) {
+        types = ['ninja', 'ninja', 'icicle', 'ghost', 'tank', 'rat', 'mamona'];
+    } else if (level === 20) {
+        types = ['icicle', 'ninja', 'ghost', 'tank', 'pepper', 'rat', 'square', 'circle'];
+    } else if (level === 21) {
+        types = ['ninja', 'icicle', 'ghost', 'tank', 'pepper', 'rat', 'mamona', 'square'];
     } else {
-        types = ['tank', 'ghost', 'pepper', 'pepper', 'rat', 'mamona', 'square'];
+        types = ['icicle', 'ninja', 'ghost', 'tank', 'pepper', 'rat', 'mamona', 'square', 'circle'];
     }
     
     const validCells = [];
@@ -599,7 +630,7 @@ function spawnEnemiesForLevel(level) {
     
     types.forEach(type => {
         let cell;
-        if (type === 'boss') {
+        if (type === 'boss' || type === 'boss2' || type === 'boss3') {
             cell = { r: 6, c: 6 };
         } else {
             let cellIndex = Math.floor(Math.random() * validCells.length);
@@ -638,6 +669,22 @@ function spawnEnemiesForLevel(level) {
             speed = 0.8;
             hp = 8;
             maxHp = 8;
+        } else if (type === 'boss2') {
+            color = '#00bcd4';
+            speed = 1.0;
+            hp = 10;
+            maxHp = 10;
+        } else if (type === 'boss3') {
+            color = '#ff1744';
+            speed = 1.2;
+            hp = 12;
+            maxHp = 12;
+        } else if (type === 'ninja') {
+            color = '#2c3e50';
+            speed = 1.3;
+        } else if (type === 'icicle') {
+            color = '#00e5ff';
+            speed = 1.6;
         }
         
         const enemy = {
@@ -1452,15 +1499,67 @@ function drawEnemy(ctx, enemy) {
             ctx.fillStyle = enemy.hp / enemy.maxHp > 0.5 ? '#2ecc71' : enemy.hp / enemy.maxHp > 0.25 ? '#f39c12' : '#e74c3c';
             ctx.fillRect(barX, barY, barW * (enemy.hp / enemy.maxHp), barH);
         }
-    } else if (enemy.type === 'boss') {
+    } else if (enemy.type === 'ninja') {
+        // Ninja - círculo escuro com máscara
+        ctx.fillStyle = '#2c3e50';
+        ctx.beginPath();
+        ctx.arc(cx, cy, r, 0, Math.PI * 2);
+        ctx.fill();
+        // Faixa na cabeça
+        ctx.fillStyle = '#e74c3c';
+        ctx.fillRect(cx - r, cy - 2, r * 2, 3);
+        // Olhos
+        ctx.fillStyle = '#fff';
+        ctx.beginPath();
+        ctx.arc(cx - 3, cy - 1, 2, 0, Math.PI * 2);
+        ctx.arc(cx + 3, cy - 1, 2, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.fillStyle = '#000';
+        ctx.beginPath();
+        ctx.arc(cx - 3, cy - 1, 1, 0, Math.PI * 2);
+        ctx.arc(cx + 3, cy - 1, 1, 0, Math.PI * 2);
+        ctx.fill();
+    } else if (enemy.type === 'icicle') {
+        // Icicle - cristal de gelo azul
+        ctx.fillStyle = '#00e5ff';
+        ctx.beginPath();
+        ctx.moveTo(cx, enemy.y + 1);
+        ctx.lineTo(enemy.x + enemy.w - 2, enemy.y + enemy.h / 2);
+        ctx.lineTo(cx, enemy.y + enemy.h - 2);
+        ctx.lineTo(enemy.x + 2, enemy.y + enemy.h / 2);
+        ctx.closePath();
+        ctx.fill();
+        ctx.strokeStyle = '#80deea';
+        ctx.lineWidth = 1;
+        ctx.stroke();
+        // Brilho
+        ctx.fillStyle = 'rgba(255,255,255,0.3)';
+        ctx.beginPath();
+        ctx.arc(cx - 2, cy - 2, 2, 0, Math.PI * 2);
+        ctx.fill();
+    } else if (enemy.type === 'boss' || enemy.type === 'boss2' || enemy.type === 'boss3') {
+        const isBoss2 = enemy.type === 'boss2';
+        const isBoss3 = enemy.type === 'boss3';
         const bossR = r + 6;
         const isEnraged = enemy.hp <= 2;
         const isWounded = enemy.hp <= 3;
         
+        // Cores base por tipo de chefão
+        const bossColors = isBoss2 ? {
+            calm: '#00bcd4', wounded: '#ff9800', enraged: '#e74c3c',
+            aura: '#004d40', shadow: '#00e5ff'
+        } : isBoss3 ? {
+            calm: '#607d8b', wounded: '#9c27b0', enraged: '#ff1744',
+            aura: '#1a1a1a', shadow: '#ffffff'
+        } : {
+            calm: '#8e44ad', wounded: '#e67e22', enraged: '#c0392b',
+            aura: '#6c3483', shadow: '#8e44ad'
+        };
+        
         // Aura pulsante (muda com a fase)
-        ctx.shadowColor = isEnraged ? '#e74c3c' : isWounded ? '#f39c12' : '#8e44ad';
+        ctx.shadowColor = isEnraged ? bossColors.enraged : isWounded ? bossColors.wounded : bossColors.shadow;
         ctx.shadowBlur = isEnraged ? 25 : 15;
-        ctx.fillStyle = isEnraged ? '#6c1a1a' : '#6c3483';
+        ctx.fillStyle = isEnraged ? '#6c1a1a' : bossColors.aura;
         ctx.beginPath();
         ctx.arc(cx, cy, bossR + 3, 0, Math.PI * 2);
         ctx.fill();
@@ -1472,7 +1571,7 @@ function drawEnemy(ctx, enemy) {
                 const angle = t + (i * Math.PI / 2);
                 const px2 = cx + Math.cos(angle) * (bossR + 8);
                 const py2 = cy + Math.sin(angle) * (bossR + 8);
-                ctx.fillStyle = '#ff4444';
+                ctx.fillStyle = isBoss2 ? '#00e5ff' : isBoss3 ? '#ff1744' : '#ff4444';
                 ctx.beginPath();
                 ctx.arc(px2, py2, 2, 0, Math.PI * 2);
                 ctx.fill();
@@ -1481,7 +1580,7 @@ function drawEnemy(ctx, enemy) {
         ctx.shadowBlur = 0;
         
         // Corpo principal (muda de cor conforme a vida)
-        ctx.fillStyle = isEnraged ? '#c0392b' : isWounded ? '#e67e22' : '#8e44ad';
+        ctx.fillStyle = isEnraged ? bossColors.enraged : isWounded ? bossColors.wounded : bossColors.calm;
         ctx.beginPath();
         ctx.arc(cx, cy, bossR, 0, Math.PI * 2);
         ctx.fill();
@@ -1503,7 +1602,7 @@ function drawEnemy(ctx, enemy) {
         }
         
         // Coroa
-        ctx.fillStyle = isEnraged ? '#ff6b6b' : '#f1c40f';
+        ctx.fillStyle = isBoss2 ? '#00e5ff' : isBoss3 ? '#ffffff' : (isEnraged ? '#ff6b6b' : '#f1c40f');
         ctx.beginPath();
         ctx.moveTo(cx - 8, cy - bossR + 2);
         ctx.lineTo(cx - 6, cy - bossR - 6);
@@ -1516,8 +1615,9 @@ function drawEnemy(ctx, enemy) {
         ctx.fill();
         
         // Olhos brilhantes
-        ctx.fillStyle = isEnraged ? '#ffff00' : '#ff0000';
-        ctx.shadowColor = isEnraged ? '#ffff00' : '#ff0000';
+        const eyeColor = isBoss2 ? '#ffff00' : isBoss3 ? '#00e5ff' : (isEnraged ? '#ffff00' : '#ff0000');
+        ctx.fillStyle = eyeColor;
+        ctx.shadowColor = eyeColor;
         ctx.shadowBlur = 10;
         ctx.beginPath();
         ctx.arc(cx - 4, cy - 2, 3, 0, Math.PI * 2);
@@ -1661,13 +1761,101 @@ function getLevelTheme() {
                 blockFill: '#cc4400',
                 floorFill: '#2a0a05'
             };
-        case 11: // Final - Galáxia (Roxo/Anil)
+        case 11: // Boss2 - Abismo Cósmico (Azul/Ciano)
             return {
-                wallFill: '#0a0a1a',
-                wallStroke: '#1a1a4a',
-                blockBorder: '#aa55ff',
-                blockFill: '#6a2be0',
-                floorFill: '#0d061a'
+                wallFill: '#0a0a2e',
+                wallStroke: '#0d47a1',
+                blockBorder: '#00e5ff',
+                blockFill: '#0097a7',
+                floorFill: '#05051a'
+            };
+        case 12: // Caverna de Gelo (Azul Gelo)
+            return {
+                wallFill: '#1a2a3a',
+                wallStroke: '#2a4a6a',
+                blockBorder: '#80deea',
+                blockFill: '#4dd0e1',
+                floorFill: '#0e1a26'
+            };
+        case 13: // Reino Sombrio (Cinza Escuro)
+            return {
+                wallFill: '#1a1a1a',
+                wallStroke: '#333333',
+                blockBorder: '#666666',
+                blockFill: '#444444',
+                floorFill: '#0a0a0a'
+            };
+        case 14: // Túneis de Lava (Vermelho/Amarelo)
+            return {
+                wallFill: '#2a0d0d',
+                wallStroke: '#5a1a1a',
+                blockBorder: '#ff8f00',
+                blockFill: '#e65100',
+                floorFill: '#1a0505'
+            };
+        case 15: // Cavernas de Cristal (Ciano/Rosa)
+            return {
+                wallFill: '#1a0a2a',
+                wallStroke: '#3a1a5a',
+                blockBorder: '#ff4081',
+                blockFill: '#e040fb',
+                floorFill: '#0d051a'
+            };
+        case 16: // Crepúsculo (Roxo Escuro)
+            return {
+                wallFill: '#1a0a1a',
+                wallStroke: '#3a1a3a',
+                blockBorder: '#ab47bc',
+                blockFill: '#7b1fa2',
+                floorFill: '#0d050d'
+            };
+        case 17: // Boss3 - O Vazio (Preto/Branco)
+            return {
+                wallFill: '#050505',
+                wallStroke: '#1a1a1a',
+                blockBorder: '#ffffff',
+                blockFill: '#555555',
+                floorFill: '#000000'
+            };
+        case 18: // Tempestade (Cinza/Azul)
+            return {
+                wallFill: '#1a1a2a',
+                wallStroke: '#3a3a5a',
+                blockBorder: '#5c6bc0',
+                blockFill: '#3949ab',
+                floorFill: '#0a0a1a'
+            };
+        case 19: // Ruínas Antigas (Dourado/Marrom)
+            return {
+                wallFill: '#2a1a0a',
+                wallStroke: '#5a3a1a',
+                blockBorder: '#ffb300',
+                blockFill: '#ff8f00',
+                floorFill: '#1a0d05'
+            };
+        case 20: // Inferno (Vermelho/Preto)
+            return {
+                wallFill: '#1a0000',
+                wallStroke: '#4a0000',
+                blockBorder: '#ff1744',
+                blockFill: '#d50000',
+                floorFill: '#0a0000'
+            };
+        case 21: // Paraíso (Verde/Azul)
+            return {
+                wallFill: '#0a1a0a',
+                wallStroke: '#1a3a1a',
+                blockBorder: '#69f0ae',
+                blockFill: '#00e676',
+                floorFill: '#050d05'
+            };
+        case 22: // Arco-Íris (Colorido)
+            return {
+                wallFill: '#1a0a2a',
+                wallStroke: '#2a1a4a',
+                blockBorder: '#ff6f00',
+                blockFill: '#aa00ff',
+                floorFill: '#0d051a'
             };
         case 1:
         default: // Clássico (Moss Green)
@@ -1969,6 +2157,64 @@ function updateEnemies(dt) {
             }
         }
         
+        // Ninja: Teletransporte para perto do jogador
+        if (enemy.type === 'ninja' && enemy.changeDirTimer <= 0) {
+            let target = null;
+            let minD = Infinity;
+            players.forEach(p => {
+                if (!p.alive) return;
+                const d = Math.abs(p.x - enemy.x) + Math.abs(p.y - enemy.y);
+                if (d < minD) { minD = d; target = p; }
+            });
+            if (target && minD > 60) {
+                const tc = Math.floor((target.x + target.w / 2) / TILE_SIZE);
+                const tr = Math.floor((target.y + target.h / 2) / TILE_SIZE);
+                const candidates = [];
+                for (let dr = -2; dr <= 2; dr++) {
+                    for (let dc = -2; dc <= 2; dc++) {
+                        const rr = tr + dr, cc = tc + dc;
+                        if (rr > 0 && rr < ROWS - 1 && cc > 0 && cc < COLS - 1 && grid[rr][cc] === 0) {
+                            const taken = enemies.some(e => e !== enemy && e.alive && Math.floor((e.x+e.w/2)/TILE_SIZE) === cc && Math.floor((e.y+e.h/2)/TILE_SIZE) === rr);
+                            if (!taken) candidates.push({ r: rr, c: cc });
+                        }
+                    }
+                }
+                if (candidates.length > 0) {
+                    const pick = candidates[Math.floor(Math.random() * candidates.length)];
+                    enemy.x = pick.c * TILE_SIZE + 5;
+                    enemy.y = pick.r * TILE_SIZE + 5;
+                }
+            }
+            enemy.changeDirTimer = 2000 + Math.random() * 2000;
+        }
+
+        // Icicle: Persegue o jogador (como o rato, mas sempre)
+        if (enemy.type === 'icicle') {
+            let target = null;
+            let minD = Infinity;
+            players.forEach(p => {
+                if (!p.alive) return;
+                const pc = Math.floor((p.x + p.w / 2) / TILE_SIZE);
+                const pr = Math.floor((p.y + p.h / 2) / TILE_SIZE);
+                const d = Math.abs(pc - enemyCol) + Math.abs(pr - enemyRow);
+                if (d < minD) { minD = d; target = p; }
+            });
+            if (target && enemy.changeDirTimer <= 0) {
+                const tc = Math.floor((target.x + target.w / 2) / TILE_SIZE);
+                const tr = Math.floor((target.y + target.h / 2) / TILE_SIZE);
+                if (tc === enemyCol) {
+                    enemy.direction = tr > enemyRow ? 'down' : 'up';
+                } else if (tr === enemyRow) {
+                    enemy.direction = tc > enemyCol ? 'right' : 'left';
+                } else {
+                    enemy.direction = Math.abs(tc - enemyCol) > Math.abs(tr - enemyRow)
+                        ? (tc > enemyCol ? 'right' : 'left')
+                        : (tr > enemyRow ? 'down' : 'up');
+                }
+                enemy.changeDirTimer = 400;
+            }
+        }
+
         // Pimenta: Velocidade errática
         if (enemy.type === 'pepper') {
             if (Math.random() < 0.03) {
@@ -1977,7 +2223,7 @@ function updateEnemies(dt) {
         }
 
         // Chefão: IA com estados (perseguir, bombar, recuar, carga)
-        if (enemy.type === 'boss') {
+        if (enemy.type === 'boss' || enemy.type === 'boss2' || enemy.type === 'boss3') {
             let targetPlayer = null;
             let minDist = Infinity;
             players.forEach(p => {
@@ -2227,18 +2473,18 @@ function clearLevel() {
     isGameOver = true;
     if (gameLoopId) cancelAnimationFrame(gameLoopId);
     
-    if (currentLevel === unlockedLevel && unlockedLevel < 11) {
+    if (currentLevel === unlockedLevel && unlockedLevel < 22) {
         unlockedLevel++;
         localStorage.setItem('bomber_unlocked_level', unlockedLevel);
     }
     
     goTitle.textContent = `Nível ${currentLevel} Concluído!`;
-    goSubtitle.textContent = currentLevel < 11 ? 'Avançar para a próxima fase?' : 'Você completou todas as fases!';
+    goSubtitle.textContent = currentLevel < 22 ? 'Avançar para a próxima fase?' : 'Você completou todas as fases!';
     goEmoji.textContent = '🎉';
     
     const restartBtn = document.getElementById('restart-btn');
     if (restartBtn) {
-        if (currentLevel < 11) {
+        if (currentLevel < 22) {
             restartBtn.innerHTML = 'Próxima Fase <span class="btn-emoji">➡️</span>';
         } else {
             restartBtn.innerHTML = 'Menu Principal <span class="btn-emoji">🏠</span>';
@@ -2979,7 +3225,7 @@ if (btnRestart) {
         if (gameMode === 'levels') {
             const p1 = players[0];
             if (p1 && p1.alive) {
-                if (currentLevel < 11) {
+                if (currentLevel < 22) {
                     currentLevel++;
                     initGame('levels');
                 } else {

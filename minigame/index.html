@@ -597,17 +597,21 @@
 
         /* ═══ TOAST ═══ */
         #toastContainer .toast {
-            padding: 10px 20px; border-radius: 10px;
-            font-family: 'Share Tech Mono', monospace; font-size: 0.8rem; font-weight: bold;
-            color: #333; background-color: #fff; border: 1px solid #ddd;
-            box-shadow: 0 6px 20px rgba(0,0,0,0.15);
+            padding: 8px 16px; border-radius: 8px;
+            font-family: 'Share Tech Mono', monospace; font-size: 0.78rem;
+            color: rgba(255,255,255,0.92); background-color: rgba(15,15,15,0.7);
+            border: 1px solid rgba(255,255,255,0.1);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+            backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
             opacity: 0; transform: translateY(-20px);
             transition: all 0.3s cubic-bezier(0.4,0,0.2,1);
             pointer-events: auto; white-space: nowrap;
         }
-        #toastContainer .toast.show { opacity: 1; transform: translateY(0); }
+        #toastContainer .toast.show { opacity: 0.85; transform: translateY(0); }
         #toastContainer .toast.hide { opacity: 0; transform: translateY(-20px); }
-        #toastContainer .toast.toast-success { border-color: #3acc7a; background-color: #eafaf1; color: #2ea862; }
+        #toastContainer .toast.toast-success { border-color: rgba(58,204,122,0.4); background-color: rgba(20,60,30,0.6); }
+        #toastContainer .toast.toast-error { border-color: rgba(255,74,74,0.4); background-color: rgba(60,20,20,0.6); }
+        #toastContainer .toast.toast-info { border-color: rgba(100,180,255,0.4); background-color: rgba(20,30,60,0.6); }
 
         /* ═══ SCREEN HEADER (FOR TOP BUTTONS ABOVE GAME BOARD) ═══ */
         #screen-header {
@@ -1122,8 +1126,8 @@
 
     // ═══ HEADER ITEMS (navegáveis mesmo com jogo ativo) ═══
     const headerItems = [
-        document.getElementById('theme-toggle-switch'),
         document.getElementById('home-btn'),
+        document.getElementById('theme-toggle-switch'),
         document.getElementById('apoie-btn'),
         document.getElementById('google-login-btn'),
     ].filter(Boolean);
@@ -1138,6 +1142,12 @@
             if (e.source) {
                 e.source.postMessage({ type: 'KAMALE_THEME', theme: currentTheme }, '*');
             }
+        }
+        if (e.data && e.data.type === 'KAMALE_TOAST') {
+            var toastType = e.data.toastType || 'info';
+            var msg = e.data.message || '';
+            var dur = e.data.duration || 3000;
+            if (msg) showToast(msg, toastType, dur);
         }
     });
 
@@ -1226,6 +1236,7 @@
 
     // ═══ NAVEGAÇÃO DO MENU ═══
     const allItems = [
+        document.getElementById('theme-toggle-switch'),
         document.getElementById('apoie-btn'),
         document.getElementById('google-login-btn'),
         document.getElementById('card-bomber'),
@@ -1235,8 +1246,8 @@
         document.getElementById('card-block'),
         document.getElementById('card-soon-2')
     ];
-    let focusedIndex = 2;
-    const ROWS = [[0, 1], [2, 3], [4, 5], [6, 7]];
+    let focusedIndex = 3;
+    const ROWS = [[0, 1, 2], [3, 4], [5, 6], [7, 8]];
 
     function findPos(idx) {
         for (let r = 0; r < ROWS.length; r++) {
@@ -1677,7 +1688,7 @@
         homeBtn.style.display = 'none';
         homeBtn.classList.add('hidden');
         
-        focusedIndex = 0; // Focus the apoie-btn in the main menu
+        focusedIndex = 1; // Focus the apoie-btn in the main menu
         updateFocus();
     }
 

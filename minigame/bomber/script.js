@@ -4,6 +4,14 @@
 
 // ─── TOAST NOTIFICATION ────────────────────────────────────────────────────────
 function showToast(message, type = 'error', duration = 3000) {
+    // Se estiver dentro de um iframe, delega ao hub pai mostrar a notificação
+    // no topo do navegador, fora da tela do jogo.
+    if (window.self !== window.top) {
+        try {
+            window.parent.postMessage({ type: 'KAMALE_TOAST', message, toastType: type, duration }, '*');
+        } catch(e) {}
+        return;
+    }
     const container = document.getElementById('toastContainer');
     if (!container) return;
     const toast = document.createElement('div');
@@ -19,8 +27,18 @@ function showToast(message, type = 'error', duration = 3000) {
 }
 
 // ─── ELEMENTOS DO DOM ─────────────────────────────────────────────────────────
-const canvas = document.getElementById('game-canvas');
-const ctx = canvas.getContext('2d');
+let canvas = document.getElementById('game-canvas');
+let ctx = canvas.getContext('2d');
+
+function switchCanvasForMP() {
+    const mpCanvas = document.getElementById('mp-game-canvas');
+    if (mpCanvas) { canvas = mpCanvas; ctx = mpCanvas.getContext('2d'); }
+}
+
+function switchCanvasForSP() {
+    const spCanvas = document.getElementById('game-canvas');
+    if (spCanvas) { canvas = spCanvas; ctx = spCanvas.getContext('2d'); }
+}
 const menuScreen = document.getElementById('menu-screen');
 const gameScreen = document.getElementById('game-screen');
 const pauseOverlay = document.getElementById('pause-overlay');
@@ -41,7 +59,7 @@ const hudP2Shield = document.getElementById('hud-p2-shield');
 
 // Botões do Menu
 const btnSolo = document.getElementById('btn-solo');
-const btnVsCpu = document.getElementById('btn-vs-cpu');
+const btnShowMultiplayer = document.getElementById('btn-show-multiplayer');
 const btnLocal2p = document.getElementById('btn-local-2p');
 const btnRestart = document.getElementById('restart-btn');
 const btnBackToMenu = document.getElementById('back-to-menu-btn');
@@ -55,11 +73,53 @@ const btnHelpGame = document.getElementById('learn-btn');
 const levelScreen = document.getElementById('level-screen');
 const btnBackLevels = document.getElementById('btn-back-levels');
 
+// Telas Multiplayer
+const multiplayerScreen = document.getElementById('multiplayer-screen');
+const createScreen = document.getElementById('create-screen');
+const joinScreen = document.getElementById('join-screen');
+const roomsScreen = document.getElementById('rooms-screen');
+const lobbyScreen = document.getElementById('lobby-screen');
+const mpGameScreen = document.getElementById('mp-game-screen');
+const nameModal = document.getElementById('name-modal');
+const btnCreateConfirm = document.getElementById('btn-create-confirm');
+const btnCreateRoom = document.getElementById('btn-create-room');
+const btnShowRooms = document.getElementById('btn-show-rooms');
+const btnShowJoin = document.getElementById('btn-show-join');
+const btnJoinConfirm = document.getElementById('btn-join-confirm');
+const btnRefreshRooms = document.getElementById('btn-refresh-rooms');
+const btnReady = document.getElementById('btn-ready');
+const btnStartGame = document.getElementById('btn-start-game');
+const btnLeaveLobby = document.getElementById('btn-leave-lobby-back');
+const btnMpLeave = document.getElementById('btn-mp-leave');
+const btnMpBackMenu = document.getElementById('btn-mp-back-menu');
+const btnMpBackMenuVictory = document.getElementById('btn-mp-back-menu-victory');
+const btnRematch = document.getElementById('btn-rematch');
+const btnRematchVictory = document.getElementById('btn-rematch-victory');
+const btnMpResume = document.getElementById('mp-resume-btn');
+const btnMpPauseMenu = document.getElementById('mp-pause-menu-btn');
+const btnMpLearn = document.getElementById('mp-learn-btn');
+const inputRoomCode = document.getElementById('input-room-code');
+const inputPlayerName = document.getElementById('input-player-name');
+const inputCreatePlayerName = document.getElementById('input-create-player-name');
+const inputRoomName = document.getElementById('input-room-name');
+const inputNameModal = document.getElementById('name-modal-input');
+const nameModalConfirm = document.getElementById('name-modal-confirm');
+const roomsList = document.getElementById('rooms-list');
+const lobbyPlayersEl = document.getElementById('lobby-players');
+const lobbyRoomCode = document.getElementById('lobby-room-code');
+const lobbyWaiting = document.getElementById('lobby-waiting');
+const joinError = document.getElementById('join-error');
+
 // Elementos de Ajuda / Instruções
 const instructionsModal = document.getElementById('instructions-modal');
 const instructionsModalGame = document.getElementById('instructions-modal-game');
+const mpInstructionsModal = document.getElementById('mp-instructions-modal');
 const closeInstructionsBtn = document.getElementById('close-instructions-btn');
 const closeInstructionsBtnGame = document.getElementById('close-instructions-btn-game');
+const closeMpInstructionsBtn = document.getElementById('mp-close-instructions-btn');
+const victoryOverlay = document.getElementById('victory-overlay');
+const victoryText = document.getElementById('victory-text');
+const spectatorOverlay = document.getElementById('spectator-overlay');
 
 // Controles Móveis (D-pad)
 const dpadUp = document.getElementById('dpad-up');
@@ -105,13 +165,13 @@ const CONTROLS = {
         down: 'ArrowDown',
         left: 'ArrowLeft',
         right: 'ArrowRight',
-        bomb: ' ' // Barra de espaço
+        bomb: ' '
     },
     P2: {
         up: 'KeyW',
         down: 'KeyS',
         left: 'KeyA',
-        right: 'KeyRight', // WASD (W, A, S, D) e F
+        right: 'KeyD',
         bomb: 'KeyF'
     }
 };
@@ -252,7 +312,8 @@ window.addEventListener('keydown', (e) => {
     }
 
     // Evita scroll por padrão para teclas úteis do jogo
-    if (['Space', 'ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', ' '].includes(e.key) || e.code === 'Space') {
+    const preventKeys = ['Space', 'ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', ' ', 'w', 'W', 'a', 'A', 's', 'S', 'd', 'D', 'f', 'F'];
+    if (preventKeys.includes(e.key) || e.code === 'Space') {
         e.preventDefault();
     }
     
@@ -261,8 +322,13 @@ window.addEventListener('keydown', (e) => {
     keys[e.key] = true;
  
     if (e.key.toLowerCase() === 'p') {
-        if (isPaused) resumeGame();
-        else pauseGame();
+        if (gameMode === 'mp') {
+            if (isPaused) mpResumeGame();
+            else mpPauseGame();
+        } else {
+            if (isPaused) resumeGame();
+            else pauseGame();
+        }
     }
 });
 
@@ -378,8 +444,14 @@ function initGame(mode) {
         players = [p1, p2];
     }
 
-    selectDoorPosition();
-    spawnEnemiesForLevel(currentLevel);
+    if (mode === 'levels') {
+        selectDoorPosition();
+        spawnEnemiesForLevel(currentLevel);
+    } else {
+        enemies = [];
+        doorRevealed = false;
+        doorActive = false;
+    }
 
     // Ocultar o HUD externo conforme solicitação para desenhar na arena
     const hudBar = document.getElementById('hud-bar');
@@ -388,9 +460,17 @@ function initGame(mode) {
     // Trocar de telas
     menuScreen.classList.add('hidden');
     if (levelScreen) levelScreen.classList.add('hidden');
+    if (multiplayerScreen) multiplayerScreen.classList.add('hidden');
+    if (createScreen) createScreen.classList.add('hidden');
+    if (joinScreen) joinScreen.classList.add('hidden');
+    if (roomsScreen) roomsScreen.classList.add('hidden');
+    if (lobbyScreen) lobbyScreen.classList.add('hidden');
+    if (mpGameScreen) mpGameScreen.classList.add('hidden');
     gameScreen.classList.remove('hidden');
     pauseOverlay.classList.add('hidden');
     gameOverScreen.classList.add('hidden');
+
+    switchCanvasForSP();
 
     if (gameLoopId) cancelAnimationFrame(gameLoopId);
     lastTime = performance.now();
@@ -401,6 +481,12 @@ function initGame(mode) {
 // ─── SELEÇÃO DE FASES E INIMIGOS ──────────────────────────────────────────────
 function showLevelsScreen() {
     menuScreen.classList.add('hidden');
+    if (multiplayerScreen) multiplayerScreen.classList.add('hidden');
+    if (createScreen) createScreen.classList.add('hidden');
+    if (joinScreen) joinScreen.classList.add('hidden');
+    if (roomsScreen) roomsScreen.classList.add('hidden');
+    if (lobbyScreen) lobbyScreen.classList.add('hidden');
+    if (mpGameScreen) mpGameScreen.classList.add('hidden');
     if (levelScreen) {
         levelScreen.classList.remove('hidden');
         renderLevels();
@@ -1423,7 +1509,7 @@ function render() {
                 }
 
                 // Desenha informações do jogador 2 na linha de baixo se for multiplayer
-                if (r === ROWS - 1 && gameMode === '2p' && players[1]) {
+                if (r === ROWS - 1 && (gameMode === '2p' || gameMode === 'mp') && players[1]) {
                     ctx.save();
                     ctx.textAlign = 'center';
                     ctx.textBaseline = 'middle';
@@ -1686,7 +1772,7 @@ function updateEnemies(dt) {
 }
 
 function checkDoorCollision() {
-    if (!doorActive) return;
+    if (!doorActive || !doorPos) return;
     
     // Qualquer jogador vivo que tocar no portal passa o nível
     const passed = players.some(p => {
@@ -1743,49 +1829,53 @@ function update(timestamp) {
         }
     });
 
-    // 1. Processar Controles P1 (Espaço para Bomba, WASD/Setas para andar)
+    // 1. Processar Controles P1 (Setas para andar, Espaço para Bomba)
     let p1Dx = 0;
     let p1Dy = 0;
 
-    if (keys['ArrowUp']) p1Dy = -1;
-    else if (keys['ArrowDown']) p1Dy = 1;
-    else if (keys['ArrowLeft']) p1Dx = -1;
-    else if (keys['ArrowRight']) p1Dx = 1;
+    if (keys[CONTROLS.P1.up]) p1Dy = -1;
+    else if (keys[CONTROLS.P1.down]) p1Dy = 1;
+    else if (keys[CONTROLS.P1.left]) p1Dx = -1;
+    else if (keys[CONTROLS.P1.right]) p1Dx = 1;
 
     if (p1Dx !== 0 || p1Dy !== 0) {
         movePlayer(players[0], p1Dx, p1Dy);
     }
 
-    if (keys[' ']) {
+    if (keys[CONTROLS.P1.bomb]) {
         placeBomb(players[0]);
     }
 
-    // 2. Processar Controles P2 / Bot AI
+    // 2. Processar Controles P2 / Bot AI / Multiplayer Remote
     const p2 = players[1];
     if (p2 && p2.alive) {
         if (p2.isBot) {
             runBotAI(p2, dt);
+        } else if (gameMode === 'mp') {
+            // Multiplayer: remote player position is synced via Firebase listener
         } else {
             // Local 2 Players (P2 usa WASD + F)
             let p2Dx = 0;
             let p2Dy = 0;
-            if (keys['KeyW']) p2Dy = -1;
-            else if (keys['KeyS']) p2Dy = 1;
-            else if (keys['KeyA']) p2Dx = -1;
-            else if (keys['KeyD']) p2Dx = 1;
+            if (keys[CONTROLS.P2.up]) p2Dy = -1;
+            else if (keys[CONTROLS.P2.down]) p2Dy = 1;
+            else if (keys[CONTROLS.P2.left]) p2Dx = -1;
+            else if (keys[CONTROLS.P2.right]) p2Dx = 1;
 
             if (p2Dx !== 0 || p2Dy !== 0) {
                 movePlayer(p2, p2Dx, p2Dy);
             }
 
-            if (keys['KeyF']) {
+            if (keys[CONTROLS.P2.bomb]) {
                 placeBomb(p2);
             }
         }
     }
 
-    // Processar inimigos em todos os modos
-    updateEnemies(dt);
+    // Processar inimigos em todos os modos (pula no multiplayer)
+    if (gameMode !== 'mp') {
+        updateEnemies(dt);
+    }
 
     // 3. Gerenciar Timers de Bombas
     for (let i = bombs.length - 1; i >= 0; i--) {
@@ -1826,7 +1916,11 @@ function update(timestamp) {
                         updateHUD();
                     } else {
                         player.alive = false;
-                        showToast(player.id === 'p1' ? 'P1 morreu!' : 'P2/Bot morreu!', 'error');
+                        if (gameMode === 'mp') {
+                            showToast(player.id === BomberMultiplayer.playerId ? 'Você morreu!' : 'Inimigo morto!', 'error');
+                        } else {
+                            showToast(player.id === 'p1' ? 'P1 morreu!' : 'P2/Bot morreu!', 'error');
+                        }
                     }
                 }
             });
@@ -1849,10 +1943,15 @@ function update(timestamp) {
         }
     }
 
-    // Controle de revelação e ativação automática da porta (em todos os modos)
-    const allDead = enemies.every(e => !e.alive);
-    if (allDead) {
-        if (!doorActive) {
+    // Multiplayer: sync local player position to Firebase
+    if (gameMode === 'mp' && players[0] && players[0].alive) {
+        BomberMultiplayer.sendPosition(players[0].x, players[0].y, players[0].direction);
+    }
+
+    // Controle de revelação e ativação automática da porta (apenas no modo campanha)
+    if (gameMode === 'levels') {
+        const allDead = enemies.every(e => !e.alive);
+        if (allDead && !doorActive) {
             doorActive = true;
             doorRevealed = true;
             // Se o bloco quebrável na porta ainda existir, limpa ele
@@ -1877,9 +1976,35 @@ function update(timestamp) {
 
 // ─── ESTADOS E MENU ──────────────────────────────────────────────────────────
 function checkGameOver() {
-    const anyAlive = players.some(p => p.alive);
-    if (!anyAlive) {
-        endGame('Você Perdeu!', 'Tente novamente o nível.', '💀');
+    if (gameMode === 'mp') {
+        const localAlive = players[0] && players[0].alive;
+        const remoteP = players[1];
+        const remoteAlive = remoteP && remoteP.alive;
+        const myId = BomberMultiplayer.playerId;
+
+        if (!localAlive || !remoteAlive) {
+            isGameOver = true;
+            if (gameLoopId) cancelAnimationFrame(gameLoopId);
+
+            if (localAlive && !remoteAlive) {
+                showMpGameOver(myId, BomberMultiplayer.playerName);
+                BomberMultiplayer.sendAliveState(true);
+                BomberMultiplayer.endRoom();
+            } else if (!localAlive && remoteAlive) {
+                const remoteName = remoteP.name || 'Inimigo';
+                showMpGameOver(remoteP.id || 'remote', remoteName);
+                BomberMultiplayer.sendAliveState(false);
+            } else {
+                showMpGameOver(null, 'Empate!');
+                BomberMultiplayer.sendAliveState(false);
+                BomberMultiplayer.endRoom();
+            }
+        }
+    } else {
+        const anyAlive = players.some(p => p.alive);
+        if (!anyAlive) {
+            endGame('Você Perdeu!', 'Tente novamente o nível.', '💀');
+        }
     }
 }
 
@@ -1915,21 +2040,472 @@ function backToMenu() {
     if (gameLoopId) cancelAnimationFrame(gameLoopId);
     isPaused = false;
     isGameOver = false;
+    switchCanvasForSP();
     gameScreen.classList.add('hidden');
+    if (multiplayerScreen) multiplayerScreen.classList.add('hidden');
+    if (createScreen) createScreen.classList.add('hidden');
+    if (joinScreen) joinScreen.classList.add('hidden');
+    if (roomsScreen) roomsScreen.classList.add('hidden');
+    if (lobbyScreen) lobbyScreen.classList.add('hidden');
+    if (mpGameScreen) mpGameScreen.classList.add('hidden');
     menuScreen.classList.remove('hidden');
     setTimeout(() => updateMenuFocus(0), 50);
 }
 
+// ─── FUNÇÕES DE NAVEGAÇÃO MULTIPLAYER ──────────────────────────────────────────
+function showScreen(screen) {
+    [menuScreen, levelScreen, gameScreen, multiplayerScreen, createScreen, joinScreen, roomsScreen, lobbyScreen, mpGameScreen].forEach(s => {
+        if (s) s.classList.add('hidden');
+    });
+    if (screen) screen.classList.remove('hidden');
+    setTimeout(() => updateMenuFocus(0), 50);
+}
+
+function showMultiplayerScreen() {
+    showScreen(multiplayerScreen);
+}
+
+function showCreateScreen() {
+    if (inputRoomName) inputRoomName.value = '';
+    if (inputCreatePlayerName) {
+        inputCreatePlayerName.value = localStorage.getItem('kamale_nickname') || '';
+    }
+    showScreen(createScreen);
+}
+
+function showJoinScreen() {
+    if (inputRoomCode) inputRoomCode.value = '';
+    if (inputPlayerName) {
+        inputPlayerName.value = localStorage.getItem('kamale_nickname') || '';
+    }
+    if (joinError) joinError.classList.add('hidden');
+    showScreen(joinScreen);
+}
+
+function showRoomsScreen() {
+    showScreen(roomsScreen);
+    refreshRoomsList();
+}
+
+function refreshRoomsList() {
+    if (!roomsList) return;
+    roomsList.innerHTML = '<div class="lobby-waiting">Carregando...</div>';
+    BomberMultiplayer.getAvailableRooms((rooms) => {
+        if (!roomsList) return;
+        if (rooms.length === 0) {
+            roomsList.innerHTML = '<div class="lobby-waiting">Nenhuma sala disponível</div>';
+            return;
+        }
+        roomsList.innerHTML = '';
+        rooms.forEach(room => {
+            const item = document.createElement('button');
+            item.className = 'room-item';
+            item.innerHTML = `<span class="room-item-name">${room.roomName}</span><span class="room-item-players">${room.players}/${room.maxPlayers}</span>`;
+            item.onclick = () => {
+                const nick = localStorage.getItem('kamale_nickname') || 'Jogador';
+                showNameModal(room.code, nick);
+            };
+            roomsList.appendChild(item);
+        });
+    });
+}
+
+let pendingRoomCode = '';
+function showNameModal(code, defaultName) {
+    pendingRoomCode = code;
+    if (inputNameModal) inputNameModal.value = defaultName;
+    if (nameModal) nameModal.classList.remove('hidden');
+    setTimeout(() => { if (inputNameModal) inputNameModal.focus(); }, 100);
+}
+
+function closeNameModal() {
+    if (nameModal) nameModal.classList.add('hidden');
+    pendingRoomCode = '';
+}
+
+function showLobbyScreen() {
+    showScreen(lobbyScreen);
+    if (lobbyRoomCode) lobbyRoomCode.textContent = BomberMultiplayer.roomCode || '------';
+    if (lobbyWaiting) lobbyWaiting.style.display = 'block';
+    if (btnReady) btnReady.classList.add('hidden');
+    if (btnStartGame) btnStartGame.style.display = 'none';
+}
+
+function updateLobbyUI(players) {
+    if (!lobbyPlayersEl) return;
+    const pCount = Object.keys(players || {}).length;
+    lobbyPlayersEl.innerHTML = '';
+    Object.entries(players || {}).forEach(([id, p]) => {
+        const div = document.createElement('div');
+        div.className = 'lobby-player';
+        div.innerHTML = `<span class="lobby-player-dot" style="background:${p.color || '#888'}"></span><span class="lobby-player-name">${p.name || '?'}</span>${p.ready ? '<span class="lobby-player-ready">✓</span>' : '<span class="lobby-player-waiting">⏳</span>'}`;
+        lobbyPlayersEl.appendChild(div);
+    });
+
+    const isHostNow = BomberMultiplayer.isHost;
+    if (lobbyWaiting) lobbyWaiting.style.display = pCount < 2 ? 'block' : 'none';
+
+    if (btnReady) {
+        if (isHostNow) {
+            btnReady.classList.add('hidden');
+            if (btnStartGame) btnStartGame.style.display = pCount >= 2 ? 'block' : 'none';
+        } else {
+            btnReady.classList.remove('hidden');
+            if (btnStartGame) btnStartGame.style.display = 'none';
+            btnReady.textContent = (players[BomberMultiplayer.playerId]?.ready) ? 'Aguardando... ⏳' : 'Pronto! ✓';
+            btnReady.disabled = false;
+        }
+    }
+}
+
+let mpInitialized = false;
+
+function initMultiplayerGame() {
+    if (mpInitialized) return;
+    mpInitialized = true;
+    gameMode = 'mp';
+    isPaused = false;
+    isGameOver = false;
+    bombs = [];
+    explosions = [];
+    enemies = [];
+    doorRevealed = false;
+    doorActive = false;
+
+    generateMpMap();
+
+    const isHost2 = BomberMultiplayer.isHost;
+    const p1Color = COLORS[0];
+
+    const myId = BomberMultiplayer.playerId;
+    const otherId = Object.keys(BomberMultiplayer.players).find(id => id !== myId);
+
+    const p1 = {
+        id: myId,
+        x: TILE_SIZE + 5,
+        y: TILE_SIZE + 5,
+        w: PLAYER_SIZE, h: PLAYER_SIZE,
+        speed: 2,
+        bombLimit: 1,
+        bombCount: 0,
+        fireRange: 2,
+        shield: false,
+        alive: true,
+        direction: 'down',
+        color: BomberMultiplayer.playerColor,
+        isBot: false,
+        invulTimer: 0
+    };
+
+    players = [p1];
+
+    if (otherId) {
+        const otherP = BomberMultiplayer.players[otherId] || {};
+        const p2 = {
+            id: otherId,
+            x: (COLS - 2) * TILE_SIZE + 5,
+            y: (ROWS - 2) * TILE_SIZE + 5,
+            w: PLAYER_SIZE, h: PLAYER_SIZE,
+            speed: 2,
+            bombLimit: 1,
+            bombCount: 0,
+            fireRange: 2,
+            shield: false,
+            alive: true,
+            direction: 'down',
+            color: otherP.color || '#ff6b6b',
+            isBot: false,
+            invulTimer: 0
+        };
+        players.push(p2);
+    }
+
+    switchCanvasForMP();
+    showScreen(mpGameScreen);
+    if (gameLoopId) cancelAnimationFrame(gameLoopId);
+    lastTime = performance.now();
+    gameLoopId = requestAnimationFrame(update);
+    setTimeout(() => updateMenuFocus(0), 50);
+}
+
+function generateMpMap() {
+    grid = [];
+    items = {};
+    for (let r = 0; r < ROWS; r++) {
+        const rowData = [];
+        for (let c = 0; c < COLS; c++) {
+            if (r === 0 || r === ROWS - 1 || c === 0 || c === COLS - 1) rowData.push(1);
+            else if (r % 2 === 0 && c % 2 === 0) rowData.push(1);
+            else rowData.push(0);
+        }
+        grid.push(rowData);
+    }
+    const spawns = [
+        { r: 1, c: 1 }, { r: 1, c: 2 }, { r: 2, c: 1 },
+        { r: 11, c: 11 }, { r: 11, c: 10 }, { r: 10, c: 11 }
+    ];
+    for (let r = 1; r < ROWS - 1; r++) {
+        for (let c = 1; c < COLS - 1; c++) {
+            if (grid[r][c] === 1) continue;
+            if (spawns.some(s => s.r === r && s.c === c)) continue;
+            if (Math.random() < 0.45) grid[r][c] = 2;
+        }
+    }
+}
+
+function showMpGameOver(winnerId, winnerName) {
+    isGameOver = true;
+    if (gameLoopId) cancelAnimationFrame(gameLoopId);
+    const isMe = winnerId === BomberMultiplayer.playerId;
+    if (isMe) {
+        if (victoryOverlay) victoryOverlay.classList.remove('hidden');
+        if (victoryText) victoryText.textContent = 'Você venceu! 🎉';
+        if (spectatorOverlay) spectatorOverlay.classList.add('hidden');
+    } else {
+        if (spectatorOverlay) spectatorOverlay.classList.remove('hidden');
+        const lb = document.getElementById('spectator-leaderboard');
+        if (lb) lb.innerHTML = `<div style="color:#ffd100;font-size:1rem;">🏆 ${winnerName || 'Inimigo'} venceu!</div>`;
+        if (victoryOverlay) victoryOverlay.classList.add('hidden');
+    }
+    setTimeout(() => updateMenuFocus(0), 50);
+}
+
+function closeMpInstructions() {
+    if (mpInstructionsModal) mpInstructionsModal.classList.add('hidden');
+    if (!isPaused) {
+        lastTime = performance.now();
+        gameLoopId = requestAnimationFrame(update);
+    }
+    setTimeout(() => updateMenuFocus(0), 50);
+}
+window.closeMpInstructions = closeMpInstructions;
+
+function mpPauseGame() {
+    if (isGameOver) return;
+    isPaused = true;
+    const pauseMp = document.getElementById('pause-overlay-mp');
+    if (pauseMp) pauseMp.classList.remove('hidden');
+    const pauseText = document.getElementById('pause-text-mp');
+    if (pauseText) pauseText.textContent = 'Jogo pausado';
+    setTimeout(() => updateMenuFocus(0), 50);
+}
+
+function mpResumeGame() {
+    if (isGameOver) return;
+    isPaused = false;
+    const pauseMp = document.getElementById('pause-overlay-mp');
+    if (pauseMp) pauseMp.classList.add('hidden');
+    lastTime = performance.now();
+    gameLoopId = requestAnimationFrame(update);
+    setTimeout(() => updateMenuFocus(0), 50);
+}
+
+function mpLeaveToLobby() {
+    if (gameLoopId) cancelAnimationFrame(gameLoopId);
+    isPaused = false;
+    isGameOver = false;
+    mpInitialized = false;
+    BomberMultiplayer.leaveRoom();
+    showScreen(multiplayerScreen);
+}
+
+// ─── MENU MULTIPLAYER BACK BUTTONS ─────────────────────────────────────────────
+function wireBackButton(id, handler) {
+    const el = document.getElementById(id);
+    if (el) el.onclick = handler;
+}
+wireBackButton('btn-back-multiplayer', () => showScreen(menuScreen));
+wireBackButton('btn-back-multiplayer-menu', () => showScreen(menuScreen));
+wireBackButton('btn-back-create', () => showScreen(multiplayerScreen));
+wireBackButton('btn-back-menu-create', () => showScreen(multiplayerScreen));
+wireBackButton('btn-back-join', () => showScreen(multiplayerScreen));
+wireBackButton('btn-back-menu-join', () => showScreen(multiplayerScreen));
+wireBackButton('btn-back-rooms', () => showScreen(multiplayerScreen));
+wireBackButton('btn-back-menu-rooms', () => showScreen(multiplayerScreen));
+
+if (btnRefreshRooms) btnRefreshRooms.onclick = refreshRoomsList;
+
+if (btnCreateConfirm) {
+    btnCreateConfirm.onclick = () => {
+        const name = inputCreatePlayerName?.value.trim() || 'Jogador';
+        const roomName = inputRoomName?.value.trim() || '';
+        if (!name) { showToast('Digite seu nome', 'error'); return; }
+        localStorage.setItem('kamale_nickname', name);
+        BomberMultiplayer.createRoom(name, roomName, (code) => {
+            showLobbyScreen();
+            setupMpListeners();
+        });
+    };
+}
+
+if (btnJoinConfirm) {
+    btnJoinConfirm.onclick = () => {
+        const code = inputRoomCode?.value.trim().toUpperCase() || '';
+        const name = inputPlayerName?.value.trim() || 'Jogador';
+        if (!code) { if (joinError) { joinError.textContent = 'Digite o código'; joinError.classList.remove('hidden'); } return; }
+        if (!name) { if (joinError) { joinError.textContent = 'Digite seu nome'; joinError.classList.remove('hidden'); } return; }
+        localStorage.setItem('kamale_nickname', name);
+        BomberMultiplayer.joinRoom(code, name, (result, err) => {
+            if (err) {
+                if (joinError) { joinError.textContent = err; joinError.classList.remove('hidden'); }
+                return;
+            }
+            showLobbyScreen();
+            setupMpListeners();
+        });
+    };
+}
+
+if (nameModalConfirm) {
+    nameModalConfirm.onclick = () => {
+        const name = inputNameModal?.value.trim() || 'Jogador';
+        localStorage.setItem('kamale_nickname', name);
+        closeNameModal();
+        BomberMultiplayer.joinRoom(pendingRoomCode, name, (result, err) => {
+            if (err) { showToast(err, 'error'); return; }
+            showLobbyScreen();
+            setupMpListeners();
+        });
+    };
+}
+
+if (btnReady) {
+    btnReady.onclick = () => {
+        const pData = BomberMultiplayer.players[BomberMultiplayer.playerId];
+        const isReady = !pData?.ready;
+        BomberMultiplayer.sendReady(isReady);
+    };
+}
+
+if (btnStartGame) {
+    btnStartGame.onclick = () => {
+        BomberMultiplayer.startGame();
+    };
+}
+
+if (btnLeaveLobby) btnLeaveLobby.onclick = mpLeaveToLobby;
+const btnLeaveLobbyTop = document.getElementById('btn-leave-lobby');
+if (btnLeaveLobbyTop) btnLeaveLobbyTop.onclick = mpLeaveToLobby;
+
+if (btnMpLeave || btnMpBackMenu || btnMpBackMenuVictory) {
+    const leaveMp = () => {
+        if (gameLoopId) cancelAnimationFrame(gameLoopId);
+        isPaused = false;
+        isGameOver = false;
+        mpInitialized = false;
+        BomberMultiplayer.leaveRoom();
+        showScreen(menuScreen);
+    };
+    if (btnMpLeave) btnMpLeave.onclick = leaveMp;
+    if (btnMpBackMenu) btnMpBackMenu.onclick = leaveMp;
+    if (btnMpBackMenuVictory) btnMpBackMenuVictory.onclick = leaveMp;
+}
+
+if (btnRematch || btnRematchVictory) {
+    const doRematch = () => {
+        BomberMultiplayer.sendRematch(true);
+    };
+    if (btnRematch) btnRematch.onclick = doRematch;
+    if (btnRematchVictory) btnRematchVictory.onclick = doRematch;
+}
+
+if (btnMpResume) btnMpResume.onclick = mpResumeGame;
+if (btnMpPauseMenu) btnMpPauseMenu.onclick = mpLeaveToLobby;
+
+if (btnMpLearn) {
+    btnMpLearn.onclick = () => {
+        if (mpInstructionsModal) mpInstructionsModal.classList.remove('hidden');
+        if (!isPaused) mpPauseGame();
+        setTimeout(() => updateMenuFocus(0), 50);
+    };
+}
+if (closeMpInstructionsBtn) closeMpInstructionsBtn.onclick = closeMpInstructions;
+
+function setupMpListeners() {
+    BomberMultiplayer.onPlayersUpdate = (fbPlayers) => {
+        updateLobbyUI(fbPlayers);
+
+        if (BomberMultiplayer.roomStatus === 'playing') {
+            if (!gameLoopId || isGameOver) {
+                if (!(document.getElementById('spectator-overlay')?.classList.contains('hidden') === false ||
+                      document.getElementById('victory-overlay')?.classList.contains('hidden') === false)) {
+                    initMultiplayerGame();
+                }
+            } else if (players.length >= 2 && players[1]) {
+                const myId = BomberMultiplayer.playerId;
+                const remoteEntry = Object.entries(fbPlayers).find(([id]) => id !== myId);
+                if (remoteEntry) {
+                    const [, remoteData] = remoteEntry;
+                    players[1].x = remoteData.x != null ? remoteData.x : players[1].x;
+                    players[1].y = remoteData.y != null ? remoteData.y : players[1].y;
+                    players[1].direction = remoteData.direction || players[1].direction;
+                    if (remoteData.alive !== undefined) players[1].alive = remoteData.alive;
+                }
+            }
+
+            // Auto-rematch: host checks if all players want rematch
+            if (BomberMultiplayer.isHost && isGameOver) {
+                const allWantRematch = Object.values(fbPlayers).every(p => p && p.wantsRematch === true);
+                if (allWantRematch && Object.keys(fbPlayers).length >= 2) {
+                    BomberMultiplayer.clearRematch();
+                    BomberMultiplayer.startGame();
+                }
+            }
+        }
+        if (BomberMultiplayer.roomStatus === 'waiting' && mpGameScreen && !mpGameScreen.classList.contains('hidden')) {
+            showLobbyScreen();
+        }
+    };
+
+    BomberMultiplayer.onStatusUpdate = (status) => {
+        if (status === 'playing') {
+            mpInitialized = false;
+            const active = document.querySelector('.screen:not(.hidden)');
+            if (active && active.id !== 'mp-game-screen') {
+                initMultiplayerGame();
+            }
+        } else if (status === 'waiting') {
+            mpInitialized = false;
+        }
+    };
+
+    BomberMultiplayer.onRoomDeleted = () => {
+        showToast('Sala foi encerrada', 'error');
+        if (gameLoopId) cancelAnimationFrame(gameLoopId);
+        isPaused = false;
+        isGameOver = false;
+        mpInitialized = false;
+        showScreen(menuScreen);
+    };
+
+    BomberMultiplayer.onBomb = (bombData) => {
+        if (bombData && bombData.ownerId !== BomberMultiplayer.playerId) {
+            const owner = players.find(p => p.id === bombData.ownerId);
+            if (owner && owner.alive) {
+                bombs.push({
+                    col: bombData.col,
+                    row: bombData.row,
+                    timer: 2000,
+                    range: bombData.range || 2,
+                    owner: owner
+                });
+            }
+        }
+    };
+}
+
 // ─── BINDINGS DE EVENTOS DE BOTÕES ────────────────────────────────────────────
 if (btnSolo) btnSolo.onclick = () => showLevelsScreen();
-if (btnVsCpu) btnVsCpu.onclick = () => initGame('vs_cpu');
+if (btnShowMultiplayer) btnShowMultiplayer.onclick = showMultiplayerScreen;
+if (btnCreateRoom) btnCreateRoom.onclick = showCreateScreen;
+if (btnShowRooms) btnShowRooms.onclick = showRoomsScreen;
+if (btnShowJoin) btnShowJoin.onclick = showJoinScreen;
 if (btnLocal2p) btnLocal2p.onclick = () => initGame('2p');
 if (btnRestart) {
     btnRestart.onclick = () => {
         if (gameMode === 'levels') {
             const p1 = players[0];
             if (p1 && p1.alive) {
-                // Avançar para a próxima fase!
                 if (currentLevel < 5) {
                     currentLevel++;
                     initGame('levels');
@@ -1937,7 +2513,6 @@ if (btnRestart) {
                     backToMenu();
                 }
             } else {
-                // Tentar novamente a mesma fase
                 initGame('levels');
             }
         } else {
@@ -1970,7 +2545,17 @@ function getActiveMenuScreen() {
         document.getElementById('game-over-screen'),
         document.getElementById('pause-overlay'),
         document.getElementById('instructions-modal'),
-        document.getElementById('instructions-modal-game')
+        document.getElementById('instructions-modal-game'),
+        document.getElementById('multiplayer-screen'),
+        document.getElementById('create-screen'),
+        document.getElementById('join-screen'),
+        document.getElementById('rooms-screen'),
+        document.getElementById('lobby-screen'),
+        document.getElementById('name-modal'),
+        document.getElementById('spectator-overlay'),
+        document.getElementById('victory-overlay'),
+        document.getElementById('pause-overlay-mp'),
+        document.getElementById('mp-instructions-modal')
     ];
     return screens.find(s => s && !s.classList.contains('hidden') && s.offsetParent !== null);
 }
@@ -1981,14 +2566,18 @@ function getFocusableElements(screen) {
         return !el.classList.contains('modal-close-btn');
     });
 
-    const topRow = document.querySelector('.game-top-row');
-    if (topRow) {
-        const loginBtn = topRow.querySelector('#google-login-btn') || topRow.querySelector('#google-login-btn-game');
-        const apoieBtn = topRow.querySelector('.apoie-btn');
-        const homeBtn = topRow.querySelector('.home-btn');
-        [loginBtn, apoieBtn, homeBtn].forEach(el => {
-            if (el && !elements.includes(el)) elements.push(el);
-        });
+    const gameScreen = document.getElementById('game-screen');
+    if (gameScreen && !gameScreen.classList.contains('hidden') && gameScreen.offsetParent !== null) {
+        const topRow = gameScreen.querySelector('.game-top-row');
+        if (topRow && screen !== topRow) {
+            const homeBtn = topRow.querySelector('.home-btn');
+            const apoieBtn = topRow.querySelector('.apoie-btn');
+            const loginBtn = topRow.querySelector('#google-login-btn') || topRow.querySelector('#google-login-btn-game');
+            const helpBtn = topRow.querySelector('.help-btn');
+            [homeBtn, apoieBtn, loginBtn, helpBtn].forEach(el => {
+                if (el && !elements.includes(el)) elements.push(el);
+            });
+        }
     }
 
     return elements.filter(el => {

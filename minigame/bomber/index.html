@@ -40,12 +40,8 @@
                         Jogar Sozinho <span class="btn-emoji">🎮</span>
                     </button>
 
-                    <button id="btn-vs-cpu" class="menu-btn menu-btn-secondary">
-                        Jogar com a Máquina <span class="btn-emoji">🤖</span>
-                    </button>
-
-                    <button id="btn-local-2p" class="menu-btn menu-btn-secondary">
-                        Jogar com amigo (mesmo pc) <span class="btn-emoji">👥</span>
+                    <button id="btn-show-multiplayer" class="menu-btn menu-btn-secondary">
+                        Jogar com Amigo <span class="btn-emoji">👥</span>
                     </button>
                 </div>
 
@@ -95,6 +91,257 @@
                     </div>
                 </div>
             </div>
+        </div>
+    </div>
+
+    <!-- ═══ TELA MULTIPLAYER ═══ -->
+    <div id="multiplayer-screen" class="screen hidden">
+        <div class="game-section">
+            <div class="game-top-row">
+                <div style="display: flex; align-items: center; gap: 8px;">
+                    <button id="btn-back-multiplayer" class="home-btn" aria-label="Voltar ao menu">
+                        ←
+                    </button>
+                </div>
+            </div>
+            <div id="game-board">
+                <div class="menu-content">
+                    <div class="menu-title" style="font-size:1rem;">Multiplayer</div>
+
+                    <button id="btn-local-2p" class="menu-btn menu-btn-primary">
+                        Na Mesma Máquina <span class="btn-emoji">🖥️</span>
+                    </button>
+
+                    <button id="btn-create-room" class="menu-btn menu-btn-secondary">
+                        Criar Sala <span class="btn-emoji">🏠</span>
+                    </button>
+
+                    <button id="btn-show-rooms" class="menu-btn menu-btn-secondary">
+                        Ver Salas <span class="btn-emoji">📋</span>
+                    </button>
+
+                    <button id="btn-show-join" class="menu-btn menu-btn-secondary">
+                        Entrar com Código <span class="btn-emoji">🔑</span>
+                    </button>
+
+                    <button id="btn-back-multiplayer-menu" class="menu-btn menu-btn-back">
+                        ← Voltar
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ═══ TELA CRIAR SALA ═══ -->
+    <div id="create-screen" class="screen hidden">
+        <div class="game-section">
+            <div class="game-top-row">
+                <div style="display: flex; align-items: center; gap: 8px;">
+                    <button id="btn-back-create" class="home-btn" aria-label="Voltar">
+                        ←
+                    </button>
+                </div>
+            </div>
+            <div id="game-board">
+                <div class="menu-content">
+                    <div class="menu-title" style="font-size:1rem;">Criar Sala</div>
+
+                    <input id="input-room-name" type="text" class="room-input name-input"
+                           maxlength="20" placeholder="Nome da sala" autocomplete="off">
+
+                    <input id="input-create-player-name" type="text" class="room-input name-input"
+                           maxlength="12" placeholder="Seu nome" autocomplete="off">
+
+                    <button id="btn-create-confirm" class="menu-btn menu-btn-primary">
+                        Criar Sala <span class="btn-emoji">🏠</span>
+                    </button>
+
+                    <button id="btn-back-menu-create" class="menu-btn menu-btn-back">
+                        ← Voltar
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ═══ TELA ENTRAR COM CÓDIGO ═══ -->
+    <div id="join-screen" class="screen hidden">
+        <div class="game-section">
+            <div class="game-top-row">
+                <div style="display: flex; align-items: center; gap: 8px;">
+                    <button id="btn-back-join" class="home-btn" aria-label="Voltar">
+                        ←
+                    </button>
+                </div>
+            </div>
+            <div id="game-board">
+                <div class="menu-content">
+                    <div class="menu-title" style="font-size:1rem;">Entrar na Sala</div>
+
+                    <input id="input-room-code" type="text" class="room-input" maxlength="6"
+                           placeholder="CÓDIGO" autocomplete="off" spellcheck="false">
+
+                    <input id="input-player-name" type="text" class="room-input name-input"
+                           maxlength="12" placeholder="Seu nome" autocomplete="off">
+
+                    <div id="join-error" class="error-text hidden"></div>
+
+                    <button id="btn-join-confirm" class="menu-btn menu-btn-primary">
+                        Entrar <span class="btn-emoji">▶</span>
+                    </button>
+
+                    <button id="btn-back-menu-join" class="menu-btn menu-btn-back">
+                        ← Voltar
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ═══ TELA VER SALAS ═══ -->
+    <div id="rooms-screen" class="screen hidden">
+        <div class="game-section">
+            <div class="game-top-row">
+                <div style="display: flex; align-items: center; gap: 8px;">
+                    <button id="btn-back-rooms" class="home-btn" aria-label="Voltar">
+                        ←
+                    </button>
+                </div>
+            </div>
+            <div id="game-board">
+                <div class="menu-content">
+                    <div class="menu-title" style="font-size:1rem;">Salas Disponíveis</div>
+                    <div id="rooms-list" class="rooms-list">
+                        <div class="lobby-waiting">Carregando...</div>
+                    </div>
+                    <button id="btn-refresh-rooms" class="menu-btn menu-btn-secondary" style="margin-top:8px;">
+                        Atualizar <span class="btn-emoji">🔄</span>
+                    </button>
+                    <button id="btn-back-menu-rooms" class="menu-btn menu-btn-back">
+                        ← Voltar
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ═══ TELA LOBBY (multiplayer) ═══ -->
+    <div id="lobby-screen" class="screen hidden">
+        <div class="game-section">
+            <div class="game-top-row">
+                <div style="display: flex; align-items: center; gap: 8px;">
+                    <button id="btn-leave-lobby" class="home-btn" aria-label="Sair da sala">
+                        ←
+                    </button>
+                </div>
+            </div>
+            <div id="game-board">
+                <div class="lobby-content">
+                    <div class="lobby-title">SALA</div>
+                    <div id="lobby-room-code" class="lobby-code">------</div>
+                    <div class="lobby-code-hint">Compartilhe o código com seus amigos</div>
+
+                    <div id="lobby-players" class="lobby-players"></div>
+                    <div id="lobby-waiting" class="lobby-waiting">Aguardando jogadores...</div>
+
+                    <button id="btn-ready" class="menu-btn menu-btn-primary hidden">
+                        Pronto! <span class="btn-emoji">✓</span>
+                    </button>
+
+                    <button id="btn-start-game" class="menu-btn menu-btn-primary" style="display:none;">
+                        Iniciar Jogo <span class="btn-emoji">▶</span>
+                    </button>
+
+                    <button id="btn-leave-lobby-back" class="menu-btn menu-btn-back" style="margin-top:10px;">
+                        Sair da Sala ←
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ═══ TELA DO JOGO MULTIPLAYER ═══ -->
+    <div id="mp-game-screen" class="screen hidden">
+        <div class="game-section">
+            <div class="game-top-row">
+                <div style="display: flex; align-items: center; gap: 8px;">
+                    <button id="btn-mp-leave" class="home-btn" aria-label="Sair">
+                        ←
+                    </button>
+                </div>
+                <div id="mp-players-bar" class="mp-players-bar" style="flex:1;justify-content:center;display:flex;gap:12px;align-items:center;"></div>
+                <div style="display: flex; align-items: center; gap: 8px;">
+                    <a href="../apoie.html" class="apoie-btn" aria-label="Apoie o Kamale Games">apoie ❤️</a>
+                    <button class="google-login-btn" id="google-login-btn-game" aria-label="Entrar"></button>
+                    <button id="mp-learn-btn" class="help-btn" aria-label="Instruções">?</button>
+                </div>
+            </div>
+            <div id="game-board">
+                <canvas id="mp-game-canvas" width="390" height="390"></canvas>
+
+                <div id="pause-overlay-mp" class="overlay hidden">
+                    <div class="game-over-content">
+                        <div class="game-over-title">⏸ Pausado</div>
+                        <div id="pause-text-mp" class="spectator-text"></div>
+                        <button id="mp-resume-btn" class="menu-btn menu-btn-primary" style="margin-top:12px;">Continuar ▶</button>
+                        <button id="mp-pause-menu-btn" class="menu-btn menu-btn-back" style="margin-top:8px;">Sair ←</button>
+                    </div>
+                </div>
+
+                <div id="spectator-overlay" class="overlay hidden">
+                    <div class="game-over-content">
+                        <div class="game-over-title" style="color:#ff6b6b;">💀 Você morreu!</div>
+                        <div class="spectator-text">Assistindo...</div>
+                        <div id="spectator-leaderboard" class="spectator-leaderboard"></div>
+                        <button id="btn-rematch" class="menu-btn menu-btn-primary" style="margin-top:14px;">
+                            Jogar novamente 🔄
+                        </button>
+                        <button id="btn-mp-back-menu" class="menu-btn menu-btn-back" style="margin-top:8px;">
+                            Sair da Sala ←
+                        </button>
+                    </div>
+                </div>
+
+                <div id="victory-overlay" class="overlay hidden">
+                    <div class="game-over-content">
+                        <div class="game-over-title" style="color:#ffd100;">🏆 Vitória!</div>
+                        <div id="victory-text" class="victory-text"></div>
+                        <button id="btn-rematch-victory" class="menu-btn menu-btn-primary" style="margin-top:12px;">
+                            Jogar novamente 🔄
+                        </button>
+                        <button id="btn-mp-back-menu-victory" class="menu-btn menu-btn-back" style="margin-top:8px;">
+                            Sair da Sala ←
+                        </button>
+                    </div>
+                </div>
+
+                <div id="mp-instructions-modal" class="overlay hidden">
+                    <button id="mp-close-instructions-btn" class="modal-close-btn" aria-label="Fechar">✕</button>
+                    <div class="instructions-content">
+                        <div class="instructions-title">💣 Multiplayer</div>
+                        <ul class="instructions-list">
+                            <li><span class="key-hint">↑ ↓ ← →</span> Mover seu personagem</li>
+                            <li><span class="key-hint">Espaço</span> Soltar bomba</li>
+                            <li><span class="key-hint">💣</span> Destrua blocos para pegar power-ups</li>
+                            <li><span class="key-hint">💀</span> Último sobrevivente vence!</li>
+                            <li><span class="key-hint">P</span> Pausar</li>
+                        </ul>
+                        <button class="menu-btn" style="margin-top:6px;" onclick="closeMpInstructions()">OK ✓</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ═══ MODAL DE NOME ═══ -->
+    <div id="name-modal" class="overlay hidden">
+        <div class="game-over-content">
+            <div class="game-over-title" style="font-size:1rem;">Qual é o seu nome?</div>
+            <input id="name-modal-input" type="text" class="room-input name-input"
+                   maxlength="12" placeholder="Seu nome" autocomplete="off" style="margin-top:12px;">
+            <button id="name-modal-confirm" class="menu-btn menu-btn-primary" style="margin-top:12px;">
+                Confirmar <span class="btn-emoji">✓</span>
+            </button>
         </div>
     </div>
 
@@ -221,6 +468,7 @@
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
 <script src="../firebase-config.js"></script>
 <script src="../auth.js"></script>
+<script src="multiplayer.js"></script>
 <script src="script.js"></script>
 <script>
 // ═══ KAMALE: recebe inputs do index.html via postMessage ═══
